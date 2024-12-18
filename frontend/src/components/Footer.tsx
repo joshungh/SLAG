@@ -5,6 +5,9 @@ export default function Footer() {
       <p className="mt-2">
         &gt; Created with AI-powered storytelling and image generation
       </p>
+      <p className="mt-2 opacity-75">
+        &gt; The $SLAG token has no inherent value and is meant for entertainment purposes only. NFA DYOR.
+      </p>
     </footer>
   )
 } 

@@ -1,17 +1,48 @@
-Failed to compile.
-./src/components/Hero.tsx:39:16
-Type error: Type '{ children: Element; key: number; style: { opacity: SpringValue<number>; y: SpringValue<number>; }; }' is not assignable to type 'IntrinsicAttributes & AnimatedProps<{ style?: { accentColor?: AccentColor | undefined; alignContent?: AlignContent | undefined; alignItems?: AlignItems | undefined; ... 841 more ...; matrix3d?: readonly [...] | undefined; } | undefined; }> & { ...; }'.
-  Property 'children' does not exist on type 'IntrinsicAttributes & AnimatedProps<{ style?: { accentColor?: AccentColor | undefined; alignContent?: AlignContent | undefined; alignItems?: AlignItems | undefined; ... 841 more ...; matrix3d?: readonly [...] | undefined; } | undefined; }> & { ...; }'.
-  37 |           <h1 className="font-black leading-none tracking-tight">
-  38 |             {trail.map((style, index) => (
-> 39 |               <animated.div key={index} style={style}>
-     |                ^
-  40 |                 {items[index]}
-  41 |               </animated.div>
-  42 |             ))}
-npm error Lifecycle script `build` failed with error:
-npm error code 1
-npm error path /vercel/path0/frontend
-npm error workspace frontend@0.1.0
-npm error location /vercel/path0/frontend
-npm error command failed
+[11:44:51.788] Running build in Washington, D.C., USA (East) – iad1
+[11:44:51.902] Cloning github.com/mango31/SLAG (Branch: master, Commit: 56086a4)
+[11:44:57.574] Cloning completed: 5.672s
+[11:44:57.933] Restored build cache from previous deployment (6LedLYAg8UaCnmuNiXgpcfKNXepu)
+[11:44:58.008] Running "vercel build"
+[11:44:58.425] Vercel CLI 39.2.0
+[11:44:58.776] Running "install" command: `npm install`...
+[11:45:01.354] 
+[11:45:01.354] added 6 packages, and audited 467 packages in 2s
+[11:45:01.354] 
+[11:45:01.355] 146 packages are looking for funding
+[11:45:01.355]   run `npm fund` for details
+[11:45:01.355] 
+[11:45:01.356] found 0 vulnerabilities
+[11:45:01.366] Detected Next.js version: 15.1.1
+[11:45:01.366] Running "npm run build"
+[11:45:01.529] 
+[11:45:01.530] > frontend@0.1.0 build
+[11:45:01.530] > next build
+[11:45:01.530] 
+[11:45:02.568]    ▲ Next.js 15.1.1
+[11:45:02.569] 
+[11:45:02.743]    Creating an optimized production build ...
+[11:45:04.743] (node:167) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+[11:45:04.743] (Use `node --trace-deprecation ...` to show where the warning was created)
+[11:45:08.987] (node:213) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+[11:45:08.987] (Use `node --trace-deprecation ...` to show where the warning was created)
+[11:45:11.073]  ✓ Compiled successfully
+[11:45:11.077]    Linting and checking validity of types ...
+[11:45:14.404] 
+[11:45:14.405] Failed to compile.
+[11:45:14.405] 
+[11:45:14.405] ./src/app/layout.tsx
+[11:45:14.412] 24:9  Warning: Custom fonts not added in `pages/_document.js` will only load for a single page. This is discouraged. See: https://nextjs.org/docs/messages/no-page-custom-font  @next/next/no-page-custom-font
+[11:45:14.412] 
+[11:45:14.412] ./src/components/Hero.tsx
+[11:45:14.413] 6:11  Error: 'AnimatedProps' is defined but never used.  @typescript-eslint/no-unused-vars
+[11:45:14.413] 
+[11:45:14.413] info  - Need to disable some ESLint rules? Learn more here: https://nextjs.org/docs/app/api-reference/config/eslint#disabling-rules
+[11:45:14.428] npm error Lifecycle script `build` failed with error:
+[11:45:14.429] npm error code 1
+[11:45:14.429] npm error path /vercel/path0/frontend
+[11:45:14.429] npm error workspace frontend@0.1.0
+[11:45:14.430] npm error location /vercel/path0/frontend
+[11:45:14.430] npm error command failed
+[11:45:14.430] npm error command sh -c next build
+[11:45:14.447] Error: Command "npm run build" exited with 1
+[11:45:14.768] 
