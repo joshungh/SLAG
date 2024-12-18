@@ -18,11 +18,14 @@ const chapters = {
   }
 } as const
 
-// Define the params type that Next.js expects
-type Params = { slug: string }
+// Update the params type to match Next.js expectations
+type Props = {
+  params: {
+    slug: string
+  }
+}
 
-// Simpler metadata function with explicit typing
-export async function generateMetadata({ params }: { params: Params }): Promise<Metadata> {
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const chapter = chapters[params.slug as keyof typeof chapters]
   if (!chapter) return { title: 'Chapter Not Found' }
   
@@ -31,8 +34,8 @@ export async function generateMetadata({ params }: { params: Params }): Promise<
   }
 }
 
-// Simpler page component with explicit typing
-export default async function ChapterPage({ params }: { params: Params }) {
+// Update the page component to use the same Props type
+export default async function ChapterPage({ params }: Props) {
   const chapter = chapters[params.slug as keyof typeof chapters]
   if (!chapter) notFound()
 
