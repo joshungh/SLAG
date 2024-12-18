@@ -1,0 +1,57 @@
+ GET / 200 in 202ms
+ ✓ Compiled / in 15ms
+ ⨯ TypeError: createContext only works in Client Components. Add the "use client" directive at the top of the file to use it. Read more: https://nextjs.org/docs/messages/context-in-server-component
+    at [project]/node_modules/@react-spring/core/dist/react-spring_core.modern.mjs [app-rsc] (ecmascript) <module evaluation> (.next/server/chunks/ssr/08b5e_ea82f6._.js:6290:204)
+    at [project]/node_modules/@react-spring/web/dist/react-spring_web.modern.mjs [app-rsc] (ecmascript) <module evaluation> (.next/server/chunks/ssr/08b5e_ea82f6._.js:6658:216)
+    at [project]/frontend/src/components/Hero.tsx [app-rsc] (ecmascript) (frontend/src/components/Hero.tsx:2:0)
+    at [project]/frontend/src/app/page.tsx [app-rsc] (ecmascript) (frontend/src/app/page.tsx:2:0)
+    at [project]/frontend/src/app/page.tsx [app-rsc] (ecmascript, Next.js server component) (.next/server/chunks/ssr/[project]_frontend_819ab7._.js:467:32)
+    at [project]/node_modules/next/dist/esm/build/templates/app-page.js?page=/page { METADATA_0 => "[project]/frontend/src/app/favicon.ico.mjs { IMAGE => \"[project]/frontend/src/app/favicon.ico [app-rsc] (static)\" } [app-rsc] (structured image object, ecmascript, Next.js server component)", MODULE_1 => "[project]/frontend/src/app/layout.tsx [app-rsc] (ecmascript, Next.js server component)", MODULE_2 => "[project]/node_modules/next/dist/client/components/not-found-error.js [app-rsc] (ecmascript, Next.js server component)", MODULE_3 => "[project]/node_modules/next/dist/client/components/forbidden-error.js [app-rsc] (ecmascript, Next.js server component)", MODULE_4 => "[project]/node_modules/next/dist/client/components/unauthorized-error.js [app-rsc] (ecmascript, Next.js server component)", MODULE_5 => "[project]/frontend/src/app/page.tsx [app-rsc] (ecmascript, Next.js server component)" } [app-rsc] (ecmascript) <module evaluation> (.next/server/chunks/ssr/08b5e_ea82f6._.js:6779:170)
+    at [project]/node_modules/next/dist/esm/build/templates/app-page.js?page=/page { METADATA_0 => "[project]/frontend/src/app/favicon.ico.mjs { IMAGE => \"[project]/frontend/src/app/favicon.ico [app-rsc] (static)\" } [app-rsc] (structured image object, ecmascript, Next.js server component)", MODULE_1 => "[project]/frontend/src/app/layout.tsx [app-rsc] (ecmascript, Next.js server component)", MODULE_2 => "[project]/node_modules/next/dist/client/components/not-found-error.js [app-rsc] (ecmascript, Next.js server component)", MODULE_3 => "[project]/node_modules/next/dist/client/components/forbidden-error.js [app-rsc] (ecmascript, Next.js server component)", MODULE_4 => "[project]/node_modules/next/dist/client/components/unauthorized-error.js [app-rsc] (ecmascript, Next.js server component)", MODULE_5 => "[project]/frontend/src/app/page.tsx [app-rsc] (ecmascript, Next.js server component)" } [app-rsc] (ecmascript) (.next/server/chunks/ssr/08b5e_ea82f6._.js:6878:1472)
+    at Object.<anonymous> (.next/server/app/page.js:14:26)
+  1 | import Image from "next/image"
+> 2 | import { useTrail, animated } from '@react-spring/web'
+  3 |
+  4 | export default function Hero() {
+  5 |   const items = [ {
+  page: '/'
+}
+ ○ Compiling /_error ...
+ ✓ Compiled /_error in 766ms
+ GET / 500 in 1052ms
+ ⨯ TypeError: createContext only works in Client Components. Add the "use client" directive at the top of the file to use it. Read more: https://nextjs.org/docs/messages/context-in-server-component
+    at [project]/node_modules/@react-spring/core/dist/react-spring_core.modern.mjs [app-rsc] (ecmascript) <module evaluation> (.next/server/chunks/ssr/08b5e_ea82f6._.js:6290:204)
+    at [project]/node_modules/@react-spring/web/dist/react-spring_web.modern.mjs [app-rsc] (ecmascript) <module evaluation> (.next/server/chunks/ssr/08b5e_ea82f6._.js:6658:216)
+    at [project]/frontend/src/components/Hero.tsx [app-rsc] (ecmascript) (frontend/src/components/Hero.tsx:2:0)
+    at [project]/frontend/src/app/page.tsx [app-rsc] (ecmascript) (frontend/src/app/page.tsx:2:0)
+    at [project]/frontend/src/app/page.tsx [app-rsc] (ecmascript, Next.js server component) (.next/server/chunks/ssr/[project]_frontend_819ab7._.js:467:32)
+    at [project]/node_modules/next/dist/esm/build/templates/app-page.js?page=/page { METADATA_0 => "[project]/frontend/src/app/favicon.ico.mjs { IMAGE => \"[project]/frontend/src/app/favicon.ico [app-rsc] (static)\" } [app-rsc] (structured image object, ecmascript, Next.js server component)", MODULE_1 => "[project]/frontend/src/app/layout.tsx [app-rsc] (ecmascript, Next.js server component)", MODULE_2 => "[project]/node_modules/next/dist/client/components/not-found-error.js [app-rsc] (ecmascript, Next.js server component)", MODULE_3 => "[project]/node_modules/next/dist/client/components/forbidden-error.js [app-rsc] (ecmascript, Next.js server component)", MODULE_4 => "[project]/node_modules/next/dist/client/components/unauthorized-error.js [app-rsc] (ecmascript, Next.js server component)", MODULE_5 => "[project]/frontend/src/app/page.tsx [app-rsc] (ecmascript, Next.js server component)" } [app-rsc] (ecmascript) <module evaluation> (.next/server/chunks/ssr/08b5e_ea82f6._.js:6779:170)
+    at [project]/node_modules/next/dist/esm/build/templates/app-page.js?page=/page { METADATA_0 => "[project]/frontend/src/app/favicon.ico.mjs { IMAGE => \"[project]/frontend/src/app/favicon.ico [app-rsc] (static)\" } [app-rsc] (structured image object, ecmascript, Next.js server component)", MODULE_1 => "[project]/frontend/src/app/layout.tsx [app-rsc] (ecmascript, Next.js server component)", MODULE_2 => "[project]/node_modules/next/dist/client/components/not-found-error.js [app-rsc] (ecmascript, Next.js server component)", MODULE_3 => "[project]/node_modules/next/dist/client/components/forbidden-error.js [app-rsc] (ecmascript, Next.js server component)", MODULE_4 => "[project]/node_modules/next/dist/client/components/unauthorized-error.js [app-rsc] (ecmascript, Next.js server component)", MODULE_5 => "[project]/frontend/src/app/page.tsx [app-rsc] (ecmascript, Next.js server component)" } [app-rsc] (ecmascript) (.next/server/chunks/ssr/08b5e_ea82f6._.js:6878:1472)
+    at Object.<anonymous> (.next/server/app/page.js:14:26)
+  1 | import Image from "next/image"
+> 2 | import { useTrail, animated } from '@react-spring/web'
+  3 |
+  4 | export default function Hero() {
+  5 |   const items = [ {
+  page: '/'
+}
+ GET / 500 in 116ms
+ GET /favicon.ico 200 in 317ms
+ ⨯ TypeError: createContext only works in Client Components. Add the "use client" directive at the top of the file to use it. Read more: https://nextjs.org/docs/messages/context-in-server-component
+    at [project]/node_modules/@react-spring/core/dist/react-spring_core.modern.mjs [app-rsc] (ecmascript) <module evaluation> (.next/server/chunks/ssr/08b5e_ea82f6._.js:6290:204)
+    at [project]/node_modules/@react-spring/web/dist/react-spring_web.modern.mjs [app-rsc] (ecmascript) <module evaluation> (.next/server/chunks/ssr/08b5e_ea82f6._.js:6658:216)
+    at [project]/frontend/src/components/Hero.tsx [app-rsc] (ecmascript) (frontend/src/components/Hero.tsx:2:0)
+    at [project]/frontend/src/app/page.tsx [app-rsc] (ecmascript) (frontend/src/app/page.tsx:2:0)
+    at [project]/frontend/src/app/page.tsx [app-rsc] (ecmascript, Next.js server component) (.next/server/chunks/ssr/[project]_frontend_819ab7._.js:467:32)
+    at [project]/node_modules/next/dist/esm/build/templates/app-page.js?page=/page { METADATA_0 => "[project]/frontend/src/app/favicon.ico.mjs { IMAGE => \"[project]/frontend/src/app/favicon.ico [app-rsc] (static)\" } [app-rsc] (structured image object, ecmascript, Next.js server component)", MODULE_1 => "[project]/frontend/src/app/layout.tsx [app-rsc] (ecmascript, Next.js server component)", MODULE_2 => "[project]/node_modules/next/dist/client/components/not-found-error.js [app-rsc] (ecmascript, Next.js server component)", MODULE_3 => "[project]/node_modules/next/dist/client/components/forbidden-error.js [app-rsc] (ecmascript, Next.js server component)", MODULE_4 => "[project]/node_modules/next/dist/client/components/unauthorized-error.js [app-rsc] (ecmascript, Next.js server component)", MODULE_5 => "[project]/frontend/src/app/page.tsx [app-rsc] (ecmascript, Next.js server component)" } [app-rsc] (ecmascript) <module evaluation> (.next/server/chunks/ssr/08b5e_ea82f6._.js:6779:170)
+    at [project]/node_modules/next/dist/esm/build/templates/app-page.js?page=/page { METADATA_0 => "[project]/frontend/src/app/favicon.ico.mjs { IMAGE => \"[project]/frontend/src/app/favicon.ico [app-rsc] (static)\" } [app-rsc] (structured image object, ecmascript, Next.js server component)", MODULE_1 => "[project]/frontend/src/app/layout.tsx [app-rsc] (ecmascript, Next.js server component)", MODULE_2 => "[project]/node_modules/next/dist/client/components/not-found-error.js [app-rsc] (ecmascript, Next.js server component)", MODULE_3 => "[project]/node_modules/next/dist/client/components/forbidden-error.js [app-rsc] (ecmascript, Next.js server component)", MODULE_4 => "[project]/node_modules/next/dist/client/components/unauthorized-error.js [app-rsc] (ecmascript, Next.js server component)", MODULE_5 => "[project]/frontend/src/app/page.tsx [app-rsc] (ecmascript, Next.js server component)" } [app-rsc] (ecmascript) (.next/server/chunks/ssr/08b5e_ea82f6._.js:6878:1472)
+    at Object.<anonymous> (.next/server/app/page.js:14:26)
+  1 | import Image from "next/image"
+> 2 | import { useTrail, animated } from '@react-spring/web'
+  3 |
+  4 | export default function Hero() {
+  5 |   const items = [ {
+  page: '/'
+}
+ GET / 500 in 146ms
+ GET /favicon.ico 200 in 20ms

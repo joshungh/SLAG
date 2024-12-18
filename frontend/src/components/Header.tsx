@@ -15,27 +15,21 @@ export default function Header() {
 
   return (
     <header className="border-b border-green-500 pb-4">
-      <div className="flex flex-col sm:flex-row items-center justify-between">
-        <div className="flex items-center space-x-2 mb-4 sm:mb-0">
-          <Terminal className="h-8 w-8 text-green-500" />
-          <h1 className="text-2xl font-bold tracking-tight text-green-400">
-            Starfall: Lost Age of Giants
-            <span className={`ml-2 ${showCursor ? 'opacity-100' : 'opacity-0'}`}>
-              ▋
-            </span>
-          </h1>
+      <div className="flex justify-between items-center">
+        <div className="flex items-center space-x-2">
+          <Terminal className="w-5 h-5" />
+          <span className="font-['IBM_Plex_Mono'] text-sm tracking-tight">
+            SLAG.exe<span className={showCursor ? 'opacity-100' : 'opacity-0'}>▋</span>
+          </span>
         </div>
         <nav>
-          <ul className="flex space-x-4">
+          <ul className="flex space-x-6 font-['IBM_Plex_Mono'] text-sm">
             <li><a href="#story" className="hover:text-green-300 transition-colors">Story</a></li>
             <li><a href="#gallery" className="hover:text-green-300 transition-colors">Gallery</a></li>
             <li><a href="#about" className="hover:text-green-300 transition-colors">About</a></li>
           </ul>
         </nav>
       </div>
-      <p className="mt-4 text-sm text-green-400">
-        &gt; Autonomously generated graphic novel // AI-powered storytelling
-      </p>
     </header>
   )
 } 
