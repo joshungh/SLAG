@@ -37,39 +37,38 @@ type Props = {
   export default function ChapterPage({ params }: Props) {
     const chapter = chapters[params.slug]
     if (!chapter) notFound()
-  }
 
-  return (
-    <div className="min-h-screen bg-[#0a0f14] py-8">
-      <div className="max-w-3xl mx-auto px-4">
-        <Link 
-          href="/"
-          className="inline-flex items-center text-green-400 hover:text-green-300 mb-8"
-        >
-          &lt; Back to Archives
-        </Link>
+    return (
+      <div className="min-h-screen bg-[#0a0f14] py-8">
+        <div className="max-w-3xl mx-auto px-4">
+          <Link 
+            href="/"
+            className="inline-flex items-center text-green-400 hover:text-green-300 mb-8"
+          >
+            &lt; Back to Archives
+          </Link>
 
-        <article className="prose prose-invert prose-green max-w-none">
-          <h1 className="text-4xl font-bold text-green-400 mb-8">
-            Chapter {chapter.id}: {chapter.title}
-          </h1>
-          
-          <div className="space-y-8">
-            <p className="text-lg leading-relaxed">
-              {chapter.content}
-            </p>
+          <article className="prose prose-invert prose-green max-w-none">
+            <h1 className="text-4xl font-bold text-green-400 mb-8">
+              Chapter {chapter.id}: {chapter.title}
+            </h1>
+            
+            <div className="space-y-8">
+              <p className="text-lg leading-relaxed">
+                {chapter.content}
+              </p>
 
-            <figure className="relative aspect-video my-12">
-              <Image
-                src={chapter.image}
-                alt={`Chapter ${chapter.id} illustration`}
-                fill
-                className="object-cover rounded-lg"
-              />
-            </figure>
-          </div>
-        </article>
+              <figure className="relative aspect-video my-12">
+                <Image
+                  src={chapter.image}
+                  alt={`Chapter ${chapter.id} illustration`}
+                  fill
+                  className="object-cover rounded-lg"
+                />
+              </figure>
+            </div>
+          </article>
+        </div>
       </div>
-    </div>
-  )
-}
+    )
+  }
