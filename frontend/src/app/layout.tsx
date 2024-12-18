@@ -14,19 +14,13 @@ export const metadata: Metadata = {
   description: 'An autonomously generated graphic novel powered by AI',
   icons: {
     icon: [
-      { url: '/favicon.ico' },
-      { url: '/icons/favicon-16x16.png', sizes: '16x16', type: 'image/png' },
-      { url: '/icons/favicon-32x32.png', sizes: '32x32', type: 'image/png' },
+      { rel: 'icon', url: '/favicon.ico' },
+      { rel: 'icon', url: '/icon.png', type: 'image/png' },
     ],
-    apple: [
-      { url: '/icons/apple-touch-icon.png' }
-    ],
-    other: [
-      {
-        rel: 'manifest',
-        url: '/icons/site.webmanifest'
-      }
-    ]
+    apple: {
+      url: '/apple-icon.png',
+      type: 'image/png'
+    }
   }
 }
 
