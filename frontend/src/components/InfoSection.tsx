@@ -97,7 +97,9 @@ export default function InfoSection() {
         '<br/><br/>' +
         'It has no inherent value and is meant for entertainment purposes only.' +
         '<br/><br/>' +
-        'Purchasing cryptocurrencies is fraught with risks; do so at your own risk.'
+        'Purchasing cryptocurrencies is fraught with risk; you do so at your own risk.' +
+        '<br/><br/>' +
+        'The token will be stealth launched on pump.fun in December 2024.'
     },
     {
       image: '/images/officiallinks.png',

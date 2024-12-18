@@ -12,10 +12,10 @@ export default function Hero() {
   }, [])
 
   const items = [
-    <span key="1" className="block text-[8rem] md:text-[12rem] lg:text-[16rem] mb-4 font-['Helvetica'] tracking-tighter text-[#fff1eb]">
+    <span key="1" className="block text-[3rem] sm:text-[5rem] md:text-[8rem] lg:text-[12rem] mb-4 font-['Helvetica'] tracking-tighter text-[#fff1eb]">
       STARFALL
     </span>,
-    <span key="2" className="block text-4xl md:text-6xl lg:text-8xl font-['Helvetica'] tracking-widest text-[#fff1eb]">
+    <span key="2" className="block text-xl sm:text-2xl md:text-4xl lg:text-6xl font-['Helvetica'] tracking-widest text-[#fff1eb]">
       LOST AGE OF GIANTS
     </span>
   ]
