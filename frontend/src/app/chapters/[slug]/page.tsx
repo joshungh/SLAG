@@ -18,11 +18,10 @@ const chapters = {
   }
 } as const
 
-// Remove custom type and use inline type
-export async function generateMetadata(
-  { params }: { params: { slug: string } }
-): Promise<Metadata> {
-  const chapter = chapters[params.slug as keyof typeof chapters]
+type ChapterParams = { slug: keyof typeof chapters }
+
+export async function generateMetadata({ params }: { params: ChapterParams }): Promise<Metadata> {
+  const chapter = chapters[params.slug]
   if (!chapter) return { title: 'Chapter Not Found' }
   
   return {
@@ -30,11 +29,13 @@ export async function generateMetadata(
   }
 }
 
-// Use inline type here as well
-export default async function ChapterPage(
-  { params }: { params: { slug: string } }
-) {
-  const chapter = chapters[params.slug as keyof typeof chapters]
+type Props = {
+  params: ChapterParams
+  searchParams: { [key: string]: string | string[] | undefined }
+}
+
+export default function ChapterPage({ params, searchParams }: Props) {
+  const chapter = chapters[params.slug]
   if (!chapter) notFound()
 
   return (
