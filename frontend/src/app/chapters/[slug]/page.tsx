@@ -18,23 +18,12 @@ const chapters = {
   }
 } as const
 
-type Params = { slug: keyof typeof chapters }
-
-type Props = {
-  params: Params
-}
-
-export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const chapter = chapters[params.slug]
-  if (!chapter) return { title: 'Chapter Not Found' }
-  
-  return {
-    title: `Chapter ${chapter.id}: ${chapter.title} | Starfall: Lost Age of Giants`,
-  }
-}
-
-export default function ChapterPage({ params }: Props) {
-  const chapter = chapters[params.slug]
+export default function ChapterPage({
+  params,
+}: {
+  params: { slug: string }
+}) {
+  const chapter = chapters[params.slug as keyof typeof chapters]
   if (!chapter) notFound()
 
   return (
@@ -70,4 +59,17 @@ export default function ChapterPage({ params }: Props) {
       </div>
     </div>
   )
+}
+
+export async function generateMetadata({
+  params,
+}: {
+  params: { slug: string }
+}): Promise<Metadata> {
+  const chapter = chapters[params.slug as keyof typeof chapters]
+  if (!chapter) return { title: 'Chapter Not Found' }
+  
+  return {
+    title: `Chapter ${chapter.id}: ${chapter.title} | Starfall: Lost Age of Giants`,
+  }
 }
