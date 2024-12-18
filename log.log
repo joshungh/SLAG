@@ -92,3 +92,51 @@
 [14:34:51.364] npm error command sh -c next build
 [14:34:51.377] Error: Command "npm run build" exited with 1
 [14:34:51.588] 
+
+---
+
+[14:38:08.409] Running build in Washington, D.C., USA (East) – iad1
+[14:38:08.500] Cloning github.com/mango31/SLAG (Branch: master, Commit: e1b6ea7)
+[14:38:12.502] Cloning completed: 4.001s
+[14:38:12.889] Restored build cache from previous deployment (6LedLYAg8UaCnmuNiXgpcfKNXepu)
+[14:38:12.963] Running "vercel build"
+[14:38:13.378] Vercel CLI 39.2.0
+[14:38:13.728] Running "install" command: `npm install`...
+[14:38:16.435] 
+[14:38:16.436] added 6 packages, and audited 467 packages in 2s
+[14:38:16.436] 
+[14:38:16.436] 146 packages are looking for funding
+[14:38:16.436]   run `npm fund` for details
+[14:38:16.437] 
+[14:38:16.437] found 0 vulnerabilities
+[14:38:16.450] Detected Next.js version: 15.1.1
+[14:38:16.450] Running "npm run build"
+[14:38:16.610] 
+[14:38:16.610] > frontend@0.1.0 build
+[14:38:16.611] > next build
+[14:38:16.611] 
+[14:38:17.426]    ▲ Next.js 15.1.1
+[14:38:17.426] 
+[14:38:17.500]    Creating an optimized production build ...
+[14:38:19.424] (node:168) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+[14:38:19.425] (Use `node --trace-deprecation ...` to show where the warning was created)
+[14:38:24.280] (node:222) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+[14:38:24.280] (Use `node --trace-deprecation ...` to show where the warning was created)
+[14:38:26.202]  ✓ Compiled successfully
+[14:38:26.206]    Linting and checking validity of types ...
+[14:38:30.292] Failed to compile.
+[14:38:30.292] 
+[14:38:30.292] src/app/chapters/[slug]/page.tsx
+[14:38:30.293] Type error: Type 'Props' does not satisfy the constraint 'PageProps'.
+[14:38:30.293]   Types of property 'params' are incompatible.
+[14:38:30.293]     Type 'ChapterParams' is missing the following properties from type 'Promise<any>': then, catch, finally, [Symbol.toStringTag]
+[14:38:30.293] 
+[14:38:30.328] npm error Lifecycle script `build` failed with error:
+[14:38:30.329] npm error code 1
+[14:38:30.329] npm error path /vercel/path0/frontend
+[14:38:30.329] npm error workspace frontend@0.1.0
+[14:38:30.329] npm error location /vercel/path0/frontend
+[14:38:30.329] npm error command failed
+[14:38:30.329] npm error command sh -c next build
+[14:38:30.347] Error: Command "npm run build" exited with 1
+[14:38:30.584] 
