@@ -1,18 +1,16 @@
 'use client'
 
 import Image from 'next/image'
-import Link from 'next/link'
 import { useState } from 'react'
 import { useSpring, a } from '@react-spring/web'
 
 interface CardProps {
   image: string
   alt: string
-  href: string
   backText: string
 }
 
-function FlipCard({ image, alt, href, backText }: CardProps) {
+function FlipCard({ image, alt, backText }: CardProps) {
   const [flipped, setFlipped] = useState(false)
 
   const { transform, opacity } = useSpring({
@@ -80,7 +78,6 @@ export default function InfoSection() {
     {
       image: '/images/whatisslag.png',
       alt: 'What is SLAG',
-      href: '/about',
       backText: 
         'Starfall: Lost Age of Giants (SLAG for short) is a human-guided but autonomously-generated epic graphic novel.' +
         '<br/><br/>' +
@@ -95,7 +92,6 @@ export default function InfoSection() {
     {
       image: '/images/whatis$slag.png',
       alt: 'What is $SLAG token',
-      href: '/token',
       backText: 
         '$SLAG is a community token deployed on Solana.' +
         '<br/><br/>' +
@@ -106,7 +102,6 @@ export default function InfoSection() {
     {
       image: '/images/officiallinks.png',
       alt: 'Official Links',
-      href: '/links',
       backText: 
         'GitHub Repository:' +
         '<br/><br/>' +
