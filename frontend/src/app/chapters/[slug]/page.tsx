@@ -4,9 +4,9 @@ import { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 
 type PageProps = {
-  params: {
+  params: Promise<{
     slug: string
-  }
+  }>
   searchParams: Record<string, string | string[] | undefined>
 }
 
