@@ -30,13 +30,14 @@ export async function generateMetadata({ params }: { params: ChapterParams }): P
 }
 
 type Props = {
-  params: ChapterParams
-  searchParams: { [key: string]: string | string[] | undefined }
-}
-
-export default function ChapterPage({ params, searchParams }: Props) {
-  const chapter = chapters[params.slug]
-  if (!chapter) notFound()
+    params: ChapterParams
+    searchParams: { [key: string]: string | string[] | undefined }
+  }
+  
+  export default function ChapterPage({ params }: Props) {
+    const chapter = chapters[params.slug]
+    if (!chapter) notFound()
+  }
 
   return (
     <div className="min-h-screen bg-[#0a0f14] py-8">

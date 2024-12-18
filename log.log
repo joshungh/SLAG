@@ -1,13 +1,45 @@
-Failed to compile.
-src/app/chapters/[slug]/page.tsx
-Type error: Type '{ params: { slug: string; }; }' does not satisfy the constraint 'PageProps'.
-  Types of property 'params' are incompatible.
-    Type '{ slug: string; }' is missing the following properties from type 'Promise<any>': then, catch, finally, [Symbol.toStringTag]
-npm error Lifecycle script `build` failed with error:
-npm error code 1
-npm error path /vercel/path0/frontend
-npm error workspace frontend@0.1.0
-npm error location /vercel/path0/frontend
-npm error command failed
-npm error command sh -c next build
-Error: Command "npm run build" exited with 1
+[14:30:33.552] Running build in Washington, D.C., USA (East) – iad1
+[14:30:33.662] Cloning github.com/mango31/SLAG (Branch: master, Commit: a4b37ac)
+[14:30:38.043] Cloning completed: 4.381s
+[14:30:38.427] Restored build cache from previous deployment (6LedLYAg8UaCnmuNiXgpcfKNXepu)
+[14:30:38.503] Running "vercel build"
+[14:30:38.931] Vercel CLI 39.2.0
+[14:30:39.278] Running "install" command: `npm install`...
+[14:30:41.867] 
+[14:30:41.868] added 6 packages, and audited 467 packages in 2s
+[14:30:41.868] 
+[14:30:41.868] 146 packages are looking for funding
+[14:30:41.868]   run `npm fund` for details
+[14:30:41.869] 
+[14:30:41.869] found 0 vulnerabilities
+[14:30:41.881] Detected Next.js version: 15.1.1
+[14:30:41.882] Running "npm run build"
+[14:30:42.047] 
+[14:30:42.047] > frontend@0.1.0 build
+[14:30:42.047] > next build
+[14:30:42.047] 
+[14:30:42.951]    ▲ Next.js 15.1.1
+[14:30:42.952] 
+[14:30:43.125]    Creating an optimized production build ...
+[14:30:45.021] (node:174) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+[14:30:45.021] (Use `node --trace-deprecation ...` to show where the warning was created)
+[14:30:49.800] (node:228) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+[14:30:49.800] (Use `node --trace-deprecation ...` to show where the warning was created)
+[14:30:51.882]  ✓ Compiled successfully
+[14:30:51.886]    Linting and checking validity of types ...
+[14:30:55.006] 
+[14:30:55.007] Failed to compile.
+[14:30:55.007] 
+[14:30:55.007] ./src/app/chapters/[slug]/page.tsx
+[14:30:55.007] 37:47  Error: 'searchParams' is defined but never used.  @typescript-eslint/no-unused-vars
+[14:30:55.007] 
+[14:30:55.008] info  - Need to disable some ESLint rules? Learn more here: https://nextjs.org/docs/app/api-reference/config/eslint#disabling-rules
+[14:30:55.021] npm error Lifecycle script `build` failed with error:
+[14:30:55.021] npm error code 1
+[14:30:55.021] npm error path /vercel/path0/frontend
+[14:30:55.021] npm error workspace frontend@0.1.0
+[14:30:55.021] npm error location /vercel/path0/frontend
+[14:30:55.022] npm error command failed
+[14:30:55.022] npm error command sh -c next build
+[14:30:55.043] Error: Command "npm run build" exited with 1
+[14:30:58.320] 
