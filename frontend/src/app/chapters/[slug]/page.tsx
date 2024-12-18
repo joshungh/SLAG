@@ -3,13 +3,6 @@ import Link from 'next/link'
 import { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 
-type PageProps = {
-  params: Promise<{
-    slug: string
-  }>
-  searchParams: Record<string, string | string[] | undefined>
-}
-
 const chapters = {
   'chapter-1-the-awakening': {
     id: 1,
@@ -23,9 +16,13 @@ const chapters = {
     content: "As the truth about the ancient civilization emerges, our heroes face an impossible choice...",
     image: "/images/mango.coca_scifi_fantasy_graphic_novel_giants_a_war_rich_detail_579b4bdb-f763-420e-84cf-602c7509c1f8.png"
   }
-}
+} as const
 
-export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
+// Define the params type that Next.js expects
+type Params = { slug: string }
+
+// Simpler metadata function with explicit typing
+export async function generateMetadata({ params }: { params: Params }): Promise<Metadata> {
   const chapter = chapters[params.slug as keyof typeof chapters]
   if (!chapter) return { title: 'Chapter Not Found' }
   
@@ -34,7 +31,8 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   }
 }
 
-export default async function ChapterPage({ params }: PageProps) {
+// Simpler page component with explicit typing
+export default async function ChapterPage({ params }: { params: Params }) {
   const chapter = chapters[params.slug as keyof typeof chapters]
   if (!chapter) notFound()
 
@@ -71,4 +69,4 @@ export default async function ChapterPage({ params }: PageProps) {
       </div>
     </div>
   )
-} 
+}

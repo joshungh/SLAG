@@ -1,10 +1,9 @@
 import Header from '@/components/Header'
 import Hero from '@/components/Hero'
 import StoryFeed from '@/components/StoryFeed'
-import ImageGallery from '@/components/ImageGallery'
 import Footer from '@/components/Footer'
 import CloudwatchLogsBox from '@/components/CloudwatchLogsBox'
-import { galleryImages } from '@/data/images'
+import InfoSection from '@/components/InfoSection'
 
 export default function Home() {
   return (
@@ -12,12 +11,12 @@ export default function Home() {
       <div className="max-w-6xl mx-auto px-4 py-8">
         <Header />
         <Hero />
-        <section className="mt-8">
-          <CloudwatchLogsBox />
-        </section>
         <main className="mt-12 space-y-16">
+          <InfoSection />
           <StoryFeed />
-          <ImageGallery images={galleryImages} />
+          <section className="mt-8">
+            <CloudwatchLogsBox />
+          </section>
         </main>
         <Footer />
       </div>

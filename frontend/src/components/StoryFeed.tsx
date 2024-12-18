@@ -30,11 +30,10 @@ export default function StoryFeed() {
   ])
 
   return (
-    <section id="story" className="space-y-8">
-      <h2 className="text-xl font-bold text-green-500">&gt; Story_Archives</h2>
+    <section id="story" className="space-y-8 font-['IBM_Plex_Mono']">
       <div className="border border-green-500 rounded-lg overflow-hidden">
-        <div className="bg-gray-800 text-green-400 px-4 py-2 font-bold">
-          &gt; Generated Chapters
+        <div className="bg-gray-800 text-green-400 px-4 py-2 font-bold text-sm">
+          &gt; Story Archives
         </div>
         <div className="bg-black p-4 divide-y divide-green-500/20">
           {chapters.map((chapter) => (
@@ -51,7 +50,7 @@ export default function StoryFeed() {
                   {new Date(chapter.date).toLocaleDateString()}
                 </span>
               </div>
-              <p className="text-green-300/80 leading-relaxed">
+              <p className="text-green-300/80 leading-relaxed text-sm">
                 {chapter.summary}
               </p>
             </Link>

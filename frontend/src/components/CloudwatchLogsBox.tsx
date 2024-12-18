@@ -12,8 +12,8 @@ export default function CloudwatchLogsBox() {
   }, [])
 
   return (
-    <div className="border border-green-500 rounded-lg overflow-hidden">
-      <div className="bg-gray-800 text-green-400 px-4 py-2 font-bold">
+    <div className="border border-green-500 rounded-lg overflow-hidden font-['IBM_Plex_Mono']">
+      <div className="bg-gray-800 text-green-400 px-4 py-2 font-bold text-sm">
         &gt; Live Cloudwatch Logs
       </div>
       {iframeUrl ? (
@@ -23,7 +23,7 @@ export default function CloudwatchLogsBox() {
           title="Cloudwatch Logs"
         />
       ) : (
-        <div className="w-full h-64 bg-black flex items-center justify-center text-green-400">
+        <div className="w-full h-64 bg-black flex items-center justify-center text-green-400 text-sm">
           Loading Cloudwatch logs...
         </div>
       )}

@@ -1,9 +1,5 @@
 export const galleryImages = [
   {
-    src: '/images/mango.coca_scifi_fantasy_graphic_novel_a_war_rich_detail_in_the_04edfcc5-fd56-43bd-a435-2dc7e4a8c791.png',
-    alt: 'Sci-fi scene 1'
-  },
-  {
     src: '/images/mango.coca_scifi_fantasy_graphic_novel_a_war_rich_detail_in_the_2aa65d5c-09dd-429b-be24-0cb37eafd80e.png',
     alt: 'Sci-fi scene 2'
   },
