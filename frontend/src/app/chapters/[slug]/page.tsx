@@ -18,14 +18,10 @@ const chapters = {
   }
 } as const
 
-// Update the params type to match Next.js expectations
-type Props = {
-  params: {
-    slug: string
-  }
-}
-
-export async function generateMetadata({ params }: Props): Promise<Metadata> {
+// Remove custom type and use inline type
+export async function generateMetadata(
+  { params }: { params: { slug: string } }
+): Promise<Metadata> {
   const chapter = chapters[params.slug as keyof typeof chapters]
   if (!chapter) return { title: 'Chapter Not Found' }
   
@@ -34,8 +30,10 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   }
 }
 
-// Update the page component to use the same Props type
-export default async function ChapterPage({ params }: Props) {
+// Use inline type here as well
+export default async function ChapterPage(
+  { params }: { params: { slug: string } }
+) {
   const chapter = chapters[params.slug as keyof typeof chapters]
   if (!chapter) notFound()
 
