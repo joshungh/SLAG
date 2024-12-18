@@ -1,13 +1,21 @@
 import Image from 'next/image'
 import Link from 'next/link'
+import { Metadata } from 'next'
 
-interface ChapterPageProps {
+interface PageProps {
   params: {
     slug: string
   }
+  searchParams: { [key: string]: string | string[] | undefined }
 }
 
-export default function ChapterPage({ params }: ChapterPageProps) {
+export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
+  return {
+    title: `Chapter: ${params.slug} | Starfall: Lost Age of Giants`,
+  }
+}
+
+export default async function ChapterPage({ params, searchParams }: PageProps) {
   return (
     <div className="min-h-screen bg-[#0a0f14] py-8">
       <div className="max-w-3xl mx-auto px-4">
