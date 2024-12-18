@@ -1,7 +1,12 @@
 'use client'
 
 import Image from "next/image"
-import { useTrail, animated } from '@react-spring/web'
+import { useTrail, animated, SpringValue } from '@react-spring/web'
+
+interface AnimatedProps {
+  opacity: SpringValue<number>
+  y: SpringValue<number>
+}
 
 export default function Hero() {
   const items = [
@@ -35,8 +40,14 @@ export default function Hero() {
       <div className="relative z-10 flex items-center justify-center h-full">
         <div className="text-center px-4">
           <h1 className="font-black leading-none tracking-tight">
-            {trail.map((style, index) => (
-              <animated.div key={index} style={style}>
+            {trail.map((props, index) => (
+              <animated.div 
+                key={index} 
+                style={{
+                  opacity: props.opacity,
+                  transform: props.y.to(y => `translateY(${y}px)`)
+                }}
+              >
                 {items[index]}
               </animated.div>
             ))}
