@@ -2,7 +2,6 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { Metadata } from 'next'
 import { notFound } from 'next/navigation'
-import { PageProps } from 'next/types'
 
 const chapters = {
   'chapter-1-the-awakening': {
@@ -19,9 +18,13 @@ const chapters = {
   }
 } as const
 
-type ChapterParams = { slug: keyof typeof chapters }
+type Params = { slug: keyof typeof chapters }
 
-export async function generateMetadata({ params }: { params: ChapterParams }): Promise<Metadata> {
+type Props = {
+  params: Params
+}
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const chapter = chapters[params.slug]
   if (!chapter) return { title: 'Chapter Not Found' }
   
@@ -30,13 +33,7 @@ export async function generateMetadata({ params }: { params: ChapterParams }): P
   }
 }
 
-export default function ChapterPage({
-  params,
-  searchParams,
-}: {
-  params: ChapterParams
-  searchParams: { [key: string]: string | string[] | undefined }
-}) {
+export default function ChapterPage({ params }: Props) {
   const chapter = chapters[params.slug]
   if (!chapter) notFound()
 
