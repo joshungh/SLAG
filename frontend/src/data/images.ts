@@ -46,5 +46,17 @@ export const galleryImages = [
   {
     src: '/images/mango.coca_scifi_fantasy_graphic_novel_giants_starfall_a_war_ri_fb0a687d-1da0-438d-aff4-31ea3aec01cd.png',
     alt: 'Sci-fi scene 13'
+  },
+  {
+    src: '/images/logo5.png',
+    alt: 'Logo 5'
+  },
+  {
+    src: '/images/logo1.png',
+    alt: 'Logo 1'
+  },
+  {
+    src: '/images/logo4.png',
+    alt: 'Logo 4'
   }
 ]; 

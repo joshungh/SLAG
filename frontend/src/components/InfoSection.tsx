@@ -83,9 +83,9 @@ export default function InfoSection() {
         '<br/><br/>' +
         'A love child born from two obsessions:' +
         '<br/><br/>' +
-        'A deep rooted admiration towards the work of John Scalzi, Joe Haldeman, Isaac Asimov, and Frank Herbert.' +
+        'A deep rooted admiration towards the work of John Scalzi, Joe Haldeman, Isaac Asimov, and Frank Herbert among many others.' +
         '<br/><br/>' +
-        'A fascination with LLMs and the world we find ourselves in.' +
+        'A fascination with LLMs and the brave new world we find ourselves in.' +
         '<br/><br/>' +
         'SLAG is first and foremost an artistic journey. As such, expect bumps, bruises, laughter, longing, and perhaps the occasional hallucination.'
     },
