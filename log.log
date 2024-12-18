@@ -1,45 +1,45 @@
-[12:12:27.037] Running build in Washington, D.C., USA (East) – iad1
-[12:12:27.154] Cloning github.com/mango31/SLAG (Branch: master, Commit: 08097d4)
-[12:12:29.154] Cloning completed: 2.000s
-[12:12:32.357] Restored build cache from previous deployment (6LedLYAg8UaCnmuNiXgpcfKNXepu)
-[12:12:32.427] Running "vercel build"
-[12:12:32.845] Vercel CLI 39.2.0
-[12:12:33.198] Running "install" command: `npm install`...
-[12:12:35.684] 
-[12:12:35.684] added 6 packages, and audited 467 packages in 2s
-[12:12:35.685] 
-[12:12:35.685] 146 packages are looking for funding
-[12:12:35.685]   run `npm fund` for details
-[12:12:35.686] 
-[12:12:35.686] found 0 vulnerabilities
-[12:12:35.696] Detected Next.js version: 15.1.1
-[12:12:35.696] Running "npm run build"
-[12:12:35.857] 
-[12:12:35.857] > frontend@0.1.0 build
-[12:12:35.857] > next build
-[12:12:35.857] 
-[12:12:36.756]    ▲ Next.js 15.1.1
-[12:12:36.756] 
-[12:12:36.899]    Creating an optimized production build ...
-[12:12:38.711] (node:168) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
-[12:12:38.711] (Use `node --trace-deprecation ...` to show where the warning was created)
-[12:12:43.161] (node:210) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
-[12:12:43.161] (Use `node --trace-deprecation ...` to show where the warning was created)
-[12:12:45.119]  ✓ Compiled successfully
-[12:12:45.123]    Linting and checking validity of types ...
-[12:12:48.974] Failed to compile.
-[12:12:48.974] 
-[12:12:48.975] src/app/chapters/[slug]/page.tsx
-[12:12:48.975] Type error: Type 'PageProps' does not satisfy the constraint 'import("/vercel/path0/frontend/.next/types/app/chapters/[slug]/page").PageProps'.
-[12:12:48.975]   Types of property 'params' are incompatible.
-[12:12:48.975]     Type '{ slug: string; }' is missing the following properties from type 'Promise<any>': then, catch, finally, [Symbol.toStringTag]
-[12:12:48.975] 
-[12:12:49.014] npm error Lifecycle script `build` failed with error:
-[12:12:49.015] npm error code 1
-[12:12:49.015] npm error path /vercel/path0/frontend
-[12:12:49.015] npm error workspace frontend@0.1.0
-[12:12:49.016] npm error location /vercel/path0/frontend
-[12:12:49.016] npm error command failed
-[12:12:49.016] npm error command sh -c next build
-[12:12:49.029] Error: Command "npm run build" exited with 1
-[12:12:49.270] 
+[12:14:02.070] Running build in Washington, D.C., USA (East) – iad1
+[12:14:02.181] Cloning github.com/mango31/SLAG (Branch: master, Commit: 2b7e9c0)
+[12:14:04.383] Cloning completed: 2.199s
+[12:14:07.466] Restored build cache from previous deployment (6LedLYAg8UaCnmuNiXgpcfKNXepu)
+[12:14:07.545] Running "vercel build"
+[12:14:07.971] Vercel CLI 39.2.0
+[12:14:08.746] Running "install" command: `npm install`...
+[12:14:11.786] 
+[12:14:11.786] added 6 packages, and audited 467 packages in 3s
+[12:14:11.786] 
+[12:14:11.786] 146 packages are looking for funding
+[12:14:11.787]   run `npm fund` for details
+[12:14:11.788] 
+[12:14:11.788] found 0 vulnerabilities
+[12:14:11.898] Detected Next.js version: 15.1.1
+[12:14:11.898] Running "npm run build"
+[12:14:12.089] 
+[12:14:12.089] > frontend@0.1.0 build
+[12:14:12.089] > next build
+[12:14:12.089] 
+[12:14:13.565]    ▲ Next.js 15.1.1
+[12:14:13.565] 
+[12:14:13.726]    Creating an optimized production build ...
+[12:14:15.444] (node:176) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+[12:14:15.444] (Use `node --trace-deprecation ...` to show where the warning was created)
+[12:14:20.089] (node:222) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+[12:14:20.090] (Use `node --trace-deprecation ...` to show where the warning was created)
+[12:14:22.577]  ✓ Compiled successfully
+[12:14:22.583]    Linting and checking validity of types ...
+[12:14:27.295] Failed to compile.
+[12:14:27.295] 
+[12:14:27.295] src/app/chapters/[slug]/page.tsx
+[12:14:27.295] Type error: Type 'PageProps' does not satisfy the constraint 'import("/vercel/path0/frontend/.next/types/app/chapters/[slug]/page").PageProps'.
+[12:14:27.295]   Types of property 'params' are incompatible.
+[12:14:27.295]     Type '{ slug: string; }' is missing the following properties from type 'Promise<any>': then, catch, finally, [Symbol.toStringTag]
+[12:14:27.296] 
+[12:14:27.334] npm error Lifecycle script `build` failed with error:
+[12:14:27.334] npm error code 1
+[12:14:27.334] npm error path /vercel/path0/frontend
+[12:14:27.334] npm error workspace frontend@0.1.0
+[12:14:27.335] npm error location /vercel/path0/frontend
+[12:14:27.335] npm error command failed
+[12:14:27.335] npm error command sh -c next build
+[12:14:27.352] Error: Command "npm run build" exited with 1
+[12:14:27.617] 

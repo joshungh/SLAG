@@ -3,11 +3,11 @@ import Link from 'next/link'
 import { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 
-interface PageProps {
+type PageProps = {
   params: {
     slug: string
   }
-  searchParams: { [key: string]: string | string[] | undefined }
+  searchParams: Record<string, string | string[] | undefined>
 }
 
 const chapters = {
@@ -34,7 +34,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   }
 }
 
-export default function ChapterPage({ params }: PageProps) {
+export default async function ChapterPage({ params }: PageProps) {
   const chapter = chapters[params.slug as keyof typeof chapters]
   if (!chapter) notFound()
 
