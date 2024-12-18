@@ -11,9 +11,6 @@ const nextConfig: NextConfig = {
     ],
     unoptimized: false,
     domains: ['vercel.app', 'localhost']
-  },
-  experimental: {
-    appDir: true
   }
 };
 
