@@ -34,7 +34,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   }
 }
 
-export default async function ChapterPage({ params }: PageProps) {
+export default function ChapterPage({ params }: PageProps) {
   const chapter = chapters[params.slug as keyof typeof chapters]
   if (!chapter) notFound()
 
