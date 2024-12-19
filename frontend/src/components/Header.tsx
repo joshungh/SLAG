@@ -48,13 +48,6 @@ export default function Header() {
     <header className="border-b border-green-500 pb-4">
       <div className="flex justify-between items-center">
         <div className="flex items-center space-x-2">
-          <Image
-            src="/images/logo5.png"
-            alt="SLAG Logo"
-            width={24}
-            height={24}
-            className="rounded-sm"
-          />
           <button 
             onClick={scrollToTop}
             className="flex items-center space-x-2 hover:text-green-300 transition-colors"
