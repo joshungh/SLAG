@@ -80,29 +80,39 @@ class StoryArcManager:
             "suggested_focus": self._suggest_world_focus(locations_used, tech_mentioned, factions_involved)
         }
 
-    async def analyze_tension_patterns(self, chapter_number: int) -> Dict:
-        """Detailed analysis of tension patterns"""
-        # Get last 10 chapters of tension data
-        recent_tension = [self.tension_curve.get(i, 0.5) 
-                         for i in range(chapter_number-10, chapter_number)]
-        
-        # Analyze patterns
-        patterns = {
-            "steady_rise": self._is_steady_rise(recent_tension),
-            "plateau": self._is_plateau(recent_tension),
-            "oscillating": self._is_oscillating(recent_tension),
-            "sharp_changes": self._count_sharp_changes(recent_tension)
-        }
-        
-        # Calculate optimal next tension
-        optimal_next = self._calculate_optimal_tension(recent_tension, patterns)
-        
-        return {
-            "patterns": patterns,
-            "current_phase": self._determine_story_phase(patterns),
-            "optimal_next_tension": optimal_next,
-            "suggested_techniques": self._suggest_tension_techniques(optimal_next)
-        }
+    async def analyze_tension_patterns(self, chapter_number: int, tensions: List[float] = None) -> Dict:
+        """Analyze story tension and recommend adjustments"""
+        if tensions:
+            # Analyze provided tension values
+            return {
+                "patterns": {
+                    "steady_rise": all(tensions[i] <= tensions[i+1] for i in range(len(tensions)-1)),
+                    "plateau": all(abs(tensions[i] - tensions[i+1]) < self.tension_threshold 
+                                 for i in range(len(tensions)-1)),
+                    "oscillating": self._is_oscillating(tensions)
+                },
+                "current_tension": tensions[-1] if tensions else 0.5,
+                "trend": "rising" if len(tensions) > 1 and tensions[-1] > tensions[0] else "falling",
+                "needs_climax": any(t > 0.8 for t in tensions[-3:]) if len(tensions) >= 3 else False,
+                "needs_relief": all(t > 0.7 for t in tensions[-3:]) if len(tensions) >= 3 else False
+            }
+        else:
+            # Use historical tension curve
+            recent_tension = [self.tension_curve.get(i, 0.5) 
+                             for i in range(chapter_number-5, chapter_number)]
+            
+            return {
+                "patterns": {
+                    "steady_rise": all(recent_tension[i] <= recent_tension[i+1] 
+                                     for i in range(len(recent_tension)-1)),
+                    "plateau": False,
+                    "oscillating": False
+                },
+                "current_tension": recent_tension[-1] if recent_tension else 0.5,
+                "trend": "rising" if len(recent_tension) > 1 and recent_tension[-1] > recent_tension[0] else "falling",
+                "needs_climax": any(t > 0.8 for t in recent_tension[-3:]),
+                "needs_relief": all(t > 0.7 for t in recent_tension[-3:])
+            }
 
     def _is_steady_rise(self, tension_values: List[float]) -> bool:
         """Check if tension is steadily rising"""

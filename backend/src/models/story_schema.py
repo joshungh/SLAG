@@ -27,22 +27,45 @@ class CharacterArc(BaseModel):
     status: str = "active"
     last_appearance: Optional[int] = None
 
+class Act(BaseModel):
+    act_number: int
+    act_theme: str
+    tension_level: float
+
 class ScenePlan(BaseModel):
     scene_number: int
-    focus: str  # main plot, character development, world building
+    act: int
+    focus: str
     key_characters: List[str]
     location: str
+    time_of_day: str
     objective: str
     expected_outcome: str
     plot_threads: List[str]
-    
+    tension_level: float
+    pacing: str
+    scene_type: str
+
+class WorldDevelopment(BaseModel):
+    locations_featured: List[str]
+    technology_elements: List[str]
+    world_building_points: List[str]
+
+class ChapterOutcomes(BaseModel):
+    plot_developments: List[str]
+    character_developments: List[str]
+    world_changes: List[str]
+
 class ChapterPlan(BaseModel):
     created_at: datetime
     theme: str
+    acts: List[Act]
     plot_threads: List[PlotThread]
     character_arcs: List[CharacterArc]
     scene_plans: List[ScenePlan]
-    expected_outcomes: List[str]
+    world_development: WorldDevelopment
+    expected_outcomes: ChapterOutcomes
+    next_chapter_setup: List[str]
 
 class ChapterSummary(BaseModel):
     chapter_number: int

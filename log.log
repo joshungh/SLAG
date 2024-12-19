@@ -84,33 +84,55 @@ INFO     src.services.rag_service:rag_service.py:77 Generated embeddings for 2 c
 INFO     src.services.rag_service:rag_service.py:124 Successfully indexed document: /Users/cmcoca/Desktop/SLAG-site/backend/src/reference-documents/story-planning/initial-story-plan.txt
 INFO     backend.tests.conftest:conftest.py:75 Indexed test document: /Users/cmcoca/Desktop/SLAG-site/backend/src/reference-documents/story-planning/initial-story-plan.txt
 INFO     backend.tests.conftest:conftest.py:77 RAG service initialization complete
-INFO     src.services.chapter_handler:chapter_handler.py:18 
+INFO     src.services.chapter_handler:chapter_handler.py:20 
 ==================== Generating Chapter 1 Plan ====================
-INFO     src.services.chapter_handler:chapter_handler.py:19 Active Plot Threads:
-INFO     src.services.chapter_handler:chapter_handler.py:21 - Strange Fragment Behavior (Priority: 1, Status: PlotStatus.ACTIVE)
-INFO     src.services.chapter_handler:chapter_handler.py:23 
+INFO     src.services.chapter_handler:chapter_handler.py:21 Active Plot Threads:
+INFO     src.services.chapter_handler:chapter_handler.py:23 - Strange Fragment Behavior (Priority: 1, Status: PlotStatus.ACTIVE)
+INFO     src.services.chapter_handler:chapter_handler.py:25 
 Unresolved Plots from Previous Chapters:
 INFO     src.services.rag_service:rag_service.py:214 Querying with filters: {'type': 'story_planning'} in namespace: story_planning
-INFO     src.services.bedrock_service:bedrock_service.py:78 Generating embedding for text of length 2011
+INFO     src.services.bedrock_service:bedrock_service.py:78 Generating embedding for text of length 3108
 INFO     src.services.bedrock_service:bedrock_service.py:113 Successfully generated embedding
 INFO     src.services.pinecone_service:pinecone_service.py:122 Found 2 matches in namespace: story_planning
 INFO     src.services.rag_service:rag_service.py:186 Found 2 unique chunks for query
 INFO     src.services.rag_service:rag_service.py:228 Context chunk 1:
 INFO     src.services.rag_service:rag_service.py:229 Text: {"Commander Drake": "professional"} } ], "scene_plans": [ { "scene_number": 1, "focus": "plot", "key_characters": ["Dr. James Chen"], "location": "Station Omega", "objective": "Discover Fragment anoma...
-INFO     src.services.rag_service:rag_service.py:230 Score: 0.653402269
+INFO     src.services.rag_service:rag_service.py:230 Score: 0.669475913
 INFO     src.services.rag_service:rag_service.py:231 Metadata: {'category': 'initial_setup', 'chunk_id': 1.0, 'filename': 'initial-story-plan.txt', 'size': 370.0, 'source': '/Users/cmcoca/Desktop/SLAG-site/backend/src/reference-documents/story-planning/initial-story-plan.txt', 'text': '{"Commander Drake": "professional"} } ], "scene_plans": [ { "scene_number": 1, "focus": "plot", "key_characters": ["Dr. James Chen"], "location": "Station Omega", "objective": "Discover Fragment anomaly", "expected_outcome": "Initial crisis revealed", "plot_threads": ["initial_crisis"] } ], "expected_outcomes": ["Crisis established", "Key characters introduced"] } ```', 'type': 'story_planning'}
 INFO     src.services.rag_service:rag_service.py:228 Context chunk 2:
 INFO     src.services.rag_service:rag_service.py:229 Text: # Initial Story Plan ## Core Plot Elements ```json { "theme": "Discovery and Crisis", "plot_threads": [ { "id": "initial_crisis", "title": "Strange Fragment Behavior", "status": "active", "priority": ...
-INFO     src.services.rag_service:rag_service.py:230 Score: 0.641337514
+INFO     src.services.rag_service:rag_service.py:230 Score: 0.653833628
 INFO     src.services.rag_service:rag_service.py:231 Metadata: {'category': 'initial_setup', 'chunk_id': 0.0, 'filename': 'initial-story-plan.txt', 'size': 491.0, 'source': '/Users/cmcoca/Desktop/SLAG-site/backend/src/reference-documents/story-planning/initial-story-plan.txt', 'text': '# Initial Story Plan ## Core Plot Elements ```json { "theme": "Discovery and Crisis", "plot_threads": [ { "id": "initial_crisis", "title": "Strange Fragment Behavior", "status": "active", "priority": 1, "related_characters": ["Dr. James Chen", "Commander Drake"] } ], "character_arcs": [ { "character_id": "Dr. James Chen", "current_state": "Investigating Fragment anomalies", "development_goals": ["Understand Fragment behavior", "Prevent catastrophe"], "relationships": {"Commander Drake":', 'type': 'story_planning'}
-INFO     src.services.bedrock_service:bedrock_service.py:43 Attempt 1: Invoking Claude with 4096 max tokens
+INFO     src.services.bedrock_service:bedrock_service.py:43 Attempt 1: Invoking Claude with 200000 max tokens
 INFO     src.services.rag_service:rag_service.py:256 Raw response from Claude:
 INFO     src.services.rag_service:rag_service.py:257 --------------------------------------------------------------------------------
 INFO     src.services.rag_service:rag_service.py:258 {
-    "theme": "Fragment Investigation",
+    "theme": "Fragment Discovery and Initial Crisis",
+    "acts": [
+        {
+            "act_number": 1,
+            "act_theme": "Setup - Dr. Chen's routine Fragment research",
+            "tension_level": 0.3
+        },
+        {
+            "act_number": 2,
+            "act_theme": "Rising Action - Fragment anomaly detection",
+            "tension_level": 0.5
+        },
+        {
+            "act_number": 3,
+            "act_theme": "Crisis - Dangerous Fragment behavior escalation",
+            "tension_level": 0.8
+        },
+        {
+            "act_number": 4,
+            "act_theme": "Resolution - Initial containment efforts",
+            "tension_level": 1.0
+        }
+    ],
     "plot_threads": [
         {
-            "id": "initial_crisis",
+            "id": "fragment_anomaly",
             "title": "Strange Fragment Behavior",
             "status": "active",
             "priority": 1,
@@ -120,120 +142,1172 @@ INFO     src.services.rag_service:rag_service.py:258 {
     "character_arcs": [
         {
             "character_id": "Dr. James Chen",
-            "current_state": "Investigating Fragment anomalies",
-            "development_goals": ["Understand Fragment behavior", "Prevent catastrophe"],
+            "current_state": "Discovering Fragment anomalies",
+            "development_goals": ["Understand Fragment behavior", "Alert proper authorities"],
             "relationships": {
                 "Commander Drake": "professional"
             }
         }
     ],
-    "scene_plans": [
-        {
-            "scene_number": 1,
-            "focus": "plot",
-            "key_characters": ["Dr. James Chen"],
-            "location": "Station Omega",
-            "objective": "Initial Fragment analysis",
-            "expected_outcome": "Discovery of anomalous readings",
-            "plot_threads": ["initial_crisis"]
-        },
-        {
-            "scene_number": 2,
-            "focus": "character",
-            "key_characters": ["Dr. James Chen", "Commander Drake"],
-            "location": "Command Center",
-            "objective": "Report findings to command",
-            "expected_outcome": "Escalation of concern",
-            "plot_threads": ["initial_crisis"]
-        },
-        {
-            "scene_number": 3,
-            "focus": "plot",
-            "key_characters": ["Dr. James Chen"],
-            "location": "Research Lab",
-            "objective": "Further Fragment testing",
-            "expected_outcome": "Unexpected Fragment reaction",
-            "plot_threads": ["initial_crisis"]
-        }
-    ],
-    "expected_outcomes": [
-        "Fragment anomaly confirmed",
-        "Command structure alerted",
-        "Research complications revealed"
+    "world_development": {
+        "locations_featured": ["Station Omega", "Fragment Research Lab"],
+        "technology_elements": ["Fragment containment systems", "Research equipment"],
+        "world_building_points": ["Fragment properties revealed", "Station Omega protocols"]
+    },
+    "expected_outcomes": {
+        "plot_developments": ["Fragment anomaly discovered", "Initial containment measures established"],
+        "character_developments": ["Dr. Chen faces first major crisis", "Working relationship with Commander Drake tested"],
+        "world_changes": ["Station Omega alert status elevated", "Fragment research protocols questioned"]
+    },
+    "next_chapter_setup": [
+        "Escalating Fragment anomalies",
+        "Station-wide crisis response",
+        "Additional character introductions"
     ]
 }
 INFO     src.services.rag_service:rag_service.py:259 --------------------------------------------------------------------------------
 INFO     src.services.rag_service:rag_service.py:261 Generated RAG response successfully
-INFO     src.services.chapter_handler:chapter_handler.py:30 
-Chapter Plan Generated:
-INFO     src.services.chapter_handler:chapter_handler.py:31 Theme: Fragment Investigation
-INFO     src.services.chapter_handler:chapter_handler.py:32 
-Plot Threads:
-INFO     src.services.chapter_handler:chapter_handler.py:34 - Strange Fragment Behavior (PlotStatus.ACTIVE)
-INFO     src.services.chapter_handler:chapter_handler.py:36 
-Character Arcs:
-INFO     src.services.chapter_handler:chapter_handler.py:38 - Dr. James Chen: Investigating Fragment anomalies
-INFO     src.services.chapter_handler:chapter_handler.py:39   Goals: Understand Fragment behavior, Prevent catastrophe
-INFO     src.services.chapter_handler:chapter_handler.py:41 
-Scene Plans:
-INFO     src.services.chapter_handler:chapter_handler.py:43 
-Scene 1:
-INFO     src.services.chapter_handler:chapter_handler.py:44 Location: Station Omega
-INFO     src.services.chapter_handler:chapter_handler.py:45 Focus: plot
-INFO     src.services.chapter_handler:chapter_handler.py:46 Characters: Dr. James Chen
-INFO     src.services.chapter_handler:chapter_handler.py:47 Objective: Initial Fragment analysis
-INFO     src.services.chapter_handler:chapter_handler.py:48 Expected Outcome: Discovery of anomalous readings
-INFO     src.services.chapter_handler:chapter_handler.py:43 
-Scene 2:
-INFO     src.services.chapter_handler:chapter_handler.py:44 Location: Command Center
-INFO     src.services.chapter_handler:chapter_handler.py:45 Focus: character
-INFO     src.services.chapter_handler:chapter_handler.py:46 Characters: Dr. James Chen, Commander Drake
-INFO     src.services.chapter_handler:chapter_handler.py:47 Objective: Report findings to command
-INFO     src.services.chapter_handler:chapter_handler.py:48 Expected Outcome: Escalation of concern
-INFO     src.services.chapter_handler:chapter_handler.py:43 
-Scene 3:
-INFO     src.services.chapter_handler:chapter_handler.py:44 Location: Research Lab
-INFO     src.services.chapter_handler:chapter_handler.py:45 Focus: plot
-INFO     src.services.chapter_handler:chapter_handler.py:46 Characters: Dr. James Chen
-INFO     src.services.chapter_handler:chapter_handler.py:47 Objective: Further Fragment testing
-INFO     src.services.chapter_handler:chapter_handler.py:48 Expected Outcome: Unexpected Fragment reaction
-INFO     src.services.chapter_handler:chapter_handler.py:50 
-Expected Chapter Outcomes:
-INFO     src.services.chapter_handler:chapter_handler.py:52 - Fragment anomaly confirmed
-INFO     src.services.chapter_handler:chapter_handler.py:52 - Command structure alerted
-INFO     src.services.chapter_handler:chapter_handler.py:52 - Research complications revealed
-INFO     src.services.story_engine_service:story_engine_service.py:68 Generated new chapter plan with 3 scenes
-INFO     src.services.story_engine_service:story_engine_service.py:72 Generating scene 1
 INFO     src.services.rag_service:rag_service.py:214 Querying with filters: {'type': 'story_planning'} in namespace: story_planning
-INFO     src.services.bedrock_service:bedrock_service.py:78 Generating embedding for text of length 1390
+INFO     src.services.bedrock_service:bedrock_service.py:78 Generating embedding for text of length 1360
 INFO     src.services.bedrock_service:bedrock_service.py:113 Successfully generated embedding
 INFO     src.services.pinecone_service:pinecone_service.py:122 Found 2 matches in namespace: story_planning
 INFO     src.services.rag_service:rag_service.py:186 Found 2 unique chunks for query
 INFO     src.services.rag_service:rag_service.py:228 Context chunk 1:
 INFO     src.services.rag_service:rag_service.py:229 Text: {"Commander Drake": "professional"} } ], "scene_plans": [ { "scene_number": 1, "focus": "plot", "key_characters": ["Dr. James Chen"], "location": "Station Omega", "objective": "Discover Fragment anoma...
-INFO     src.services.rag_service:rag_service.py:230 Score: 0.767706752
+INFO     src.services.rag_service:rag_service.py:230 Score: 0.714310527
 INFO     src.services.rag_service:rag_service.py:231 Metadata: {'category': 'initial_setup', 'chunk_id': 1.0, 'filename': 'initial-story-plan.txt', 'size': 370.0, 'source': '/Users/cmcoca/Desktop/SLAG-site/backend/src/reference-documents/story-planning/initial-story-plan.txt', 'text': '{"Commander Drake": "professional"} } ], "scene_plans": [ { "scene_number": 1, "focus": "plot", "key_characters": ["Dr. James Chen"], "location": "Station Omega", "objective": "Discover Fragment anomaly", "expected_outcome": "Initial crisis revealed", "plot_threads": ["initial_crisis"] } ], "expected_outcomes": ["Crisis established", "Key characters introduced"] } ```', 'type': 'story_planning'}
 INFO     src.services.rag_service:rag_service.py:228 Context chunk 2:
 INFO     src.services.rag_service:rag_service.py:229 Text: # Initial Story Plan ## Core Plot Elements ```json { "theme": "Discovery and Crisis", "plot_threads": [ { "id": "initial_crisis", "title": "Strange Fragment Behavior", "status": "active", "priority": ...
-INFO     src.services.rag_service:rag_service.py:230 Score: 0.692066789
+INFO     src.services.rag_service:rag_service.py:230 Score: 0.647885561
+INFO     src.services.rag_service:rag_service.py:231 Metadata: {'category': 'initial_setup', 'chunk_id': 0.0, 'filename': 'initial-story-plan.txt', 'size': 491.0, 'source': '/Users/cmcoca/Desktop/SLAG-site/backend/src/reference-documents/story-planning/initial-story-plan.txt', 'text': '# Initial Story Plan ## Core Plot Elements ```json { "theme": "Discovery and Crisis", "plot_threads": [ { "id": "initial_crisis", "title": "Strange Fragment Behavior", "status": "active", "priority": 1, "related_characters": ["Dr. James Chen", "Commander Drake"] } ], "character_arcs": [ { "character_id": "Dr. James Chen", "current_state": "Investigating Fragment anomalies", "development_goals": ["Understand Fragment behavior", "Prevent catastrophe"], "relationships": {"Commander Drake":', 'type': 'story_planning'}
+INFO     src.services.bedrock_service:bedrock_service.py:43 Attempt 1: Invoking Claude with 200000 max tokens
+INFO     src.services.rag_service:rag_service.py:256 Raw response from Claude:
+INFO     src.services.rag_service:rag_service.py:257 --------------------------------------------------------------------------------
+INFO     src.services.rag_service:rag_service.py:258 [
+  {
+    "scene_number": 1,
+    "act": 1,
+    "focus": "world",
+    "key_characters": ["Dr. James Chen"],
+    "location": "Station Omega Laboratory",
+    "time_of_day": "morning",
+    "objective": "Establish daily Fragment research routine",
+    "expected_outcome": "Show normal Fragment behavior baseline",
+    "plot_threads": ["initial_crisis"],
+    "tension_level": 0.1,
+    "pacing": "slow",
+    "scene_type": "investigation"
+  },
+  {
+    "scene_number": 2,
+    "act": 1,
+    "focus": "character",
+    "key_characters": ["Dr. James Chen", "Commander Drake"],
+    "location": "Station Omega Meeting Room",
+    "time_of_day": "morning",
+    "objective": "Weekly research update meeting",
+    "expected_outcome": "Establish professional dynamic",
+    "plot_threads": ["initial_crisis"],
+    "tension_level": 0.1,
+    "pacing": "slow",
+    "scene_type": "dialogue"
+  },
+  {
+    "scene_number": 3,
+    "act": 1,
+    "focus": "plot",
+    "key_characters": ["Dr. James Chen"],
+    "location": "Station Omega Laboratory",
+    "time_of_day": "afternoon",
+    "objective": "First minor Fragment anomaly detected",
+    "expected_outcome": "Initial concern raised",
+    "plot_threads": ["initial_crisis"],
+    "tension_level": 0.2,
+    "pacing": "medium",
+    "scene_type": "investigation"
+  },
+  {
+    "scene_number": 4,
+    "act": 1,
+    "focus": "character",
+    "key_characters": ["Dr. James Chen"],
+    "location": "Personal Quarters",
+    "time_of_day": "evening",
+    "objective": "Review research notes",
+    "expected_outcome": "Pattern recognition begins",
+    "plot_threads": ["initial_crisis"],
+    "tension_level": 0.2,
+    "pacing": "slow",
+    "scene_type": "investigation"
+  },
+  {
+    "scene_number": 5,
+    "act": 1,
+    "focus": "plot",
+    "key_characters": ["Dr. James Chen", "Commander Drake"],
+    "location": "Station Omega Laboratory",
+    "time_of_day": "morning",
+    "objective": "Second anomaly occurs",
+    "expected_outcome": "Increased concern",
+    "plot_threads": ["initial_crisis"],
+    "tension_level": 0.3,
+    "pacing": "medium",
+    "scene_type": "action"
+  },
+  {
+    "scene_number": 6,
+    "act": 1,
+    "focus": "character",
+    "key_characters": ["Dr. James Chen", "Commander Drake"],
+    "location": "Commander's Office",
+    "time_of_day": "afternoon",
+    "objective": "Report anomalies",
+    "expected_outcome": "Initial skepticism",
+    "plot_threads": ["initial_crisis"],
+    "tension_level": 0.3,
+    "pacing": "medium",
+    "scene_type": "dialogue"
+  },
+  {
+    "scene_number": 7,
+    "act": 1,
+    "focus": "world",
+    "key_characters": ["Dr. James Chen"],
+    "location": "Station Archives",
+    "time_of_day": "evening",
+    "objective": "Research historical Fragment data",
+    "expected_outcome": "Discovery of similar past incidents",
+    "plot_threads": ["initial_crisis"],
+    "tension_level": 0.4,
+    "pacing": "slow",
+    "scene_type": "investigation"
+  },
+  {
+    "scene_number": 8,
+    "act": 1,
+    "focus": "plot",
+    "key_characters": ["Dr. James Chen"],
+    "location": "Station Omega Laboratory",
+    "time_of_day": "night",
+    "objective": "Third anomaly occurs",
+    "expected_outcome": "Clear pattern emerges",
+    "plot_threads": ["initial_crisis"],
+    "tension_level": 0.5,
+    "pacing": "fast",
+    "scene_type": "action"
+  },
+  {
+    "scene_number": 9,
+    "act": 1,
+    "focus": "character",
+    "key_characters": ["Dr. James Chen", "Commander Drake"],
+    "location": "Emergency Meeting Room",
+    "time_of_day": "morning",
+    "objective": "Present evidence of escalating situation",
+    "expected_outcome": "Commander takes concerns seriously",
+    "plot_threads": ["initial_crisis"],
+    "tension_level": 0.6,
+    "pacing": "medium",
+    "scene_type": "dialogue"
+  },
+  {
+    "scene_number": 10,
+    "act": 1,
+    "focus": "plot",
+    "key_characters": ["Dr. James Chen"],
+    "location": "Station Omega Laboratory",
+    "time_of_day": "afternoon",
+    "objective": "Attempt to stabilize Fragment behavior",
+    "expected_outcome": "Initial attempts fail",
+    "plot_threads": ["initial_crisis"],
+    "tension_level": 0.7,
+    "pacing": "fast",
+    "scene_type": "action"
+  },
+  {
+    "scene_number": 11,
+    "act": 1,
+    "focus": "world",
+    "key_characters": ["Dr. James Chen", "Commander Drake"],
+    "location": "Station Control Room",
+    "time_of_day": "evening",
+    "objective": "Monitor station-wide Fragment effects",
+    "expected_outcome": "Situation becomes critical",
+    "plot_threads": ["initial_crisis"],
+    "tension_level": 0.8,
+    "pacing": "fast",
+    "scene_type": "investigation"
+  },
+  {
+    "scene_number": 12,
+    "act": 1,
+    "focus": "plot",
+    "key_characters": ["Dr. James Chen", "Commander Drake"],
+    "location": "Station Omega Laboratory",
+    "time_of_day": "night",
+    "objective": "Major Fragment anomaly occurs",
+    "expected_outcome": "Act climax - crisis fully manifests",
+    "plot_threads": ["initial_crisis"],
+    "tension_level": 0.9,
+    "pacing": "fast",
+    "scene_type": "action"
+  }
+]
+INFO     src.services.rag_service:rag_service.py:259 --------------------------------------------------------------------------------
+INFO     src.services.rag_service:rag_service.py:261 Generated RAG response successfully
+INFO     src.services.rag_service:rag_service.py:214 Querying with filters: {'type': 'story_planning'} in namespace: story_planning
+INFO     src.services.bedrock_service:bedrock_service.py:78 Generating embedding for text of length 2101
+INFO     src.services.bedrock_service:bedrock_service.py:113 Successfully generated embedding
+INFO     src.services.pinecone_service:pinecone_service.py:122 Found 2 matches in namespace: story_planning
+INFO     src.services.rag_service:rag_service.py:186 Found 2 unique chunks for query
+INFO     src.services.rag_service:rag_service.py:228 Context chunk 1:
+INFO     src.services.rag_service:rag_service.py:229 Text: {"Commander Drake": "professional"} } ], "scene_plans": [ { "scene_number": 1, "focus": "plot", "key_characters": ["Dr. James Chen"], "location": "Station Omega", "objective": "Discover Fragment anoma...
+INFO     src.services.rag_service:rag_service.py:230 Score: 0.76635766
+INFO     src.services.rag_service:rag_service.py:231 Metadata: {'category': 'initial_setup', 'chunk_id': 1.0, 'filename': 'initial-story-plan.txt', 'size': 370.0, 'source': '/Users/cmcoca/Desktop/SLAG-site/backend/src/reference-documents/story-planning/initial-story-plan.txt', 'text': '{"Commander Drake": "professional"} } ], "scene_plans": [ { "scene_number": 1, "focus": "plot", "key_characters": ["Dr. James Chen"], "location": "Station Omega", "objective": "Discover Fragment anomaly", "expected_outcome": "Initial crisis revealed", "plot_threads": ["initial_crisis"] } ], "expected_outcomes": ["Crisis established", "Key characters introduced"] } ```', 'type': 'story_planning'}
+INFO     src.services.rag_service:rag_service.py:228 Context chunk 2:
+INFO     src.services.rag_service:rag_service.py:229 Text: # Initial Story Plan ## Core Plot Elements ```json { "theme": "Discovery and Crisis", "plot_threads": [ { "id": "initial_crisis", "title": "Strange Fragment Behavior", "status": "active", "priority": ...
+INFO     src.services.rag_service:rag_service.py:230 Score: 0.677323461
+INFO     src.services.rag_service:rag_service.py:231 Metadata: {'category': 'initial_setup', 'chunk_id': 0.0, 'filename': 'initial-story-plan.txt', 'size': 491.0, 'source': '/Users/cmcoca/Desktop/SLAG-site/backend/src/reference-documents/story-planning/initial-story-plan.txt', 'text': '# Initial Story Plan ## Core Plot Elements ```json { "theme": "Discovery and Crisis", "plot_threads": [ { "id": "initial_crisis", "title": "Strange Fragment Behavior", "status": "active", "priority": 1, "related_characters": ["Dr. James Chen", "Commander Drake"] } ], "character_arcs": [ { "character_id": "Dr. James Chen", "current_state": "Investigating Fragment anomalies", "development_goals": ["Understand Fragment behavior", "Prevent catastrophe"], "relationships": {"Commander Drake":', 'type': 'story_planning'}
+INFO     src.services.bedrock_service:bedrock_service.py:43 Attempt 1: Invoking Claude with 200000 max tokens
+INFO     src.services.rag_service:rag_service.py:256 Raw response from Claude:
+INFO     src.services.rag_service:rag_service.py:257 --------------------------------------------------------------------------------
+INFO     src.services.rag_service:rag_service.py:258 [
+  {
+    "scene_number": 13,
+    "act": 2,
+    "focus": "plot",
+    "key_characters": ["Dr. James Chen"],
+    "location": "Station Omega Laboratory",
+    "time_of_day": "morning",
+    "objective": "Analyze overnight Fragment data",
+    "expected_outcome": "Discovery of pattern in anomalies",
+    "plot_threads": ["initial_crisis"],
+    "tension_level": 0.3,
+    "pacing": "slow",
+    "scene_type": "investigation"
+  },
+  {
+    "scene_number": 14,
+    "act": 2,
+    "focus": "character",
+    "key_characters": ["Dr. James Chen", "Commander Drake"],
+    "location": "Station Control Room",
+    "time_of_day": "morning",
+    "objective": "Report findings to Commander",
+    "expected_outcome": "Strategic response planning",
+    "plot_threads": ["initial_crisis"],
+    "tension_level": 0.4,
+    "pacing": "medium",
+    "scene_type": "dialogue"
+  },
+  {
+    "scene_number": 15,
+    "act": 2,
+    "focus": "world",
+    "key_characters": ["Dr. James Chen"],
+    "location": "Station Lower Levels",
+    "time_of_day": "afternoon",
+    "objective": "Investigate Fragment spread",
+    "expected_outcome": "New anomaly discovered",
+    "plot_threads": ["initial_crisis"],
+    "tension_level": 0.5,
+    "pacing": "medium",
+    "scene_type": "investigation"
+  },
+  {
+    "scene_number": 16,
+    "act": 2,
+    "focus": "plot",
+    "key_characters": ["Dr. James Chen", "Commander Drake"],
+    "location": "Emergency Response Center",
+    "time_of_day": "evening",
+    "objective": "Implement containment measures",
+    "expected_outcome": "Partial success with complications",
+    "plot_threads": ["initial_crisis"],
+    "tension_level": 0.6,
+    "pacing": "fast",
+    "scene_type": "action"
+  },
+  {
+    "scene_number": 17,
+    "act": 2,
+    "focus": "character",
+    "key_characters": ["Dr. James Chen"],
+    "location": "Personal Quarters",
+    "time_of_day": "night",
+    "objective": "Review personal research notes",
+    "expected_outcome": "Key insight discovered",
+    "plot_threads": ["initial_crisis"],
+    "tension_level": 0.4,
+    "pacing": "slow",
+    "scene_type": "revelation"
+  },
+  {
+    "scene_number": 18,
+    "act": 2,
+    "focus": "plot",
+    "key_characters": ["Dr. James Chen", "Commander Drake"],
+    "location": "Station Omega Laboratory",
+    "time_of_day": "morning",
+    "objective": "Test new containment theory",
+    "expected_outcome": "Unexpected reaction from Fragment",
+    "plot_threads": ["initial_crisis"],
+    "tension_level": 0.7,
+    "pacing": "medium",
+    "scene_type": "investigation"
+  },
+  {
+    "scene_number": 19,
+    "act": 2,
+    "focus": "world",
+    "key_characters": ["Dr. James Chen"],
+    "location": "Station External Hull",
+    "time_of_day": "afternoon",
+    "objective": "Monitor Fragment effects on station structure",
+    "expected_outcome": "Signs of structural compromise",
+    "plot_threads": ["initial_crisis"],
+    "tension_level": 0.6,
+    "pacing": "medium",
+    "scene_type": "investigation"
+  },
+  {
+    "scene_number": 20,
+    "act": 2,
+    "focus": "character",
+    "key_characters": ["Dr. James Chen", "Commander Drake"],
+    "location": "Station Control Room",
+    "time_of_day": "evening",
+    "objective": "Debate evacuation options",
+    "expected_outcome": "Tension between safety and research",
+    "plot_threads": ["initial_crisis"],
+    "tension_level": 0.7,
+    "pacing": "medium",
+    "scene_type": "dialogue"
+  },
+  {
+    "scene_number": 21,
+    "act": 2,
+    "focus": "plot",
+    "key_characters": ["Dr. James Chen"],
+    "location": "Station Omega Laboratory",
+    "time_of_day": "night",
+    "objective": "Emergency containment breach",
+    "expected_outcome": "Crisis escalation",
+    "plot_threads": ["initial_crisis"],
+    "tension_level": 0.8,
+    "pacing": "fast",
+    "scene_type": "action"
+  },
+  {
+    "scene_number": 22,
+    "act": 2,
+    "focus": "world",
+    "key_characters": ["Dr. James Chen", "Commander Drake"],
+    "location": "Station Lower Levels",
+    "time_of_day": "morning",
+    "objective": "Assess breach damage",
+    "expected_outcome": "Discovery of critical threat",
+    "plot_threads": ["initial_crisis"],
+    "tension_level": 0.8,
+    "pacing": "medium",
+    "scene_type": "investigation"
+  },
+  {
+    "scene_number": 23,
+    "act": 2,
+    "focus": "character",
+    "key_characters": ["Dr. James Chen"],
+    "location": "Station Omega Laboratory",
+    "time_of_day": "afternoon",
+    "objective": "Final attempt at containment",
+    "expected_outcome": "Partial breakthrough",
+    "plot_threads": ["initial_crisis"],
+    "tension_level": 0.9,
+    "pacing": "fast",
+    "scene_type": "action"
+  },
+  {
+    "scene_number": 24,
+    "act": 2,
+    "focus": "plot",
+    "key_characters": ["Dr. James Chen", "Commander Drake"],
+    "location": "Station Control Room",
+    "time_of_day": "evening",
+    "objective": "Make critical decision about station future",
+    "expected_outcome": "Act climax - major decision point reached",
+    "plot_threads": ["initial_crisis"],
+    "tension_level": 1.0,
+    "pacing": "fast",
+    "scene_type": "revelation"
+  }
+]
+INFO     src.services.rag_service:rag_service.py:259 --------------------------------------------------------------------------------
+INFO     src.services.rag_service:rag_service.py:261 Generated RAG response successfully
+WARNING  src.services.chapter_handler:chapter_handler.py:221 Act 2 tension progression may need adjustment
+INFO     src.services.rag_service:rag_service.py:214 Querying with filters: {'type': 'story_planning'} in namespace: story_planning
+INFO     src.services.bedrock_service:bedrock_service.py:78 Generating embedding for text of length 2097
+INFO     src.services.bedrock_service:bedrock_service.py:113 Successfully generated embedding
+INFO     src.services.pinecone_service:pinecone_service.py:122 Found 2 matches in namespace: story_planning
+INFO     src.services.rag_service:rag_service.py:186 Found 2 unique chunks for query
+INFO     src.services.rag_service:rag_service.py:228 Context chunk 1:
+INFO     src.services.rag_service:rag_service.py:229 Text: {"Commander Drake": "professional"} } ], "scene_plans": [ { "scene_number": 1, "focus": "plot", "key_characters": ["Dr. James Chen"], "location": "Station Omega", "objective": "Discover Fragment anoma...
+INFO     src.services.rag_service:rag_service.py:230 Score: 0.766619802
+INFO     src.services.rag_service:rag_service.py:231 Metadata: {'category': 'initial_setup', 'chunk_id': 1.0, 'filename': 'initial-story-plan.txt', 'size': 370.0, 'source': '/Users/cmcoca/Desktop/SLAG-site/backend/src/reference-documents/story-planning/initial-story-plan.txt', 'text': '{"Commander Drake": "professional"} } ], "scene_plans": [ { "scene_number": 1, "focus": "plot", "key_characters": ["Dr. James Chen"], "location": "Station Omega", "objective": "Discover Fragment anomaly", "expected_outcome": "Initial crisis revealed", "plot_threads": ["initial_crisis"] } ], "expected_outcomes": ["Crisis established", "Key characters introduced"] } ```', 'type': 'story_planning'}
+INFO     src.services.rag_service:rag_service.py:228 Context chunk 2:
+INFO     src.services.rag_service:rag_service.py:229 Text: # Initial Story Plan ## Core Plot Elements ```json { "theme": "Discovery and Crisis", "plot_threads": [ { "id": "initial_crisis", "title": "Strange Fragment Behavior", "status": "active", "priority": ...
+INFO     src.services.rag_service:rag_service.py:230 Score: 0.67672646
+INFO     src.services.rag_service:rag_service.py:231 Metadata: {'category': 'initial_setup', 'chunk_id': 0.0, 'filename': 'initial-story-plan.txt', 'size': 491.0, 'source': '/Users/cmcoca/Desktop/SLAG-site/backend/src/reference-documents/story-planning/initial-story-plan.txt', 'text': '# Initial Story Plan ## Core Plot Elements ```json { "theme": "Discovery and Crisis", "plot_threads": [ { "id": "initial_crisis", "title": "Strange Fragment Behavior", "status": "active", "priority": 1, "related_characters": ["Dr. James Chen", "Commander Drake"] } ], "character_arcs": [ { "character_id": "Dr. James Chen", "current_state": "Investigating Fragment anomalies", "development_goals": ["Understand Fragment behavior", "Prevent catastrophe"], "relationships": {"Commander Drake":', 'type': 'story_planning'}
+INFO     src.services.bedrock_service:bedrock_service.py:43 Attempt 1: Invoking Claude with 200000 max tokens
+INFO     src.services.rag_service:rag_service.py:256 Raw response from Claude:
+INFO     src.services.rag_service:rag_service.py:257 --------------------------------------------------------------------------------
+INFO     src.services.rag_service:rag_service.py:258 [
+  {
+    "scene_number": 25,
+    "act": 3,
+    "focus": "plot",
+    "key_characters": ["Dr. James Chen", "Commander Drake"],
+    "location": "Station Omega Laboratory",
+    "time_of_day": "morning",
+    "objective": "Assess Fragment containment failure",
+    "expected_outcome": "Discovery of critical instability",
+    "plot_threads": ["initial_crisis"],
+    "tension_level": 0.7,
+    "pacing": "fast",
+    "scene_type": "investigation"
+  },
+  {
+    "scene_number": 26,
+    "act": 3,
+    "focus": "character",
+    "key_characters": ["Dr. James Chen"],
+    "location": "Personal Quarters",
+    "time_of_day": "morning",
+    "objective": "Review research notes for solution",
+    "expected_outcome": "Potential breakthrough identified",
+    "plot_threads": ["initial_crisis"],
+    "tension_level": 0.75,
+    "pacing": "slow",
+    "scene_type": "investigation"
+  },
+  {
+    "scene_number": 27,
+    "act": 3,
+    "focus": "plot",
+    "key_characters": ["Commander Drake", "Dr. James Chen"],
+    "location": "Station Control Room",
+    "time_of_day": "afternoon",
+    "objective": "Emergency response planning",
+    "expected_outcome": "Conflict over approach",
+    "plot_threads": ["initial_crisis"],
+    "tension_level": 0.8,
+    "pacing": "medium",
+    "scene_type": "dialogue"
+  },
+  {
+    "scene_number": 28,
+    "act": 3,
+    "focus": "world",
+    "key_characters": ["Dr. James Chen"],
+    "location": "Station Exterior",
+    "time_of_day": "afternoon",
+    "objective": "Observe Fragment effects on station",
+    "expected_outcome": "Disturbing discoveries",
+    "plot_threads": ["initial_crisis"],
+    "tension_level": 0.85,
+    "pacing": "medium",
+    "scene_type": "investigation"
+  },
+  {
+    "scene_number": 29,
+    "act": 3,
+    "focus": "character",
+    "key_characters": ["Commander Drake"],
+    "location": "Command Center",
+    "time_of_day": "evening",
+    "objective": "Make evacuation preparations",
+    "expected_outcome": "Difficult choices made",
+    "plot_threads": ["initial_crisis"],
+    "tension_level": 0.85,
+    "pacing": "fast",
+    "scene_type": "action"
+  },
+  {
+    "scene_number": 30,
+    "act": 3,
+    "focus": "plot",
+    "key_characters": ["Dr. James Chen", "Commander Drake"],
+    "location": "Laboratory",
+    "time_of_day": "night",
+    "objective": "Last-ditch containment attempt",
+    "expected_outcome": "Partial success with complications",
+    "plot_threads": ["initial_crisis"],
+    "tension_level": 0.9,
+    "pacing": "fast",
+    "scene_type": "action"
+  },
+  {
+    "scene_number": 31,
+    "act": 3,
+    "focus": "character",
+    "key_characters": ["Dr. James Chen"],
+    "location": "Observation Deck",
+    "time_of_day": "night",
+    "objective": "Confront personal demons",
+    "expected_outcome": "Critical realization",
+    "plot_threads": ["initial_crisis"],
+    "tension_level": 0.9,
+    "pacing": "slow",
+    "scene_type": "dialogue"
+  },
+  {
+    "scene_number": 32,
+    "act": 3,
+    "focus": "plot",
+    "key_characters": ["Dr. James Chen", "Commander Drake"],
+    "location": "Station Core",
+    "time_of_day": "morning",
+    "objective": "Implement desperate solution",
+    "expected_outcome": "High-stakes gamble",
+    "plot_threads": ["initial_crisis"],
+    "tension_level": 0.95,
+    "pacing": "fast",
+    "scene_type": "action"
+  },
+  {
+    "scene_number": 33,
+    "act": 3,
+    "focus": "world",
+    "key_characters": ["Commander Drake"],
+    "location": "Station-wide",
+    "time_of_day": "afternoon",
+    "objective": "Deal with cascading effects",
+    "expected_outcome": "Crisis escalation",
+    "plot_threads": ["initial_crisis"],
+    "tension_level": 0.95,
+    "pacing": "fast",
+    "scene_type": "action"
+  },
+  {
+    "scene_number": 34,
+    "act": 3,
+    "focus": "plot",
+    "key_characters": ["Dr. James Chen"],
+    "location": "Fragment Containment",
+    "time_of_day": "evening",
+    "objective": "Final confrontation with Fragment",
+    "expected_outcome": "Climactic moment",
+    "plot_threads": ["initial_crisis"],
+    "tension_level": 1.0,
+    "pacing": "fast",
+    "scene_type": "action"
+  },
+  {
+    "scene_number": 35,
+    "act": 3,
+    "focus": "character",
+    "key_characters": ["Dr. James Chen", "Commander Drake"],
+    "location": "Station Control Room",
+    "time_of_day": "night",
+    "objective": "Face aftermath",
+    "expected_outcome": "Resolution revealed",
+    "plot_threads": ["initial_crisis"],
+    "tension_level": 0.8,
+    "pacing": "medium",
+    "scene_type": "revelation"
+  },
+  {
+    "scene_number": 36,
+    "act": 3,
+    "focus": "world",
+    "key_characters": ["Dr. James Chen", "Commander Drake"],
+    "location": "Station Omega Overview",
+    "time_of_day": "night",
+    "objective": "Assess final impact",
+    "expected_outcome": "New status quo established",
+    "plot_threads": ["initial_crisis"],
+    "tension_level": 0.7,
+    "pacing": "slow",
+    "scene_type": "revelation"
+  }
+]
+INFO     src.services.rag_service:rag_service.py:259 --------------------------------------------------------------------------------
+INFO     src.services.rag_service:rag_service.py:261 Generated RAG response successfully
+WARNING  src.services.chapter_handler:chapter_handler.py:221 Act 3 tension progression may need adjustment
+INFO     src.services.rag_service:rag_service.py:214 Querying with filters: {'type': 'story_planning'} in namespace: story_planning
+INFO     src.services.bedrock_service:bedrock_service.py:78 Generating embedding for text of length 2054
+INFO     src.services.bedrock_service:bedrock_service.py:113 Successfully generated embedding
+INFO     src.services.pinecone_service:pinecone_service.py:122 Found 2 matches in namespace: story_planning
+INFO     src.services.rag_service:rag_service.py:186 Found 2 unique chunks for query
+INFO     src.services.rag_service:rag_service.py:228 Context chunk 1:
+INFO     src.services.rag_service:rag_service.py:229 Text: {"Commander Drake": "professional"} } ], "scene_plans": [ { "scene_number": 1, "focus": "plot", "key_characters": ["Dr. James Chen"], "location": "Station Omega", "objective": "Discover Fragment anoma...
+INFO     src.services.rag_service:rag_service.py:230 Score: 0.743872881
+INFO     src.services.rag_service:rag_service.py:231 Metadata: {'category': 'initial_setup', 'chunk_id': 1.0, 'filename': 'initial-story-plan.txt', 'size': 370.0, 'source': '/Users/cmcoca/Desktop/SLAG-site/backend/src/reference-documents/story-planning/initial-story-plan.txt', 'text': '{"Commander Drake": "professional"} } ], "scene_plans": [ { "scene_number": 1, "focus": "plot", "key_characters": ["Dr. James Chen"], "location": "Station Omega", "objective": "Discover Fragment anomaly", "expected_outcome": "Initial crisis revealed", "plot_threads": ["initial_crisis"] } ], "expected_outcomes": ["Crisis established", "Key characters introduced"] } ```', 'type': 'story_planning'}
+INFO     src.services.rag_service:rag_service.py:228 Context chunk 2:
+INFO     src.services.rag_service:rag_service.py:229 Text: # Initial Story Plan ## Core Plot Elements ```json { "theme": "Discovery and Crisis", "plot_threads": [ { "id": "initial_crisis", "title": "Strange Fragment Behavior", "status": "active", "priority": ...
+INFO     src.services.rag_service:rag_service.py:230 Score: 0.648672819
+INFO     src.services.rag_service:rag_service.py:231 Metadata: {'category': 'initial_setup', 'chunk_id': 0.0, 'filename': 'initial-story-plan.txt', 'size': 491.0, 'source': '/Users/cmcoca/Desktop/SLAG-site/backend/src/reference-documents/story-planning/initial-story-plan.txt', 'text': '# Initial Story Plan ## Core Plot Elements ```json { "theme": "Discovery and Crisis", "plot_threads": [ { "id": "initial_crisis", "title": "Strange Fragment Behavior", "status": "active", "priority": 1, "related_characters": ["Dr. James Chen", "Commander Drake"] } ], "character_arcs": [ { "character_id": "Dr. James Chen", "current_state": "Investigating Fragment anomalies", "development_goals": ["Understand Fragment behavior", "Prevent catastrophe"], "relationships": {"Commander Drake":', 'type': 'story_planning'}
+INFO     src.services.bedrock_service:bedrock_service.py:43 Attempt 1: Invoking Claude with 200000 max tokens
+INFO     src.services.rag_service:rag_service.py:256 Raw response from Claude:
+INFO     src.services.rag_service:rag_service.py:257 --------------------------------------------------------------------------------
+INFO     src.services.rag_service:rag_service.py:258 [
+  {
+    "scene_number": 37,
+    "act": 4,
+    "focus": "plot",
+    "key_characters": ["Dr. James Chen", "Commander Drake"],
+    "location": "Research Lab",
+    "time_of_day": "morning",
+    "objective": "Begin containment planning",
+    "expected_outcome": "Initial containment strategy developed",
+    "plot_threads": ["initial_crisis"],
+    "tension_level": 0.3,
+    "pacing": "medium",
+    "scene_type": "investigation"
+  },
+  {
+    "scene_number": 38,
+    "act": 4,
+    "focus": "character",
+    "key_characters": ["Dr. James Chen"],
+    "location": "Fragment Storage",
+    "time_of_day": "morning",
+    "objective": "Study Fragment patterns",
+    "expected_outcome": "New insights discovered",
+    "plot_threads": ["initial_crisis"],
+    "tension_level": 0.4,
+    "pacing": "slow",
+    "scene_type": "investigation"
+  },
+  {
+    "scene_number": 39,
+    "act": 4,
+    "focus": "world",
+    "key_characters": ["Commander Drake"],
+    "location": "Station Command Center",
+    "time_of_day": "afternoon",
+    "objective": "Coordinate station resources",
+    "expected_outcome": "Resources allocated for containment",
+    "plot_threads": ["initial_crisis"],
+    "tension_level": 0.5,
+    "pacing": "medium",
+    "scene_type": "dialogue"
+  },
+  {
+    "scene_number": 40,
+    "act": 4,
+    "focus": "plot",
+    "key_characters": ["Dr. James Chen", "Commander Drake"],
+    "location": "Testing Chamber",
+    "time_of_day": "afternoon",
+    "objective": "Test containment measures",
+    "expected_outcome": "Initial tests show promise",
+    "plot_threads": ["initial_crisis"],
+    "tension_level": 0.6,
+    "pacing": "fast",
+    "scene_type": "action"
+  },
+  {
+    "scene_number": 41,
+    "act": 4,
+    "focus": "character",
+    "key_characters": ["Dr. James Chen"],
+    "location": "Personal Quarters",
+    "time_of_day": "evening",
+    "objective": "Review findings",
+    "expected_outcome": "Pattern recognition breakthrough",
+    "plot_threads": ["initial_crisis"],
+    "tension_level": 0.5,
+    "pacing": "slow",
+    "scene_type": "revelation"
+  },
+  {
+    "scene_number": 42,
+    "act": 4,
+    "focus": "plot",
+    "key_characters": ["Dr. James Chen", "Commander Drake"],
+    "location": "Research Lab",
+    "time_of_day": "evening",
+    "objective": "Implement containment prototype",
+    "expected_outcome": "First successful containment test",
+    "plot_threads": ["initial_crisis"],
+    "tension_level": 0.7,
+    "pacing": "medium",
+    "scene_type": "action"
+  },
+  {
+    "scene_number": 43,
+    "act": 4,
+    "focus": "world",
+    "key_characters": ["Commander Drake"],
+    "location": "Station Overview",
+    "time_of_day": "night",
+    "objective": "Monitor station status",
+    "expected_outcome": "Stability assessment",
+    "plot_threads": ["initial_crisis"],
+    "tension_level": 0.6,
+    "pacing": "slow",
+    "scene_type": "investigation"
+  },
+  {
+    "scene_number": 44,
+    "act": 4,
+    "focus": "character",
+    "key_characters": ["Dr. James Chen", "Commander Drake"],
+    "location": "Conference Room",
+    "time_of_day": "morning",
+    "objective": "Plan full implementation",
+    "expected_outcome": "Final strategy agreed upon",
+    "plot_threads": ["initial_crisis"],
+    "tension_level": 0.7,
+    "pacing": "medium",
+    "scene_type": "dialogue"
+  },
+  {
+    "scene_number": 45,
+    "act": 4,
+    "focus": "plot",
+    "key_characters": ["Dr. James Chen"],
+    "location": "Fragment Storage",
+    "time_of_day": "afternoon",
+    "objective": "Prepare containment systems",
+    "expected_outcome": "Systems ready for deployment",
+    "plot_threads": ["initial_crisis"],
+    "tension_level": 0.8,
+    "pacing": "fast",
+    "scene_type": "action"
+  },
+  {
+    "scene_number": 46,
+    "act": 4,
+    "focus": "world",
+    "key_characters": ["Commander Drake"],
+    "location": "Station Control Room",
+    "time_of_day": "evening",
+    "objective": "Initialize containment protocols",
+    "expected_outcome": "Station-wide implementation begins",
+    "plot_threads": ["initial_crisis"],
+    "tension_level": 0.9,
+    "pacing": "fast",
+    "scene_type": "action"
+  },
+  {
+    "scene_number": 47,
+    "act": 4,
+    "focus": "plot",
+    "key_characters": ["Dr. James Chen", "Commander Drake"],
+    "location": "Testing Chamber",
+    "time_of_day": "night",
+    "objective": "Monitor containment progress",
+    "expected_outcome": "Initial success confirmed",
+    "plot_threads": ["initial_crisis"],
+    "tension_level": 1.0,
+    "pacing": "fast",
+    "scene_type": "revelation"
+  },
+  {
+    "scene_number": 48,
+    "act": 4,
+    "focus": "character",
+    "key_characters": ["Dr. James Chen", "Commander Drake"],
+    "location": "Observation Deck",
+    "time_of_day": "night",
+    "objective": "Reflect on achievement",
+    "expected_outcome": "Temporary resolution reached",
+    "plot_threads": ["initial_crisis"],
+    "tension_level": 0.8,
+    "pacing": "slow",
+    "scene_type": "dialogue"
+  }
+]
+INFO     src.services.rag_service:rag_service.py:259 --------------------------------------------------------------------------------
+INFO     src.services.rag_service:rag_service.py:261 Generated RAG response successfully
+WARNING  src.services.chapter_handler:chapter_handler.py:221 Act 4 tension progression may need adjustment
+INFO     src.services.chapter_handler:chapter_handler.py:32 
+Chapter Plan Generated:
+INFO     src.services.chapter_handler:chapter_handler.py:33 Theme: Fragment Discovery and Initial Crisis
+INFO     src.services.chapter_handler:chapter_handler.py:34 
+Plot Threads:
+INFO     src.services.chapter_handler:chapter_handler.py:36 - Strange Fragment Behavior (PlotStatus.ACTIVE)
+INFO     src.services.chapter_handler:chapter_handler.py:38 
+Character Arcs:
+INFO     src.services.chapter_handler:chapter_handler.py:40 - Dr. James Chen: Discovering Fragment anomalies
+INFO     src.services.chapter_handler:chapter_handler.py:41   Goals: Understand Fragment behavior, Alert proper authorities
+INFO     src.services.chapter_handler:chapter_handler.py:43 
+Scene Plans:
+INFO     src.services.chapter_handler:chapter_handler.py:45 
+Scene 1:
+INFO     src.services.chapter_handler:chapter_handler.py:46 Location: Station Omega Laboratory
+INFO     src.services.chapter_handler:chapter_handler.py:47 Focus: world
+INFO     src.services.chapter_handler:chapter_handler.py:48 Characters: Dr. James Chen
+INFO     src.services.chapter_handler:chapter_handler.py:49 Objective: Establish daily Fragment research routine
+INFO     src.services.chapter_handler:chapter_handler.py:50 Expected Outcome: Show normal Fragment behavior baseline
+INFO     src.services.chapter_handler:chapter_handler.py:45 
+Scene 2:
+INFO     src.services.chapter_handler:chapter_handler.py:46 Location: Station Omega Meeting Room
+INFO     src.services.chapter_handler:chapter_handler.py:47 Focus: character
+INFO     src.services.chapter_handler:chapter_handler.py:48 Characters: Dr. James Chen, Commander Drake
+INFO     src.services.chapter_handler:chapter_handler.py:49 Objective: Weekly research update meeting
+INFO     src.services.chapter_handler:chapter_handler.py:50 Expected Outcome: Establish professional dynamic
+INFO     src.services.chapter_handler:chapter_handler.py:45 
+Scene 3:
+INFO     src.services.chapter_handler:chapter_handler.py:46 Location: Station Omega Laboratory
+INFO     src.services.chapter_handler:chapter_handler.py:47 Focus: plot
+INFO     src.services.chapter_handler:chapter_handler.py:48 Characters: Dr. James Chen
+INFO     src.services.chapter_handler:chapter_handler.py:49 Objective: First minor Fragment anomaly detected
+INFO     src.services.chapter_handler:chapter_handler.py:50 Expected Outcome: Initial concern raised
+INFO     src.services.chapter_handler:chapter_handler.py:45 
+Scene 4:
+INFO     src.services.chapter_handler:chapter_handler.py:46 Location: Personal Quarters
+INFO     src.services.chapter_handler:chapter_handler.py:47 Focus: character
+INFO     src.services.chapter_handler:chapter_handler.py:48 Characters: Dr. James Chen
+INFO     src.services.chapter_handler:chapter_handler.py:49 Objective: Review research notes
+INFO     src.services.chapter_handler:chapter_handler.py:50 Expected Outcome: Pattern recognition begins
+INFO     src.services.chapter_handler:chapter_handler.py:45 
+Scene 5:
+INFO     src.services.chapter_handler:chapter_handler.py:46 Location: Station Omega Laboratory
+INFO     src.services.chapter_handler:chapter_handler.py:47 Focus: plot
+INFO     src.services.chapter_handler:chapter_handler.py:48 Characters: Dr. James Chen, Commander Drake
+INFO     src.services.chapter_handler:chapter_handler.py:49 Objective: Second anomaly occurs
+INFO     src.services.chapter_handler:chapter_handler.py:50 Expected Outcome: Increased concern
+INFO     src.services.chapter_handler:chapter_handler.py:45 
+Scene 6:
+INFO     src.services.chapter_handler:chapter_handler.py:46 Location: Commander's Office
+INFO     src.services.chapter_handler:chapter_handler.py:47 Focus: character
+INFO     src.services.chapter_handler:chapter_handler.py:48 Characters: Dr. James Chen, Commander Drake
+INFO     src.services.chapter_handler:chapter_handler.py:49 Objective: Report anomalies
+INFO     src.services.chapter_handler:chapter_handler.py:50 Expected Outcome: Initial skepticism
+INFO     src.services.chapter_handler:chapter_handler.py:45 
+Scene 7:
+INFO     src.services.chapter_handler:chapter_handler.py:46 Location: Station Archives
+INFO     src.services.chapter_handler:chapter_handler.py:47 Focus: world
+INFO     src.services.chapter_handler:chapter_handler.py:48 Characters: Dr. James Chen
+INFO     src.services.chapter_handler:chapter_handler.py:49 Objective: Research historical Fragment data
+INFO     src.services.chapter_handler:chapter_handler.py:50 Expected Outcome: Discovery of similar past incidents
+INFO     src.services.chapter_handler:chapter_handler.py:45 
+Scene 8:
+INFO     src.services.chapter_handler:chapter_handler.py:46 Location: Station Omega Laboratory
+INFO     src.services.chapter_handler:chapter_handler.py:47 Focus: plot
+INFO     src.services.chapter_handler:chapter_handler.py:48 Characters: Dr. James Chen
+INFO     src.services.chapter_handler:chapter_handler.py:49 Objective: Third anomaly occurs
+INFO     src.services.chapter_handler:chapter_handler.py:50 Expected Outcome: Clear pattern emerges
+INFO     src.services.chapter_handler:chapter_handler.py:45 
+Scene 9:
+INFO     src.services.chapter_handler:chapter_handler.py:46 Location: Emergency Meeting Room
+INFO     src.services.chapter_handler:chapter_handler.py:47 Focus: character
+INFO     src.services.chapter_handler:chapter_handler.py:48 Characters: Dr. James Chen, Commander Drake
+INFO     src.services.chapter_handler:chapter_handler.py:49 Objective: Present evidence of escalating situation
+INFO     src.services.chapter_handler:chapter_handler.py:50 Expected Outcome: Commander takes concerns seriously
+INFO     src.services.chapter_handler:chapter_handler.py:45 
+Scene 10:
+INFO     src.services.chapter_handler:chapter_handler.py:46 Location: Station Omega Laboratory
+INFO     src.services.chapter_handler:chapter_handler.py:47 Focus: plot
+INFO     src.services.chapter_handler:chapter_handler.py:48 Characters: Dr. James Chen
+INFO     src.services.chapter_handler:chapter_handler.py:49 Objective: Attempt to stabilize Fragment behavior
+INFO     src.services.chapter_handler:chapter_handler.py:50 Expected Outcome: Initial attempts fail
+INFO     src.services.chapter_handler:chapter_handler.py:45 
+Scene 11:
+INFO     src.services.chapter_handler:chapter_handler.py:46 Location: Station Control Room
+INFO     src.services.chapter_handler:chapter_handler.py:47 Focus: world
+INFO     src.services.chapter_handler:chapter_handler.py:48 Characters: Dr. James Chen, Commander Drake
+INFO     src.services.chapter_handler:chapter_handler.py:49 Objective: Monitor station-wide Fragment effects
+INFO     src.services.chapter_handler:chapter_handler.py:50 Expected Outcome: Situation becomes critical
+INFO     src.services.chapter_handler:chapter_handler.py:45 
+Scene 12:
+INFO     src.services.chapter_handler:chapter_handler.py:46 Location: Station Omega Laboratory
+INFO     src.services.chapter_handler:chapter_handler.py:47 Focus: plot
+INFO     src.services.chapter_handler:chapter_handler.py:48 Characters: Dr. James Chen, Commander Drake
+INFO     src.services.chapter_handler:chapter_handler.py:49 Objective: Major Fragment anomaly occurs
+INFO     src.services.chapter_handler:chapter_handler.py:50 Expected Outcome: Act climax - crisis fully manifests
+INFO     src.services.chapter_handler:chapter_handler.py:45 
+Scene 13:
+INFO     src.services.chapter_handler:chapter_handler.py:46 Location: Station Omega Laboratory
+INFO     src.services.chapter_handler:chapter_handler.py:47 Focus: plot
+INFO     src.services.chapter_handler:chapter_handler.py:48 Characters: Dr. James Chen
+INFO     src.services.chapter_handler:chapter_handler.py:49 Objective: Analyze overnight Fragment data
+INFO     src.services.chapter_handler:chapter_handler.py:50 Expected Outcome: Discovery of pattern in anomalies
+INFO     src.services.chapter_handler:chapter_handler.py:45 
+Scene 14:
+INFO     src.services.chapter_handler:chapter_handler.py:46 Location: Station Control Room
+INFO     src.services.chapter_handler:chapter_handler.py:47 Focus: character
+INFO     src.services.chapter_handler:chapter_handler.py:48 Characters: Dr. James Chen, Commander Drake
+INFO     src.services.chapter_handler:chapter_handler.py:49 Objective: Report findings to Commander
+INFO     src.services.chapter_handler:chapter_handler.py:50 Expected Outcome: Strategic response planning
+INFO     src.services.chapter_handler:chapter_handler.py:45 
+Scene 15:
+INFO     src.services.chapter_handler:chapter_handler.py:46 Location: Station Lower Levels
+INFO     src.services.chapter_handler:chapter_handler.py:47 Focus: world
+INFO     src.services.chapter_handler:chapter_handler.py:48 Characters: Dr. James Chen
+INFO     src.services.chapter_handler:chapter_handler.py:49 Objective: Investigate Fragment spread
+INFO     src.services.chapter_handler:chapter_handler.py:50 Expected Outcome: New anomaly discovered
+INFO     src.services.chapter_handler:chapter_handler.py:45 
+Scene 16:
+INFO     src.services.chapter_handler:chapter_handler.py:46 Location: Emergency Response Center
+INFO     src.services.chapter_handler:chapter_handler.py:47 Focus: plot
+INFO     src.services.chapter_handler:chapter_handler.py:48 Characters: Dr. James Chen, Commander Drake
+INFO     src.services.chapter_handler:chapter_handler.py:49 Objective: Implement containment measures
+INFO     src.services.chapter_handler:chapter_handler.py:50 Expected Outcome: Partial success with complications
+INFO     src.services.chapter_handler:chapter_handler.py:45 
+Scene 17:
+INFO     src.services.chapter_handler:chapter_handler.py:46 Location: Personal Quarters
+INFO     src.services.chapter_handler:chapter_handler.py:47 Focus: character
+INFO     src.services.chapter_handler:chapter_handler.py:48 Characters: Dr. James Chen
+INFO     src.services.chapter_handler:chapter_handler.py:49 Objective: Review personal research notes
+INFO     src.services.chapter_handler:chapter_handler.py:50 Expected Outcome: Key insight discovered
+INFO     src.services.chapter_handler:chapter_handler.py:45 
+Scene 18:
+INFO     src.services.chapter_handler:chapter_handler.py:46 Location: Station Omega Laboratory
+INFO     src.services.chapter_handler:chapter_handler.py:47 Focus: plot
+INFO     src.services.chapter_handler:chapter_handler.py:48 Characters: Dr. James Chen, Commander Drake
+INFO     src.services.chapter_handler:chapter_handler.py:49 Objective: Test new containment theory
+INFO     src.services.chapter_handler:chapter_handler.py:50 Expected Outcome: Unexpected reaction from Fragment
+INFO     src.services.chapter_handler:chapter_handler.py:45 
+Scene 19:
+INFO     src.services.chapter_handler:chapter_handler.py:46 Location: Station External Hull
+INFO     src.services.chapter_handler:chapter_handler.py:47 Focus: world
+INFO     src.services.chapter_handler:chapter_handler.py:48 Characters: Dr. James Chen
+INFO     src.services.chapter_handler:chapter_handler.py:49 Objective: Monitor Fragment effects on station structure
+INFO     src.services.chapter_handler:chapter_handler.py:50 Expected Outcome: Signs of structural compromise
+INFO     src.services.chapter_handler:chapter_handler.py:45 
+Scene 20:
+INFO     src.services.chapter_handler:chapter_handler.py:46 Location: Station Control Room
+INFO     src.services.chapter_handler:chapter_handler.py:47 Focus: character
+INFO     src.services.chapter_handler:chapter_handler.py:48 Characters: Dr. James Chen, Commander Drake
+INFO     src.services.chapter_handler:chapter_handler.py:49 Objective: Debate evacuation options
+INFO     src.services.chapter_handler:chapter_handler.py:50 Expected Outcome: Tension between safety and research
+INFO     src.services.chapter_handler:chapter_handler.py:45 
+Scene 21:
+INFO     src.services.chapter_handler:chapter_handler.py:46 Location: Station Omega Laboratory
+INFO     src.services.chapter_handler:chapter_handler.py:47 Focus: plot
+INFO     src.services.chapter_handler:chapter_handler.py:48 Characters: Dr. James Chen
+INFO     src.services.chapter_handler:chapter_handler.py:49 Objective: Emergency containment breach
+INFO     src.services.chapter_handler:chapter_handler.py:50 Expected Outcome: Crisis escalation
+INFO     src.services.chapter_handler:chapter_handler.py:45 
+Scene 22:
+INFO     src.services.chapter_handler:chapter_handler.py:46 Location: Station Lower Levels
+INFO     src.services.chapter_handler:chapter_handler.py:47 Focus: world
+INFO     src.services.chapter_handler:chapter_handler.py:48 Characters: Dr. James Chen, Commander Drake
+INFO     src.services.chapter_handler:chapter_handler.py:49 Objective: Assess breach damage
+INFO     src.services.chapter_handler:chapter_handler.py:50 Expected Outcome: Discovery of critical threat
+INFO     src.services.chapter_handler:chapter_handler.py:45 
+Scene 23:
+INFO     src.services.chapter_handler:chapter_handler.py:46 Location: Station Omega Laboratory
+INFO     src.services.chapter_handler:chapter_handler.py:47 Focus: character
+INFO     src.services.chapter_handler:chapter_handler.py:48 Characters: Dr. James Chen
+INFO     src.services.chapter_handler:chapter_handler.py:49 Objective: Final attempt at containment
+INFO     src.services.chapter_handler:chapter_handler.py:50 Expected Outcome: Partial breakthrough
+INFO     src.services.chapter_handler:chapter_handler.py:45 
+Scene 24:
+INFO     src.services.chapter_handler:chapter_handler.py:46 Location: Station Control Room
+INFO     src.services.chapter_handler:chapter_handler.py:47 Focus: plot
+INFO     src.services.chapter_handler:chapter_handler.py:48 Characters: Dr. James Chen, Commander Drake
+INFO     src.services.chapter_handler:chapter_handler.py:49 Objective: Make critical decision about station future
+INFO     src.services.chapter_handler:chapter_handler.py:50 Expected Outcome: Act climax - major decision point reached
+INFO     src.services.chapter_handler:chapter_handler.py:45 
+Scene 25:
+INFO     src.services.chapter_handler:chapter_handler.py:46 Location: Station Omega Laboratory
+INFO     src.services.chapter_handler:chapter_handler.py:47 Focus: plot
+INFO     src.services.chapter_handler:chapter_handler.py:48 Characters: Dr. James Chen, Commander Drake
+INFO     src.services.chapter_handler:chapter_handler.py:49 Objective: Assess Fragment containment failure
+INFO     src.services.chapter_handler:chapter_handler.py:50 Expected Outcome: Discovery of critical instability
+INFO     src.services.chapter_handler:chapter_handler.py:45 
+Scene 26:
+INFO     src.services.chapter_handler:chapter_handler.py:46 Location: Personal Quarters
+INFO     src.services.chapter_handler:chapter_handler.py:47 Focus: character
+INFO     src.services.chapter_handler:chapter_handler.py:48 Characters: Dr. James Chen
+INFO     src.services.chapter_handler:chapter_handler.py:49 Objective: Review research notes for solution
+INFO     src.services.chapter_handler:chapter_handler.py:50 Expected Outcome: Potential breakthrough identified
+INFO     src.services.chapter_handler:chapter_handler.py:45 
+Scene 27:
+INFO     src.services.chapter_handler:chapter_handler.py:46 Location: Station Control Room
+INFO     src.services.chapter_handler:chapter_handler.py:47 Focus: plot
+INFO     src.services.chapter_handler:chapter_handler.py:48 Characters: Commander Drake, Dr. James Chen
+INFO     src.services.chapter_handler:chapter_handler.py:49 Objective: Emergency response planning
+INFO     src.services.chapter_handler:chapter_handler.py:50 Expected Outcome: Conflict over approach
+INFO     src.services.chapter_handler:chapter_handler.py:45 
+Scene 28:
+INFO     src.services.chapter_handler:chapter_handler.py:46 Location: Station Exterior
+INFO     src.services.chapter_handler:chapter_handler.py:47 Focus: world
+INFO     src.services.chapter_handler:chapter_handler.py:48 Characters: Dr. James Chen
+INFO     src.services.chapter_handler:chapter_handler.py:49 Objective: Observe Fragment effects on station
+INFO     src.services.chapter_handler:chapter_handler.py:50 Expected Outcome: Disturbing discoveries
+INFO     src.services.chapter_handler:chapter_handler.py:45 
+Scene 29:
+INFO     src.services.chapter_handler:chapter_handler.py:46 Location: Command Center
+INFO     src.services.chapter_handler:chapter_handler.py:47 Focus: character
+INFO     src.services.chapter_handler:chapter_handler.py:48 Characters: Commander Drake
+INFO     src.services.chapter_handler:chapter_handler.py:49 Objective: Make evacuation preparations
+INFO     src.services.chapter_handler:chapter_handler.py:50 Expected Outcome: Difficult choices made
+INFO     src.services.chapter_handler:chapter_handler.py:45 
+Scene 30:
+INFO     src.services.chapter_handler:chapter_handler.py:46 Location: Laboratory
+INFO     src.services.chapter_handler:chapter_handler.py:47 Focus: plot
+INFO     src.services.chapter_handler:chapter_handler.py:48 Characters: Dr. James Chen, Commander Drake
+INFO     src.services.chapter_handler:chapter_handler.py:49 Objective: Last-ditch containment attempt
+INFO     src.services.chapter_handler:chapter_handler.py:50 Expected Outcome: Partial success with complications
+INFO     src.services.chapter_handler:chapter_handler.py:45 
+Scene 31:
+INFO     src.services.chapter_handler:chapter_handler.py:46 Location: Observation Deck
+INFO     src.services.chapter_handler:chapter_handler.py:47 Focus: character
+INFO     src.services.chapter_handler:chapter_handler.py:48 Characters: Dr. James Chen
+INFO     src.services.chapter_handler:chapter_handler.py:49 Objective: Confront personal demons
+INFO     src.services.chapter_handler:chapter_handler.py:50 Expected Outcome: Critical realization
+INFO     src.services.chapter_handler:chapter_handler.py:45 
+Scene 32:
+INFO     src.services.chapter_handler:chapter_handler.py:46 Location: Station Core
+INFO     src.services.chapter_handler:chapter_handler.py:47 Focus: plot
+INFO     src.services.chapter_handler:chapter_handler.py:48 Characters: Dr. James Chen, Commander Drake
+INFO     src.services.chapter_handler:chapter_handler.py:49 Objective: Implement desperate solution
+INFO     src.services.chapter_handler:chapter_handler.py:50 Expected Outcome: High-stakes gamble
+INFO     src.services.chapter_handler:chapter_handler.py:45 
+Scene 33:
+INFO     src.services.chapter_handler:chapter_handler.py:46 Location: Station-wide
+INFO     src.services.chapter_handler:chapter_handler.py:47 Focus: world
+INFO     src.services.chapter_handler:chapter_handler.py:48 Characters: Commander Drake
+INFO     src.services.chapter_handler:chapter_handler.py:49 Objective: Deal with cascading effects
+INFO     src.services.chapter_handler:chapter_handler.py:50 Expected Outcome: Crisis escalation
+INFO     src.services.chapter_handler:chapter_handler.py:45 
+Scene 34:
+INFO     src.services.chapter_handler:chapter_handler.py:46 Location: Fragment Containment
+INFO     src.services.chapter_handler:chapter_handler.py:47 Focus: plot
+INFO     src.services.chapter_handler:chapter_handler.py:48 Characters: Dr. James Chen
+INFO     src.services.chapter_handler:chapter_handler.py:49 Objective: Final confrontation with Fragment
+INFO     src.services.chapter_handler:chapter_handler.py:50 Expected Outcome: Climactic moment
+INFO     src.services.chapter_handler:chapter_handler.py:45 
+Scene 35:
+INFO     src.services.chapter_handler:chapter_handler.py:46 Location: Station Control Room
+INFO     src.services.chapter_handler:chapter_handler.py:47 Focus: character
+INFO     src.services.chapter_handler:chapter_handler.py:48 Characters: Dr. James Chen, Commander Drake
+INFO     src.services.chapter_handler:chapter_handler.py:49 Objective: Face aftermath
+INFO     src.services.chapter_handler:chapter_handler.py:50 Expected Outcome: Resolution revealed
+INFO     src.services.chapter_handler:chapter_handler.py:45 
+Scene 36:
+INFO     src.services.chapter_handler:chapter_handler.py:46 Location: Station Omega Overview
+INFO     src.services.chapter_handler:chapter_handler.py:47 Focus: world
+INFO     src.services.chapter_handler:chapter_handler.py:48 Characters: Dr. James Chen, Commander Drake
+INFO     src.services.chapter_handler:chapter_handler.py:49 Objective: Assess final impact
+INFO     src.services.chapter_handler:chapter_handler.py:50 Expected Outcome: New status quo established
+INFO     src.services.chapter_handler:chapter_handler.py:45 
+Scene 37:
+INFO     src.services.chapter_handler:chapter_handler.py:46 Location: Research Lab
+INFO     src.services.chapter_handler:chapter_handler.py:47 Focus: plot
+INFO     src.services.chapter_handler:chapter_handler.py:48 Characters: Dr. James Chen, Commander Drake
+INFO     src.services.chapter_handler:chapter_handler.py:49 Objective: Begin containment planning
+INFO     src.services.chapter_handler:chapter_handler.py:50 Expected Outcome: Initial containment strategy developed
+INFO     src.services.chapter_handler:chapter_handler.py:45 
+Scene 38:
+INFO     src.services.chapter_handler:chapter_handler.py:46 Location: Fragment Storage
+INFO     src.services.chapter_handler:chapter_handler.py:47 Focus: character
+INFO     src.services.chapter_handler:chapter_handler.py:48 Characters: Dr. James Chen
+INFO     src.services.chapter_handler:chapter_handler.py:49 Objective: Study Fragment patterns
+INFO     src.services.chapter_handler:chapter_handler.py:50 Expected Outcome: New insights discovered
+INFO     src.services.chapter_handler:chapter_handler.py:45 
+Scene 39:
+INFO     src.services.chapter_handler:chapter_handler.py:46 Location: Station Command Center
+INFO     src.services.chapter_handler:chapter_handler.py:47 Focus: world
+INFO     src.services.chapter_handler:chapter_handler.py:48 Characters: Commander Drake
+INFO     src.services.chapter_handler:chapter_handler.py:49 Objective: Coordinate station resources
+INFO     src.services.chapter_handler:chapter_handler.py:50 Expected Outcome: Resources allocated for containment
+INFO     src.services.chapter_handler:chapter_handler.py:45 
+Scene 40:
+INFO     src.services.chapter_handler:chapter_handler.py:46 Location: Testing Chamber
+INFO     src.services.chapter_handler:chapter_handler.py:47 Focus: plot
+INFO     src.services.chapter_handler:chapter_handler.py:48 Characters: Dr. James Chen, Commander Drake
+INFO     src.services.chapter_handler:chapter_handler.py:49 Objective: Test containment measures
+INFO     src.services.chapter_handler:chapter_handler.py:50 Expected Outcome: Initial tests show promise
+INFO     src.services.chapter_handler:chapter_handler.py:45 
+Scene 41:
+INFO     src.services.chapter_handler:chapter_handler.py:46 Location: Personal Quarters
+INFO     src.services.chapter_handler:chapter_handler.py:47 Focus: character
+INFO     src.services.chapter_handler:chapter_handler.py:48 Characters: Dr. James Chen
+INFO     src.services.chapter_handler:chapter_handler.py:49 Objective: Review findings
+INFO     src.services.chapter_handler:chapter_handler.py:50 Expected Outcome: Pattern recognition breakthrough
+INFO     src.services.chapter_handler:chapter_handler.py:45 
+Scene 42:
+INFO     src.services.chapter_handler:chapter_handler.py:46 Location: Research Lab
+INFO     src.services.chapter_handler:chapter_handler.py:47 Focus: plot
+INFO     src.services.chapter_handler:chapter_handler.py:48 Characters: Dr. James Chen, Commander Drake
+INFO     src.services.chapter_handler:chapter_handler.py:49 Objective: Implement containment prototype
+INFO     src.services.chapter_handler:chapter_handler.py:50 Expected Outcome: First successful containment test
+INFO     src.services.chapter_handler:chapter_handler.py:45 
+Scene 43:
+INFO     src.services.chapter_handler:chapter_handler.py:46 Location: Station Overview
+INFO     src.services.chapter_handler:chapter_handler.py:47 Focus: world
+INFO     src.services.chapter_handler:chapter_handler.py:48 Characters: Commander Drake
+INFO     src.services.chapter_handler:chapter_handler.py:49 Objective: Monitor station status
+INFO     src.services.chapter_handler:chapter_handler.py:50 Expected Outcome: Stability assessment
+INFO     src.services.chapter_handler:chapter_handler.py:45 
+Scene 44:
+INFO     src.services.chapter_handler:chapter_handler.py:46 Location: Conference Room
+INFO     src.services.chapter_handler:chapter_handler.py:47 Focus: character
+INFO     src.services.chapter_handler:chapter_handler.py:48 Characters: Dr. James Chen, Commander Drake
+INFO     src.services.chapter_handler:chapter_handler.py:49 Objective: Plan full implementation
+INFO     src.services.chapter_handler:chapter_handler.py:50 Expected Outcome: Final strategy agreed upon
+INFO     src.services.chapter_handler:chapter_handler.py:45 
+Scene 45:
+INFO     src.services.chapter_handler:chapter_handler.py:46 Location: Fragment Storage
+INFO     src.services.chapter_handler:chapter_handler.py:47 Focus: plot
+INFO     src.services.chapter_handler:chapter_handler.py:48 Characters: Dr. James Chen
+INFO     src.services.chapter_handler:chapter_handler.py:49 Objective: Prepare containment systems
+INFO     src.services.chapter_handler:chapter_handler.py:50 Expected Outcome: Systems ready for deployment
+INFO     src.services.chapter_handler:chapter_handler.py:45 
+Scene 46:
+INFO     src.services.chapter_handler:chapter_handler.py:46 Location: Station Control Room
+INFO     src.services.chapter_handler:chapter_handler.py:47 Focus: world
+INFO     src.services.chapter_handler:chapter_handler.py:48 Characters: Commander Drake
+INFO     src.services.chapter_handler:chapter_handler.py:49 Objective: Initialize containment protocols
+INFO     src.services.chapter_handler:chapter_handler.py:50 Expected Outcome: Station-wide implementation begins
+INFO     src.services.chapter_handler:chapter_handler.py:45 
+Scene 47:
+INFO     src.services.chapter_handler:chapter_handler.py:46 Location: Testing Chamber
+INFO     src.services.chapter_handler:chapter_handler.py:47 Focus: plot
+INFO     src.services.chapter_handler:chapter_handler.py:48 Characters: Dr. James Chen, Commander Drake
+INFO     src.services.chapter_handler:chapter_handler.py:49 Objective: Monitor containment progress
+INFO     src.services.chapter_handler:chapter_handler.py:50 Expected Outcome: Initial success confirmed
+INFO     src.services.chapter_handler:chapter_handler.py:45 
+Scene 48:
+INFO     src.services.chapter_handler:chapter_handler.py:46 Location: Observation Deck
+INFO     src.services.chapter_handler:chapter_handler.py:47 Focus: character
+INFO     src.services.chapter_handler:chapter_handler.py:48 Characters: Dr. James Chen, Commander Drake
+INFO     src.services.chapter_handler:chapter_handler.py:49 Objective: Reflect on achievement
+INFO     src.services.chapter_handler:chapter_handler.py:50 Expected Outcome: Temporary resolution reached
+INFO     src.services.chapter_handler:chapter_handler.py:52 
+Expected Chapter Outcomes:
+INFO     src.services.chapter_handler:chapter_handler.py:54 - ('plot_developments', ['Fragment anomaly discovered', 'Initial containment measures established'])
+INFO     src.services.chapter_handler:chapter_handler.py:54 - ('character_developments', ['Dr. Chen faces first major crisis', 'Working relationship with Commander Drake tested'])
+INFO     src.services.chapter_handler:chapter_handler.py:54 - ('world_changes', ['Station Omega alert status elevated', 'Fragment research protocols questioned'])
+INFO     src.services.story_engine_service:story_engine_service.py:68 Generated new chapter plan with 48 scenes
+INFO     src.services.story_engine_service:story_engine_service.py:72 Generating scene 1
+INFO     src.services.rag_service:rag_service.py:214 Querying with filters: {'type': 'story_planning'} in namespace: story_planning
+INFO     src.services.bedrock_service:bedrock_service.py:78 Generating embedding for text of length 1522
+INFO     src.services.bedrock_service:bedrock_service.py:113 Successfully generated embedding
+INFO     src.services.pinecone_service:pinecone_service.py:122 Found 2 matches in namespace: story_planning
+INFO     src.services.rag_service:rag_service.py:186 Found 2 unique chunks for query
+INFO     src.services.rag_service:rag_service.py:228 Context chunk 1:
+INFO     src.services.rag_service:rag_service.py:229 Text: {"Commander Drake": "professional"} } ], "scene_plans": [ { "scene_number": 1, "focus": "plot", "key_characters": ["Dr. James Chen"], "location": "Station Omega", "objective": "Discover Fragment anoma...
+INFO     src.services.rag_service:rag_service.py:230 Score: 0.7584185
+INFO     src.services.rag_service:rag_service.py:231 Metadata: {'category': 'initial_setup', 'chunk_id': 1.0, 'filename': 'initial-story-plan.txt', 'size': 370.0, 'source': '/Users/cmcoca/Desktop/SLAG-site/backend/src/reference-documents/story-planning/initial-story-plan.txt', 'text': '{"Commander Drake": "professional"} } ], "scene_plans": [ { "scene_number": 1, "focus": "plot", "key_characters": ["Dr. James Chen"], "location": "Station Omega", "objective": "Discover Fragment anomaly", "expected_outcome": "Initial crisis revealed", "plot_threads": ["initial_crisis"] } ], "expected_outcomes": ["Crisis established", "Key characters introduced"] } ```', 'type': 'story_planning'}
+INFO     src.services.rag_service:rag_service.py:228 Context chunk 2:
+INFO     src.services.rag_service:rag_service.py:229 Text: # Initial Story Plan ## Core Plot Elements ```json { "theme": "Discovery and Crisis", "plot_threads": [ { "id": "initial_crisis", "title": "Strange Fragment Behavior", "status": "active", "priority": ...
+INFO     src.services.rag_service:rag_service.py:230 Score: 0.673243284
 INFO     src.services.rag_service:rag_service.py:231 Metadata: {'category': 'initial_setup', 'chunk_id': 0.0, 'filename': 'initial-story-plan.txt', 'size': 491.0, 'source': '/Users/cmcoca/Desktop/SLAG-site/backend/src/reference-documents/story-planning/initial-story-plan.txt', 'text': '# Initial Story Plan ## Core Plot Elements ```json { "theme": "Discovery and Crisis", "plot_threads": [ { "id": "initial_crisis", "title": "Strange Fragment Behavior", "status": "active", "priority": 1, "related_characters": ["Dr. James Chen", "Commander Drake"] } ], "character_arcs": [ { "character_id": "Dr. James Chen", "current_state": "Investigating Fragment anomalies", "development_goals": ["Understand Fragment behavior", "Prevent catastrophe"], "relationships": {"Commander Drake":', 'type': 'story_planning'}
 INFO     src.services.bedrock_service:bedrock_service.py:43 Attempt 1: Invoking Claude with 4096 max tokens
 INFO     src.services.rag_service:rag_service.py:256 Raw response from Claude:
 INFO     src.services.rag_service:rag_service.py:257 --------------------------------------------------------------------------------
 INFO     src.services.rag_service:rag_service.py:258 {
-    "content": "Dr. James Chen frowned at the holographic display floating above his workstation in Station Omega's main laboratory. The Fragment readings made no sense. Where the crystalline structure had maintained stable patterns for months, it now pulsed with irregular energy signatures he'd never seen before. 'This can't be right,' he muttered, adjusting the calibration for the third time. The numbers remained stubbornly anomalous. As he reached for his comm unit to alert Commander Drake, a sharp crack echoed through the lab. The Fragment specimen in the containment chamber had developed a hairline fracture, something that should have been impossible given its documented properties. Warning lights began flashing as energy readings spiked dangerously. 'Security breach imminent in Containment Chamber A,' the station's AI announced with mechanical calm. Chen's fingers flew across the console, initiating emergency protocols even as his mind raced to understand what was happening. This wasn't just an anomaly - it was the beginning of a crisis.",
+    "content": "Dr. James Chen stood before the containment chamber, frowning at the readouts on his tablet. The Fragment, usually a stable crystalline structure floating in its containment field, was exhibiting unusual oscillation patterns. 'That's not right,' he muttered, tapping through various diagnostic screens. The Fragment's energy signature had shifted by 0.03% since yesterday - a tiny change that would be negligible in any other context, but Fragments never changed. Not in the three years he'd been studying them. He initiated another scan sequence, the soft hum of equipment filling the sterile laboratory. As the new data streamed in, the Fragment pulsed with an unexpected flash of blue light, causing several sensors to spike. Chen immediately hit the emergency containment protocols. 'Control, this is Dr. Chen. We have an anomaly in Lab 3. Request immediate verification and backup containment measures.'",
     "characters": ["Dr. James Chen"],
-    "location": "Station Omega",
+    "location": "Station Omega Laboratory",
     "metadata": {
         "plot_thread": "initial_crisis",
-        "focus": "plot",
+        "focus": "conflict_introduction",
         "scene_number": 1
     }
 }
 INFO     src.services.rag_service:rag_service.py:259 --------------------------------------------------------------------------------
 INFO     src.services.rag_service:rag_service.py:261 Generated RAG response successfully
 INFO     src.services.story_engine_service:story_engine_service.py:136 Successfully parsed scene content JSON
-INFO     backend.tests.test_story_generation:test_story_generation.py:52 Generated scene: {'content': "Dr. James Chen frowned at the holographic display floating above his workstation in Station Omega's main laboratory. The Fragment readings made no sense. Where the crystalline structure had maintained stable patterns for months, it now pulsed with irregular energy signatures he'd never seen before. 'This can't be right,' he muttered, adjusting the calibration for the third time. The numbers remained stubbornly anomalous. As he reached for his comm unit to alert Commander Drake, a sharp crack echoed through the lab. The Fragment specimen in the containment chamber had developed a hairline fracture, something that should have been impossible given its documented properties. Warning lights began flashing as energy readings spiked dangerously. 'Security breach imminent in Containment Chamber A,' the station's AI announced with mechanical calm. Chen's fingers flew across the console, initiating emergency protocols even as his mind raced to understand what was happening. This wasn't just an anomaly - it was the beginning of a crisis.", 'characters': ['Dr. James Chen'], 'location': 'Station Omega', 'metadata': {'plot_thread': 'initial_crisis', 'focus': 'plot', 'scene_number': 1}}
+INFO     src.services.continuity_checker:continuity_checker.py:41 Character Dr. James Chen moved from Station Omega to Station Omega Laboratory
+INFO     backend.tests.test_story_generation:test_story_generation.py:52 Generated scene: {'content': "Dr. James Chen stood before the containment chamber, frowning at the readouts on his tablet. The Fragment, usually a stable crystalline structure floating in its containment field, was exhibiting unusual oscillation patterns. 'That's not right,' he muttered, tapping through various diagnostic screens. The Fragment's energy signature had shifted by 0.03% since yesterday - a tiny change that would be negligible in any other context, but Fragments never changed. Not in the three years he'd been studying them. He initiated another scan sequence, the soft hum of equipment filling the sterile laboratory. As the new data streamed in, the Fragment pulsed with an unexpected flash of blue light, causing several sensors to spike. Chen immediately hit the emergency containment protocols. 'Control, this is Dr. Chen. We have an anomaly in Lab 3. Request immediate verification and backup containment measures.'", 'characters': ['Dr. James Chen'], 'location': 'Station Omega Laboratory', 'metadata': {'plot_thread': 'initial_crisis', 'focus': 'conflict_introduction', 'scene_number': 1}}
 PASSED                                                                                                                                                                                                                                             [100%]
 
 ==================================================================================================================== warnings summary ====================================================================================================================
@@ -242,5 +1316,5 @@ backend/venv/lib/python3.11/site-packages/pydantic/_internal/_config.py:271
     warnings.warn(DEPRECATION_MESSAGE, DeprecationWarning)
 
 -- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
-============================================================================================================= 1 passed, 1 warning in 21.93s ==============================================================================================================
+======================================================================================================== 1 passed, 1 warning in 138.14s (0:02:18) ========================================================================================================
 (venv) cmcoca@Mac SLAG-site % 
