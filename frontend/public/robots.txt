@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://lostage.io/sitemap.xml 

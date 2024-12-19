@@ -61,15 +61,30 @@ export default function ChapterPage({
   )
 }
 
-export async function generateMetadata({
-  params,
-}: {
-  params: { slug: string }
-}): Promise<Metadata> {
-  const chapter = chapters[params.slug as keyof typeof chapters]
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const chapter = chapters[params.slug]
   if (!chapter) return { title: 'Chapter Not Found' }
   
   return {
     title: `Chapter ${chapter.id}: ${chapter.title} | Starfall: Lost Age of Giants`,
+    description: chapter.content.substring(0, 155) + '...',
+    openGraph: {
+      title: `Chapter ${chapter.id}: ${chapter.title} | Starfall: Lost Age of Giants`,
+      description: chapter.content.substring(0, 155) + '...',
+      images: [
+        {
+          url: chapter.image,
+          width: 1200,
+          height: 630,
+          alt: `Chapter ${chapter.id}: ${chapter.title}`,
+        },
+      ],
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: `Chapter ${chapter.id}: ${chapter.title}`,
+      description: chapter.content.substring(0, 155) + '...',
+      images: [chapter.image],
+    },
   }
 }
