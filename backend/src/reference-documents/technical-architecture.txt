@@ -1,0 +1,171 @@
+# System Architecture
+
+## Core Components
+
+### AWS Services
+- Lambda (Python) for story generation using Claude 3.5 Sonnet
+- Lambda (Python) for image generation using Stable Diffusion
+- CloudWatch for logging and monitoring
+- EventBridge for scheduling automated tasks
+- S3 for storing generated content
+- DynamoDB for primary story state tracking
+
+### Vector Database Infrastructure
+- Pinecone for semantic search capabilities
+- Amazon Bedrock for embedding generation
+- ElastiCache for frequent context caching
+
+### Web Infrastructure
+- Next.js frontend deployed on Vercel
+- API Routes in Next.js for backend functionality
+- Vercel Edge Functions for dynamic content
+- MongoDB Atlas for website content storage
+- Cloudflare CDN for image caching
+
+### Integration Points
+- Twitter API v2 for automated posting
+- Phantom Wallet SDK for Solana integration
+- AWS SDK for CloudWatch integration
+- Custom WebSocket server for real-time updates
+
+## Data Flow Architecture
+
+1. Story Generation Pipeline:
+```
+EventBridge Trigger 
+→ Context Retrieval (Pinecone + DynamoDB) 
+→ Story Generation Lambda 
+→ State Update (DynamoDB + Pinecone) 
+→ S3 (content storage) 
+→ MongoDB (website content) 
+→ WebSocket (real-time updates)
+```
+
+2. Context Management Pipeline:
+```
+New Content Generated 
+→ Bedrock (embedding generation) 
+→ Pinecone (vector storage) 
+→ ElastiCache (frequent context) 
+→ DynamoDB (state update)
+```
+
+3. Image Generation Pipeline:
+```
+Story Generation Lambda 
+→ Image Generation Lambda 
+→ S3 (image storage) 
+→ Twitter API 
+→ Website Content Update
+```
+
+4. Blockchain Integration Pipeline:
+```
+User Interaction 
+→ Phantom Wallet 
+→ Smart Contract 
+→ WebSocket 
+→ Story Generation Lambda
+```
+
+## State Management
+
+### DynamoDB Schema
+```javascript
+StoryState {
+  chapterId: string
+  sceneId: string
+  characters: Map<string, CharacterState>
+  worldState: Map<string, any>
+  plotThreads: Array<PlotThread>
+  userInfluenceQueue: Array<UserInfluence>
+}
+
+CharacterState {
+  name: string
+  traits: Map<string, number>
+  relationships: Map<string, Relationship>
+  arcProgress: number
+  lastAppearance: string
+}
+```
+
+### Vector Database Schema
+```javascript
+VectorEntry {
+  id: string  // Maps to scene/character/plotThread ID
+  vector: Float32Array  // 1536-dimensional embedding
+  metadata: {
+    type: 'scene' | 'character' | 'plotThread'
+    timestamp: string
+    themes: string[]
+    characters: string[]
+    locations: string[]
+    importance: number
+  }
+}
+```
+
+### Context Retrieval System
+```python
+class ContextManager:
+    def get_relevant_context(self, current_scene, k=5):
+        # Generate embedding for current scene
+        embedding = self.bedrock.generate_embedding(current_scene)
+        
+        # Get similar scenes from vector DB
+        similar_scenes = self.pinecone.query(
+            vector=embedding,
+            top_k=k,
+            namespace='scenes'
+        )
+        
+        # Get core state from DynamoDB
+        core_state = self.dynamodb.get_item(
+            TableName='StoryState',
+            Key={'chapterId': current_chapter_id}
+        )
+        
+        # Combine and format context
+        return {
+            'similar_scenes': similar_scenes,
+            'core_state': core_state,
+            'cached_context': self.elasticache.get_frequent_context()
+        }
+```
+
+## Caching Strategy
+
+### ElastiCache Configuration
+```python
+class ContextCache:
+    def cache_frequent_context(self):
+        # Cache frequently accessed story elements
+        frequent_items = {
+            'main_characters': self.get_main_characters(),
+            'active_plots': self.get_active_plots(),
+            'world_rules': self.get_world_rules(),
+            'recent_scenes': self.get_recent_scenes(5)
+        }
+        self.elasticache.set_multiple(frequent_items)
+```
+
+## Implementation Notes
+
+1. Vector Database Management:
+- Use batch operations for embedding updates
+- Implement automatic reindexing for optimization
+- Set up automatic backup and recovery
+- Monitor vector space distribution
+
+2. Context Retrieval Optimization:
+- Cache frequent queries in ElastiCache
+- Implement context relevance scoring
+- Use hybrid retrieval (exact + semantic)
+- Maintain context window size limits
+
+3. Performance Considerations:
+- Use async operations for non-blocking context retrieval
+- Implement automatic pruning of old vectors
+- Monitor and optimize query latency
+- Use batch operations where possible

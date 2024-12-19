@@ -1,0 +1,140 @@
+# Prompt Engineering for Long-form Narrative Generation
+
+## 1. World-Building Template
+
+```markdown
+Please help create a detailed world for our story using the following framework. For each element, provide specific details and explain how they interact with other elements:
+
+Physical Environment:
+- Geographic features and climate
+- Natural resources and their distribution
+- Unique physical phenomena
+
+Social Structure:
+- Major political/social organizations
+- Economic systems
+- Cultural groups and their relationships
+
+Technology/Magic System:
+- Core principles and limitations
+- Common applications
+- Social impact and distribution
+
+Historical Context:
+- Key historical events
+- How they shaped current society
+- Ongoing consequences
+
+Rules and Constraints:
+- Natural laws that differ from our world
+- Technological/magical limitations
+- Social taboos and customs
+
+Please maintain internal consistency and explain any apparent contradictions.
+```
+
+## 2. Character Development Framework
+
+```markdown
+For the character [CHARACTER_NAME], please develop the following aspects while maintaining consistency with established world rules:
+
+Background:
+- Personal history aligned with world events
+- Formative experiences
+- Cultural/social context
+
+Core Traits:
+- Personality matrix (provide 3-5 key traits)
+- Behavioral patterns
+- Internal contradictions
+
+Relationships:
+- Key connections to other characters
+- Position in social structures
+- Alliance patterns and conflicts
+
+Development Arc:
+- Current state
+- Desired character growth
+- Obstacles to overcome
+
+Consistency Markers:
+- Speech patterns
+- Recurring behaviors
+- Decision-making framework
+
+Please explain how these elements interact and influence each other.
+```
+
+## 3. Scene Generation Template
+
+```markdown
+Context:
+Previous Scene Summary: [SUMMARY]
+Current Chapter Goal: [GOAL]
+Active Plot Threads: [THREADS]
+Relevant Character States: [STATES]
+
+Scene Requirements:
+1. Advance plot thread: [THREAD]
+2. Develop character: [CHARACTER]
+3. Reveal world element: [ELEMENT]
+
+Format:
+1. Scene setting and atmosphere
+2. Character interactions
+3. Plot advancement
+4. World-building elements
+5. Scene conclusion and hooks
+
+Constraints:
+- Maintain consistency with established world rules
+- Honor character traits and development
+- Advance at least one plot thread
+- Include sensory details and atmosphere
+```
+
+## 4. Continuity Tracking System
+
+```markdown
+Please track and update the following elements after each scene:
+
+Plot Threads:
+[List active threads with current status]
+
+Character Development:
+[List involved characters with development progress]
+
+World State:
+[List any changes to world elements]
+
+Consistency Check:
+1. Review previous scenes' established facts
+2. Confirm alignment with world rules
+3. Verify character behavior consistency
+4. Update relevant state information
+
+Future Hooks:
+[List potential plot threads or developments]
+```
+
+## 5. Reader Interaction Integration
+
+```markdown
+Given the following user influence:
+User Action: [ACTION]
+Token Amount: [AMOUNT]
+Desired Impact: [IMPACT]
+
+Please modify the upcoming scene to:
+1. Incorporate user influence naturally
+2. Maintain story coherence
+3. Honor existing plot threads
+4. Acknowledge user contribution subtly
+5. Update story state accordingly
+
+Constraints:
+- Must not break established world rules
+- Should feel organic to the story
+- Cannot override major plot points
+```
