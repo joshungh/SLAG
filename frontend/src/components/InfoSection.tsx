@@ -62,9 +62,8 @@ function FlipCard({ image, alt, backText }: CardProps) {
               <p 
                 key={index} 
                 className="font-['IBM_Plex_Mono'] text-black text-sm leading-relaxed"
-              >
-                {paragraph}
-              </p>
+                dangerouslySetInnerHTML={{ __html: paragraph }}
+              />
             ))}
           </div>
         </div>
@@ -107,7 +106,7 @@ export default function InfoSection() {
       backText: 
         'GitHub Repository:' +
         '<br/><br/>' +
-        'https://github.com/mango31/SLAG'
+        '<a href="https://github.com/mango31/SLAG" target="_blank" rel="noopener noreferrer" class="text-green-600 hover:text-green-500 underline">GitHub</a>'
     }
   ]
 
