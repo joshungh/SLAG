@@ -1,15 +1,24 @@
-import pinecone
+from pinecone import Pinecone, ServerlessSpec
 from typing import List, Dict, Optional
 from ..config.config import Settings
 
 class PineconeService:
     def __init__(self, settings: Settings):
-        pinecone.init(
-            api_key=settings.PINECONE_API_KEY,
-            environment=settings.PINECONE_ENVIRONMENT
-        )
-        self.index = pinecone.Index("slag-index")
-        self.index_url = "slag-index-22tqnba.svc.apw5-4e34-81fa.pinecone.io"
+        self.pc = Pinecone(api_key=settings.PINECONE_API_KEY)
+        
+        # Create index if it doesn't exist
+        if 'slag-index' not in self.pc.list_indexes().names():
+            self.pc.create_index(
+                name='slag-index',
+                dimension=1536,
+                metric='cosine',
+                spec=ServerlessSpec(
+                    cloud='aws',
+                    region='us-west-2'
+                )
+            )
+        
+        self.index = self.pc.Index("slag-index")
     
     async def similarity_search(
         self,
@@ -19,21 +28,22 @@ class PineconeService:
         filter: Optional[Dict] = None
     ) -> List[Dict]:
         """Search for similar vectors in Pinecone"""
-        results = self.index.query(
-            namespace=namespace,
+        response = self.index.query(
             vector=vector,
             top_k=top_k,
             filter=filter,
-            include_metadata=True
+            include_values=True,
+            include_metadata=True,
+            namespace=namespace
         )
         
         return [
             {
-                "id": match.id,
-                "score": match.score,
-                "metadata": match.metadata
+                "id": match["id"],
+                "score": match["score"],
+                "metadata": match["metadata"]
             }
-            for match in results.matches
+            for match in response["matches"]
         ]
     
     async def upsert_vectors(
@@ -42,8 +52,17 @@ class PineconeService:
         namespace: str
     ):
         """Insert or update vectors in Pinecone"""
+        formatted_vectors = [
+            {
+                "id": id,
+                "values": vec,
+                "metadata": meta
+            }
+            for id, vec, meta in vectors
+        ]
+        
         self.index.upsert(
-            vectors=[(id, vec, meta) for id, vec, meta in vectors],
+            vectors=formatted_vectors,
             namespace=namespace
         )
     
@@ -53,4 +72,7 @@ class PineconeService:
         namespace: str
     ):
         """Delete vectors from Pinecone"""
-        self.index.delete(ids=ids, namespace=namespace) 
+        self.index.delete(
+            ids=ids,
+            namespace=namespace
+        ) 

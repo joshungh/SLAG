@@ -1,7 +1,10 @@
-from pydantic import BaseSettings
+from pydantic_settings import BaseSettings
+from pydantic import ConfigDict
 from typing import Optional
 
 class Settings(BaseSettings):
+    model_config = ConfigDict(env_file='.env')
+    
     # AWS Configuration
     AWS_REGION: str = "us-west-2"
     BEDROCK_MODEL_ID: str = "anthropic.claude-3-5-sonnet-20241022-v2:0"
@@ -14,7 +17,4 @@ class Settings(BaseSettings):
     
     # Vector DB Configuration
     PINECONE_API_KEY: Optional[str] = None
-    PINECONE_ENVIRONMENT: str = "us-east1-gcp"
-    
-    class Config:
-        env_file = ".env" 
+    PINECONE_ENVIRONMENT: str = "apw5-4e34-81fa"

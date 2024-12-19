@@ -34,8 +34,32 @@ class StoryEngine:
         """Generate the next scene in the story"""
         try:
             context = self.context_manager.get_full_context()
-            # AWS Bedrock integration will go here
-            return {"status": "placeholder"}
+            
+            # Generate scene
+            scene_text = await self.bedrock.generate_text(
+                prompt=self.prompt_templates.get_scene_generation_prompt(context)
+            )
+            
+            # Generate embedding and store in Pinecone
+            embedding = await self.bedrock.generate_embedding(scene_text)
+            await self.pinecone.upsert_vectors(
+                vectors=[(
+                    f"scene_{self.current_chapter_number}_{self.current_scene_number}",
+                    embedding,
+                    {
+                        "type": "scene",
+                        "chapter": self.current_chapter_number,
+                        "scene": self.current_scene_number,
+                        "content": scene_text,
+                        "timestamp": datetime.now().isoformat()
+                    }
+                )],
+                namespace="scenes"
+            )
+            
+            self.current_scene_number += 1
+            return {"scene": scene_text, "embedding": embedding}
+            
         except Exception as e:
             logger.error(f"Scene generation failed: {str(e)}")
             raise 
