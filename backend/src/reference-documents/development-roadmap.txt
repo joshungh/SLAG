@@ -26,33 +26,35 @@
    - Basic configuration
    - Environment setup
 
-## 🚧 In Progress
-1. Reference Document Organization
-   - Structuring for RAG
-   - Categorization
-   - Cross-referencing
-   - Metadata tagging
-
-## 📋 Next Steps (Priority Order)
-1. Pinecone Service Implementation
-   - Upsert operations
-   - Query functionality
-   - Vector management
-   - Error handling
-
-2. RAG Implementation
+5. RAG Service
    - Document chunking
-   - Context assembly
-   - Relevance scoring
+   - Embedding pipeline
+   - Vector storage
+   - Query functionality
    - Response generation
+   - Comprehensive testing
 
-3. Story Engine Core
+## 🚧 In Progress
+1. Content Organization
+   - Document categorization
+   - Metadata standards
+   - Cross-referencing
+   - Quality assurance
+
+2. Story Engine Integration
+   - RAG integration
    - State management
    - Scene generation
    - Character tracking
-   - Plot progression
 
-4. Integration Layer
+## 📋 Next Steps (Priority Order)
+1. Story Engine Core
+   - Plot progression
+   - Scene composition
+   - Character interaction
+   - Narrative flow
+
+2. Integration Layer
    - Service coordination
    - Error handling
    - Performance monitoring
@@ -76,6 +78,13 @@
    - Content updates
    - Style enforcement
    - Consistency checking
+
+4. Metadata Enhancements
+   - Advanced filtering (narrative, technical, security)
+   - Bulk update functionality
+   - Schema migration tools
+   - Metadata validation rules
+   - Cross-reference tracking
 
 ## 📚 Documentation Needs
 1. API Documentation

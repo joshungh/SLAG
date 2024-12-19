@@ -1,20 +1,19 @@
 from pydantic_settings import BaseSettings
-from pydantic import ConfigDict
-from typing import Optional
+from dotenv import load_dotenv
+import os
+
+load_dotenv()  # Make sure this is at the top
 
 class Settings(BaseSettings):
-    model_config = ConfigDict(env_file='.env')
+    AWS_REGION: str = os.getenv("AWS_REGION", "us-west-2")
+    PINECONE_API_KEY: str = os.getenv("PINECONE_API_KEY")
+    PINECONE_ENVIRONMENT: str = os.getenv("PINECONE_ENVIRONMENT")
+    PINECONE_INDEX: str = os.getenv("PINECONE_INDEX", "slag-index")
     
-    # AWS Configuration
-    AWS_REGION: str = "us-west-2"
-    BEDROCK_MODEL_ID: str = "anthropic.claude-3-5-sonnet-20241022-v2:0"
-    STABLE_DIFFUSION_MODEL_ID: str = "stability.stable-image-ultra-v1:0"
-    
-    # Story Configuration
-    SCENE_INTERVAL_MINUTES: int = 30
-    SCENES_PER_CHAPTER: int = 48
-    CONTEXT_WINDOW_SIZE: int = 3
-    
-    # Vector DB Configuration
-    PINECONE_API_KEY: Optional[str] = None
-    PINECONE_ENVIRONMENT: str = "apw5-4e34-81fa"
+    # Add Bedrock settings
+    BEDROCK_MODEL_ID: str = os.getenv("BEDROCK_MODEL_ID", "anthropic.claude-3-5-sonnet-20241022-v2:0")
+    BEDROCK_EMBEDDING_MODEL_ID: str = os.getenv("BEDROCK_EMBEDDING_MODEL_ID", "amazon.titan-embed-text-v1")
+
+    class Config:
+        env_file = ".env"
+        env_file_encoding = "utf-8"

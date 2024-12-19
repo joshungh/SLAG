@@ -117,16 +117,18 @@ class BedrockService:
             logger.error(f"Error generating embedding: {str(e)}")
             raise Exception(f"Error generating embedding: {str(e)}")
     
-    async def generate_text(self, prompt: str, context_docs: Optional[List[Dict]] = None) -> str:
-        """Generate text using Claude with RAG if context_docs provided"""
+    async def generate_text(self, prompt: str, max_tokens: int = 4096) -> str:
+        """Generate text using Claude
+        
+        Args:
+            prompt: Text prompt for Claude
+            max_tokens: Maximum tokens in response
+            
+        Returns:
+            Generated text response
+        """
         messages = [{"role": "user", "content": prompt}]
-        
-        if context_docs:
-            # Add context as system message
-            context = "\n\n".join([doc["text"] for doc in context_docs])
-            messages.insert(0, {"role": "system", "content": f"Context:\n{context}"})
-        
-        return await self._invoke_claude_with_retry(messages)
+        return await self._invoke_claude_with_retry(messages, max_tokens)
     
     async def generate_image(self, prompt: str) -> bytes:
         """Generate image using Stable Diffusion Ultra"""

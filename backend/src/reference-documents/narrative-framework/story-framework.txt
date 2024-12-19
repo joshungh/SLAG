@@ -1,0 +1,173 @@
+# Narrative Structure Framework
+
+## Scene Construction
+```markdown
+Basic Scene Elements:
+- Timestamp (4424 date/time)
+- Location identifier
+- Present characters
+- Scene objective
+- Story thread identification
+
+Memory Scene Format:
+- Clear timeline marker
+- Memory trigger
+- Historical context
+- Character insight
+- Present relevance
+
+Scene Categories:
+1. Present Action
+   - Current events
+   - Direct plot advancement
+   - Character interactions
+   - Real-time developments
+
+2. Memory/Flashback
+   - Character background
+   - Historical context
+   - Past events influence
+   - Relationship development
+
+3. Research/Discovery
+   - Scientific advancement
+   - Giant-related findings
+   - Technical developments
+   - Theory exploration
+```
+
+## Plot Structure
+
+### Main Plot Thread
+```markdown
+Initial Crisis Build-up:
+- Growing tensions
+- Mysterious occurrences
+- Character positioning
+- World state establishment
+
+Development Phases:
+1. Initial Mystery (Days 1-7)
+   - Character introductions
+   - World establishment
+   - Tension building
+   - Core conflict hints
+
+2. Rising Action (Days 8-14)
+   - Plot acceleration
+   - Character challenges
+   - Mystery deepening
+   - Stakes escalation
+
+3. Crisis Points (Variable)
+   - Major revelations
+   - Character decisions
+   - Action sequences
+   - Resolution phases
+```
+
+## Story Management
+
+### RAG Implementation
+```markdown
+Context Tracking:
+- Character states
+- Plot progression
+- World events
+- Technical details
+
+Vector Database Categories:
+1. Character Development
+   - Personal histories
+   - Relationship dynamics
+   - Growth arcs
+   - Key decisions
+
+2. Plot Elements
+   - Main story threads
+   - Subplots
+   - Mystery components
+   - Resolution paths
+
+3. World State
+   - Location details
+   - Political climate
+   - Technology status
+   - Giant activity
+```
+
+### Scene Balance
+```markdown
+Daily Distribution:
+- Character development (30%)
+- Plot advancement (40%)
+- World building (15%)
+- Action/tension (15%)
+
+Scene Transitions:
+- Logical flow
+- Time progression
+- Location changes
+- Character movement
+```
+
+## Creative Guidelines
+
+### Character Usage
+```markdown
+Dr. Chen:
+- Primary perspective
+- Key decision points
+- Research leadership
+- Personal journey
+
+Supporting Cast:
+- Independent arcs
+- Interconnected stories
+- Relationship development
+- Specialty moments
+
+Team Dynamics:
+- Natural groupings
+- Conflict resolution
+- Professional interaction
+- Personal bonds
+```
+
+### Giant Integration
+```markdown
+Encounter Types:
+1. Direct
+   - Rare, significant
+   - High impact
+   - Major plot points
+   - Character changing
+
+2. Indirect
+   - Research findings
+   - Artifact discovery
+   - Historical revelation
+   - Technology insight
+
+3. Background
+   - World influence
+   - Political impact
+   - Cultural effects
+   - Scientific study
+```
+
+### Daily Resolution
+```markdown
+Chapter Structure:
+- Self-contained arcs
+- Subplot advancement
+- Character progress
+- Satisfying endings
+
+Continuity:
+- Plot thread tracking
+- Character consistency
+- World state updates
+- Timeline maintenance
+```
+
