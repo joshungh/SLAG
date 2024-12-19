@@ -104,9 +104,9 @@ export default function InfoSection() {
       image: '/images/officiallinks.png',
       alt: 'Official Links',
       backText: 
-        'GitHub Repository:' +
+        '<a href="https://github.com/mango31/SLAG" target="_blank" rel="noopener noreferrer" class="text-green-600 hover:text-green-500 underline">GitHub</a>' +
         '<br/><br/>' +
-        '<a href="https://github.com/mango31/SLAG" target="_blank" rel="noopener noreferrer" class="text-green-600 hover:text-green-500 underline">GitHub</a>'
+        '<a href="https://x.com/slag_ai" target="_blank" rel="noopener noreferrer" class="text-green-600 hover:text-green-500 underline">X/Twitter</a>'
     }
   ]
 
