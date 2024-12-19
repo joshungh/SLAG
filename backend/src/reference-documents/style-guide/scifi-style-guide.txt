@@ -1,0 +1,168 @@
+# Science Fiction Style Guide
+
+## Core Narrative Principles
+
+### Tone and Atmosphere
+- Emphasize rational, scientific approach to problems
+- Focus on technological and sociological implications
+- Maintain emotional depth while prioritizing intellectual discourse
+- Balance personal narratives with larger societal implications
+- Avoid mysticism unless explicitly part of scientific exploration
+
+### Scientific Elements
+- Ground all technological concepts in real scientific principles
+- Explain complex concepts through natural dialogue and demonstration
+- Focus on the human implications of scientific advancement
+- Maintain internal consistency in technological capabilities
+- Include detailed but accessible explanations of scientific concepts
+
+### Character Development
+- Characters should be deeply knowledgeable in their fields
+- Emphasize problem-solving and analytical thinking
+- Personal conflicts often mirror larger technological/societal issues
+- Character growth through scientific understanding and ethical challenges
+- Balance professional expertise with human fallibility
+
+### World Building
+- Establish clear technological limitations and capabilities
+- Build detailed societal structures influenced by technological change
+- Create consistent rules for future technologies
+- Explore long-term consequences of scientific advancement
+- Focus on systematic changes rather than individual innovations
+
+## Writing Style
+
+### Narrative Voice
+- Clear, precise prose
+- Technical accuracy without overwhelming detail
+- Matter-of-fact descriptions of advanced technology
+- Objective tone for scientific elements
+- Measured pacing with emphasis on logical progression
+
+### Dialogue Characteristics
+- Technical discussions feel natural, not forced
+- Characters speak with authority in their areas of expertise
+- Use technical terminology appropriately and consistently
+- Include subtle exposition through conversation
+- Balance technical and emotional content
+
+### Description Guidelines
+- Precise technical details for important technologies
+- Clean, efficient prose for action sequences
+- Focus on functional aspects over aesthetic ones
+- Clear cause-and-effect relationships
+- Emphasis on scientific accuracy
+
+### Scene Structure
+- Begin with context-setting technical elements
+- Build tension through logical progression
+- Include problem-solving sequences
+- Balance technical discussion with character development
+- End with implications of scientific discoveries
+
+## Thematic Elements
+
+### Core Themes
+- Human adaptation to technological change
+- Ethical implications of scientific advancement
+- Long-term consequences of current decisions
+- Intersection of human nature and technology
+- Scientific responsibility and ethics
+
+### Scientific Focus
+- Prioritize "hard" science over speculation
+- Maintain plausible technological progression
+- Include detailed scientific problem-solving
+- Explore unintended consequences
+- Focus on systematic understanding
+
+### Social Commentary
+- Examine how technology shapes society
+- Explore class structures in technological societies
+- Address ethical implications of advancement
+- Consider long-term societal evolution
+- Include political implications of scientific progress
+
+## Technical Considerations
+
+### Technology Description
+```markdown
+When introducing new technology:
+1. Establish basic principles
+2. Show practical applications
+3. Explain limitations
+4. Demonstrate implications
+5. Reveal complications
+```
+
+### Scientific Detail Level
+```markdown
+For scientific concepts:
+- Primary concept: Detailed explanation
+- Secondary elements: Functional overview
+- Background technology: Brief mention
+- New discoveries: Thorough exploration
+- Established science: Referenced naturally
+```
+
+### Problem-Solving Format
+```markdown
+When characters face technical challenges:
+1. Clear problem statement
+2. Systematic analysis
+3. Logical solution attempts
+4. Scientific principles applied
+5. Resolution through understanding
+```
+
+## Language Guidelines
+
+### Vocabulary Usage
+- Technical terms used precisely and consistently
+- Scientific terminology introduced naturally
+- Complex concepts explained through analogy
+- Field-specific jargon used appropriately
+- Clear distinction between speculation and established science
+
+### Sentence Structure
+- Clear, direct sentences for technical information
+- Complex structures for theoretical discussions
+- Short, punchy sentences for action
+- Logical flow in explanatory passages
+- Natural integration of technical terms
+
+### Descriptive Priority
+1. Functional aspects
+2. Scientific principles
+3. Physical characteristics
+4. Environmental impact
+5. Human interaction
+
+## Content Formatting
+
+### Chapter Structure
+```markdown
+Standard chapter format:
+1. Scientific context
+2. Character situation
+3. Problem introduction
+4. Technical development
+5. Resolution and implications
+```
+
+### Scene Formatting
+```markdown
+Scene elements priority:
+1. Technical setup
+2. Character positioning
+3. Scientific elements
+4. Problem development
+5. Logical resolution
+```
+
+### Notation Conventions
+- Use metric system consistently
+- Include relevant scientific units
+- Maintain consistent technological terminology
+- Clear notation for mathematical concepts
+- Standardized format for technical specifications

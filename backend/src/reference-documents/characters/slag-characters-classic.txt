@@ -1,0 +1,229 @@
+# Core Character Roster
+
+## Primary Characters
+
+### Dr. James Chen
+```markdown
+Role: Lead Giant Researcher
+Age: 142 (biological age: 45)
+Species: Human (Earth-born)
+Location: Deep Space Station Omega
+
+Background:
+- Third generation Giant researcher
+- Former Concordat Chief Scientist
+- Defected to independent research
+- Pioneer of Giant consciousness theory
+
+Physical Characteristics:
+- Height: 1.80m
+- Build: Academic, angular features
+- Augmentations: Neural interface, quantum sight
+- Distinguished by: Prematurely white hair, intense gaze
+
+Key Characteristics:
+- Brilliant but obsessive
+- Dry humor
+- Ethical backbone
+- Cannot let go of a puzzle
+
+Character Arc:
+- Uncovering Giant origins
+- Wrestling with ethical implications
+- Choice between knowledge and safety
+- Redemption through understanding
+```
+
+### Commander Thomas Drake
+```markdown
+Role: Military Special Operations
+Age: 95 (biological age: 40)
+Species: Human (Mars-born)
+Location: Mars Command
+
+Background:
+- Giant Defense Force Commander
+- Veteran of Fragment Wars
+- Tactical genius
+- Secret Giant tech expert
+
+Physical Characteristics:
+- Height: 2.1m (Mars gravity adaptation)
+- Build: Military enhanced, imposing
+- Augmentations: Combat suite, tactical AI
+- Distinguished by: Red-tinted skin, battlescars
+
+Key Characteristics:
+- Natural leader
+- Strategic mind
+- Moral compass
+- Protective of crew
+
+Character Arc:
+- Uncovering military conspiracy
+- Leading through uncertainty
+- Balancing duty and truth
+- Personal honor versus orders
+```
+
+### Marcus Webb (Lead Support)
+```markdown
+Role: Chief Engineer/Pilot
+Age: 35
+Species: Human (Void-born)
+Location: Research Vessel "Quantum Horizon"
+
+Background:
+- Engineering prodigy
+- Deep space pilot
+- Giant tech specialist
+- First to reverse-engineer Fragment tech
+
+Physical Characteristics:
+- Height: 2.2m (void adaptation)
+- Build: Zero-G optimized, lean
+- Augmentations: Engineering neural suite
+- Distinguished by: Graceful zero-G movement
+
+Key Characteristics:
+- Technical genius
+- Adrenaline junkie
+- Loyal to a fault
+- Innovative problem solver
+
+Character Arc:
+- Finding confidence in leadership
+- Understanding Giant technology
+- Balancing risk and responsibility
+- Personal growth beyond technical skill
+```
+
+### Dr. Victor Vass
+```markdown
+Role: Vess Ambassador/Scientist
+Age: Unknown
+Species: Vess
+Location: Crystal Sphere
+
+Background:
+- Ancient Vess lineage
+- Quantum physics pioneer
+- Giant communication expert
+- Cross-species diplomatic role
+
+Physical Characteristics:
+- Form: Crystalline structure
+- Size: Variable (typically 2.5m)
+- Composition: Silicon-quantum matrix
+- Distinguished by: Complex resonance patterns
+
+Key Characteristics:
+- Logical approach
+- Diplomatic nature
+- Hidden agenda
+- Fascination with humans
+
+Character Arc:
+- Revealing Vess-Giant connection
+- Testing species loyalty
+- Understanding human nature
+- Personal evolution
+```
+
+### David Nash
+```markdown
+Role: Young Researcher
+Age: 28
+Species: Human (Earth-born)
+Location: Mobile (research vessel)
+
+Background:
+- Quantum mechanics specialist
+- Fresh from Earth Academy
+- Idealistic approach
+- Hidden Giant sensitivity
+
+Physical Characteristics:
+- Height: 1.75m
+- Build: Athletic scholar
+- Augmentations: Basic neural link
+- Distinguished by: Perpetual curiosity
+
+Key Characteristics:
+- Brilliant theorist
+- Naive optimism
+- Natural intuition
+- Quick learner
+
+Character Arc:
+- Coming of age in crisis
+- Discovering unique abilities
+- Growing beyond mentors
+- Finding personal strength
+```
+
+### Dr. Sarah Wells (Secondary Character)
+```markdown
+Role: Medical Officer/Xenobiologist
+Age: 38
+Species: Human (Earth-born)
+Location: Research Vessel "Quantum Horizon"
+
+Background:
+- Expert in xenobiology
+- Former Concordat researcher
+- Giant physiology specialist
+- Combat medical experience
+
+Physical Characteristics:
+- Height: 1.70m
+- Build: Athletic
+- Augmentations: Medical suite
+- Distinguished by: Precision movements
+
+Key Characteristics:
+- Professional efficiency
+- Sharp wit
+- Practical approach
+- Strong ethical core
+
+Role in Story:
+- Medical expertise
+- Voice of reason
+- Technical support
+- Team stability
+```
+
+## Team Dynamics
+```markdown
+Command Structure:
+- Scientific Leadership (Chen)
+- Military Command (Drake)
+- Technical Operations (Webb)
+- Research Support (Nash)
+- Medical/Science Support (Wells)
+
+Core Relationships:
+- Mentor/Student (Chen & Nash)
+- Military/Science (Drake & Chen)
+- Technical/Research (Webb & Nash)
+- Cross-Species (Vass & Team)
+
+Operational Units:
+1. Research Team
+   - Chen (Lead)
+   - Nash (Assistant)
+   - Wells (Support)
+
+2. Military/Technical
+   - Drake (Command)
+   - Webb (Operations)
+   - Vass (Advisor)
+```
+
+Would you like to:
+1. Develop detailed backstories for any character?
+2. Explore specific relationship dynamics?
+3. Create character-specific mission profiles?
+4. Design personal story arcs?
+5. Detail how they fit into daily chapter structure?

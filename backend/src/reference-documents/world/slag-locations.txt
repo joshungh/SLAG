@@ -1,0 +1,261 @@
+# SLAG Universe - Location Profiles
+
+## Sol System
+
+### Earth (Capital World)
+```markdown
+Capital: New Geneva
+Population: 4.2 billion
+Status: Concordat Headquarters
+
+Political Structure:
+- Global Unity Government
+- Concordat oversight
+- Regional autonomy zones
+- Giant technology restrictions
+
+Major Cities:
+1. New Geneva
+   - Population: 28 million
+   - Concordat Administrative Center
+   - Giant Research Institute
+   - Diplomatic Quarter
+   - Wealth Index: Ultra-High
+   - Notable: World's largest quantum shield
+
+2. Neo Tokyo
+   - Population: 35 million
+   - AI Development Center
+   - Synthetic Rights Movement HQ
+   - Advanced robotics industry
+   - Wealth Index: High
+   - Notable: Highest synthetic population
+
+Environmental Status:
+- Climate: AI-controlled weather
+- Sea Level: +3m (stabilized)
+- Agriculture: Vertical farming
+- Giant Activity: Restricted Zone
+
+Economy:
+- Currency: Earth Credit (EC)
+- Major Exports: Technology, AI Systems
+- Major Imports: Raw Materials
+- Economic Model: Post-scarcity regulated
+```
+
+### Mars (Military Hub)
+```markdown
+Capital: Olympus City
+Population: 1.8 billion
+Status: Military Command Center
+
+Political Structure:
+- Military Council
+- Frontier Systems Alliance member
+- Independent defense force
+- Pro-Giant technology research
+
+Major Cities:
+1. Olympus City
+   - Population: 15 million
+   - Military Command Center
+   - Giant Defense Research
+   - Terraforming Control
+   - Wealth Index: High
+   - Notable: Ancient Giant artifact burial site
+
+2. Valles Marineris Strip
+   - Population: 22 million (spread)
+   - Mining operations
+   - Heavy industry
+   - Weapons manufacturing
+   - Wealth Index: Medium-High
+   - Notable: Longest enclosed city in Sol System
+
+Environmental Status:
+- Climate: Partially terraformed
+- Atmosphere: 85% Earth standard
+- Agriculture: Underground farms
+- Giant Activity: Military Testing Zone
+
+Economy:
+- Currency: Mars Credit (MC)
+- Major Exports: Military Tech, Minerals
+- Major Imports: Luxury Goods, Water
+- Economic Model: Military-Industrial
+```
+
+## Alpha Centauri System
+
+### Nova Terra (Colony World)
+```markdown
+Capital: Landing City
+Population: 800 million
+Status: Independent Colony
+
+Political Structure:
+- Democratic Federation
+- Strong environmental controls
+- Pro-expansion policies
+- Giant cooperation research
+
+Major Cities:
+1. Landing City
+   - Population: 5 million
+   - Spaceport Hub
+   - Research Centers
+   - Cultural Mixing Zone
+   - Wealth Index: Medium
+   - Notable: First successful Giant communication
+
+2. Haven's Rest
+   - Population: 3 million
+   - Agricultural Center
+   - Xenobiology Research
+   - Meridian Embassy
+   - Wealth Index: Medium-High
+   - Notable: Largest multi-species population
+
+Environmental Status:
+- Climate: Earth-like (engineered)
+- Gravity: 1.1G
+- Agriculture: Mixed traditional/vertical
+- Giant Activity: Active Cooperation Zone
+
+Economy:
+- Currency: Colonial Standard (CS)
+- Major Exports: Agricultural Products
+- Major Imports: Technology
+- Economic Model: Mixed Economy
+```
+
+## Vega System
+
+### Crystal Sphere (Vess Homeworld)
+```markdown
+Capital: The Resonance
+Population: Unknown (estimated 3 billion)
+Status: Vess Sovereign Territory
+
+Political Structure:
+- Crystalline Consciousness Network
+- Quantum Democracy
+- Giant Technology Integration
+- Multi-species Restricted Access
+
+Major Locations:
+1. The Resonance
+   - Population: Fluid
+   - Vess Government Center
+   - Quantum Computing Hub
+   - Crystal Architecture
+   - Wealth Index: N/A (non-human metrics)
+   - Notable: Living city structure
+
+2. Human Quarter
+   - Population: 1 million
+   - Diplomatic Zone
+   - Research Facilities
+   - Cultural Exchange
+   - Wealth Index: Ultra-High
+   - Notable: Human-adapted crystal environments
+
+Environmental Status:
+- Climate: Controlled Crystal Matrix
+- Gravity: Variable by sector
+- Agriculture: Energy synthesis
+- Giant Activity: Protected Observation
+
+Economy:
+- Currency: Crystal Units (CU)
+- Major Exports: Quantum Technology
+- Major Imports: Organic Materials
+- Economic Model: Energy-Based Economy
+```
+
+## Frontier Zones
+
+### Deep Space Station Omega
+```markdown
+Location: Edge of Known Space
+Population: 2 million
+Status: Independent
+
+Political Structure:
+- Corporate Consortium
+- Minimal regulations
+- High autonomy
+- Giant research black market
+
+Major Sections:
+1. Trading Hub
+   - Population: 800,000
+   - Multi-species markets
+   - Black market
+   - Entertainment district
+   - Wealth Index: Variable
+   - Notable: Largest free trade zone
+
+2. Research Ring
+   - Population: 400,000
+   - Private laboratories
+   - Giant artifact study
+   - Classified projects
+   - Wealth Index: High
+   - Notable: Controversial research programs
+
+Station Status:
+- Structure: Modified Giant artifact
+- Gravity: Artificial (0.8G)
+- Life Support: Hybrid systems
+- Giant Activity: Research Zone
+
+Economy:
+- Currency: All major accepted
+- Major Exports: Research, Information
+- Major Imports: Everything
+- Economic Model: Free Market
+```
+
+## Giant Territories
+
+### The Void Gate System
+```markdown
+Status: Restricted Access
+Population: Research teams only
+Classification: Omega-level Giant site
+
+Structure:
+- Ancient Giant complex
+- Active Titan presence
+- Quantum anomalies
+- Space-time distortions
+
+Research Outposts:
+1. Forward Station Alpha
+   - Population: 500
+   - Giant observation
+   - Quantum research
+   - Emergency protocols
+   - Wealth Index: Classified
+   - Notable: Most Giant encounters
+
+Environmental Status:
+- Reality Status: Unstable
+- Gravity: Fluctuating
+- Atmosphere: Artificial
+- Giant Activity: Extreme
+
+Access:
+- Clearance: Omega-level
+- Purpose: Research/Military
+- Duration: Limited
+- Risk Level: Maximum
+```
+
+Would you like me to:
+1. Detail more specific locations?
+2. Expand on any particular location's features?
+3. Create maps or spatial relationships between locations?
+4. Develop more details about local cultures and customs?
