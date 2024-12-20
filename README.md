@@ -25,7 +25,7 @@ SLAG (Starfall: Lost Age of Giants) is an innovative web application that levera
 - **Project Name**: Starfall - Lost Age of Giants
 - **Token Symbol**: $SLAG
 - **Total Supply**: 1,000,000,000
-- **Token Distribution**: The token will be fairly launched on pump.fun. The token generation even will be announced in advance on the official website (https:/lostage.io) and on the official X account (https://x.com/slag_ai).
+- **Token Distribution**: The token will be fairly launched on pump.fun. The token generation even will be announced in advance on the official website (https://lostage.io) and on the official X account (https://x.com/slag_ai).
 
 ## Tech Stack
 
