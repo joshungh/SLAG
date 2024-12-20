@@ -84,7 +84,7 @@ async def story_engine(rag_service):
     rag = await rag_service
     # Then initialize the story engine
     engine = await StoryEngineService.initialize(rag)
-    return engine
+    return engine  # Return the engine instance, not the coroutine
 
 @pytest.fixture
 def test_story_data():

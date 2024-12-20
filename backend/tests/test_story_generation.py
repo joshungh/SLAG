@@ -3,7 +3,9 @@ from src.services.story_engine_service import StoryEngineService
 from src.services.story_arc_manager import StoryArcManager
 from src.services.continuity_checker import ContinuityChecker
 from src.models.story_schema import StoryState, PlotThread, ChapterSummary, PlotStatus, CharacterArc
+from src.utils.initialize_services import initialize_services
 import logging
+import asyncio
 
 logger = logging.getLogger(__name__)
 
@@ -249,3 +251,186 @@ async def test_act_transitions(story_engine):
         
         # Verify scene count
         assert len(act_scenes) == 12, f"Act {act_num} should have exactly 12 scenes"
+
+@pytest.mark.asyncio
+async def test_scene_indexing(story_engine):
+    """Test that scenes are properly indexed after generation"""
+    engine = await story_engine
+    
+    logger.info("\n=== Starting Scene Indexing Test ===")
+    
+    await engine.initialize_story(
+        main_characters=["Dr. James Chen"],
+        starting_location="Station Omega",
+        initial_plot_thread="initial_crisis"
+    )
+    logger.info("Story initialized")
+
+    # Generate first scene
+    logger.info("Generating first scene...")
+    scene = await engine.generate_next_scene()
+    logger.info(f"Scene generated with {len(scene['content'])} characters")
+    
+    # Add a small delay to allow for indexing
+    await asyncio.sleep(1)
+    logger.info("Querying for indexed scene...")
+    
+    # Verify scene was indexed via semantic search
+    results = await engine.rag.query_knowledge(
+        query=scene["content"][:100],  # Use first 100 chars as query
+        filters={
+            "type": "generated_scene",
+            "chapter_number": engine.story_state.current_chapter,
+            "scene_number": 1
+        },
+        namespace=f"chapter_{engine.story_state.current_chapter}"
+    )
+    
+    # Detailed verification
+    assert len(results) > 0, "No results found for indexed scene"
+    assert results[0]["metadata"]["scene_number"] == 1, f"Wrong scene number: {results[0]['metadata']['scene_number']}"
+    assert results[0]["metadata"]["type"] == "generated_scene", "Wrong metadata type"
+    assert results[0]["metadata"]["chapter_number"] == engine.story_state.current_chapter, "Wrong chapter number"
+    
+    # Verify key scene elements instead of exact content match
+    retrieved_content = results[0]["metadata"]["content"]
+    assert "Dr. James Chen" in retrieved_content, "Missing main character"
+    assert "Fragment" in retrieved_content, "Missing key story element"
+    assert len(retrieved_content) > 100, "Scene content too short"
+
+    logger.info(f"Found {len(results)} matching scenes")
+    logger.info(f"Scene metadata: {results[0]['metadata']}")
+    logger.info("Scene indexing test passed")
+    logger.info("=== Scene Indexing Test Complete ===\n")
+
+@pytest.mark.asyncio
+async def test_full_chapter_generation_with_output(story_engine):
+    """Test complete chapter generation and output all scenes for review"""
+    engine = await story_engine
+    
+    logger.info("\n=== Starting Full Chapter Generation Test ===")
+    
+    # Initialize story state
+    await engine.initialize_story(
+        main_characters=["Dr. James Chen"],
+        starting_location="Station Omega",
+        initial_plot_thread="initial_crisis"
+    )
+    logger.info("Story initialized")
+
+    # Create a file to store the chapter output
+    chapter_file = "chapter_1_output.md"
+    with open(chapter_file, "w") as f:
+        f.write("# Chapter 1: Fragment Crisis\n\n")
+        
+        # Generate all 48 scenes
+        for scene_num in range(1, 49):
+            logger.info(f"\nGenerating scene {scene_num}/48...")
+            
+            try:
+                scene = await engine.generate_next_scene()
+                
+                # Verify scene was generated
+                if not scene:
+                    logger.error(f"Scene {scene_num} generation returned None")
+                    continue
+                    
+                if 'content' not in scene:
+                    logger.error(f"Scene {scene_num} missing content field")
+                    logger.error(f"Scene data: {scene}")
+                    continue
+
+                # Write scene to file with metadata
+                f.write(f"\n## Scene {scene_num}\n")
+                f.write(f"Location: {scene.get('location', 'Unknown')}\n")
+                f.write(f"Characters: {', '.join(scene.get('characters', []))}\n")
+                if 'metadata' in scene:
+                    f.write(f"Focus: {scene['metadata'].get('focus', 'Unknown')}\n")
+                    f.write(f"Plot Thread: {scene['metadata'].get('plot_thread', 'Unknown')}\n")
+                f.write("\n")
+                f.write(scene.get('content', '[Scene content generation failed]'))
+                f.write("\n\n---\n")
+                
+                # Log progress
+                logger.info(f"Scene {scene_num} generated and written to file")
+                logger.info(f"Location: {scene.get('location', 'Unknown')}")
+                logger.info(f"Characters: {', '.join(scene.get('characters', []))}")
+                logger.info(f"Content length: {len(scene.get('content', ''))}")
+                
+            except Exception as e:
+                logger.error(f"Error generating scene {scene_num}: {str(e)}")
+                # Write error to file
+                f.write(f"\n## Scene {scene_num} - Generation Failed\n")
+                f.write(f"Error: {str(e)}\n\n---\n")
+                continue
+            
+            # Add a small delay between scenes
+            await asyncio.sleep(1)
+    
+    logger.info(f"\nChapter generation complete. Output written to {chapter_file}")
+    logger.info("=== Full Chapter Generation Test Complete ===\n")
+    
+    # Return the file path for review
+    return chapter_file
+
+@pytest.mark.asyncio
+async def test_full_story_generation_flow():
+    """Test the complete story generation process from outline to scenes"""
+    # Initialize services
+    services = await initialize_services()
+    story_engine = await StoryEngineService.initialize(services["rag"])
+    
+    logger.info("\n=== Starting Full Story Generation Test ===")
+    
+    # Initialize story
+    initialized = await story_engine.initialize_story(
+        main_characters=["Dr. James Chen"],
+        starting_location="Station Omega",
+        initial_plot_thread="initial_crisis"
+    )
+    assert initialized, "Story should initialize successfully"
+    logger.info("Story initialized")
+    
+    # Generate chapter outline
+    logger.info("\n=== Generating Chapter Outline ===")
+    chapter_plan = await story_engine.generate_chapter_outline()
+    assert chapter_plan is not None, "Should generate chapter plan"
+    assert len(chapter_plan.scene_plans) == 48, "Should have 48 scenes planned"
+    
+    # Generate each scene
+    logger.info("\n=== Generating Scene Narratives ===")
+    
+    # Create output file
+    with open("chapter_1_narrative.md", "w") as f:
+        f.write(f"# Chapter 1: {chapter_plan.theme}\n\n")
+        
+        # Generate scenes sequentially
+        for scene_number in range(1, 49):
+            logger.info(f"\nGenerating scene {scene_number}/48...")
+            
+            try:
+                scene = await story_engine.generate_scene_narrative(scene_number)
+                
+                # Log scene details
+                logger.info(f"\n--- Scene {scene_number} ---")
+                logger.info(f"Location: {scene['location']}")
+                logger.info(f"Characters: {', '.join(scene['characters'])}")
+                logger.info(f"Content length: {len(scene['content'])} chars")
+                
+                # Write to file
+                f.write(f"\n## Scene {scene_number}\n")
+                f.write(f"Location: {scene['location']}\n")
+                f.write(f"Characters: {', '.join(scene['characters'])}\n\n")
+                f.write(f"{scene['content']}\n")
+                f.write("\n---\n")
+                
+                # Validate scene content
+                assert scene['content'], f"Scene {scene_number} should have content"
+                assert len(scene['content']) >= 100, f"Scene {scene_number} content too short"
+                assert scene['characters'], f"Scene {scene_number} should have characters"
+                assert scene['location'], f"Scene {scene_number} should have location"
+                
+            except Exception as e:
+                logger.error(f"Error generating scene {scene_number}: {str(e)}")
+                f.write(f"\n## Scene {scene_number} - Generation Failed\n")
+                f.write(f"Error: {str(e)}\n\n---\n")

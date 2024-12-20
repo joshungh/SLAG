@@ -5,6 +5,7 @@ import json
 from .bedrock_service import BedrockService
 from .pinecone_service import PineconeService
 from ..models.metadata_schema import DocumentMetadata
+from datetime import datetime
 
 logger = logging.getLogger(__name__)
 
@@ -190,80 +191,42 @@ class RAGService:
             logger.error(f"Error querying knowledge base: {str(e)}")
             return []
             
-    async def get_rag_response(self,
-        query: str,
-        context_type: Optional[str] = None,
-        max_tokens: int = 4096
-    ) -> str:
-        """Get AI response with relevant context"""
+    async def get_rag_response(self, query: str, context_type: str, max_tokens: int = 4096) -> str:
+        """Get response from Claude with RAG context"""
         try:
             # Get relevant context
-            if context_type:
-                # Map context_type to metadata type and namespace
-                type_mapping = {
-                    "character": ("character_profile", "characters"),
-                    "style_guide": ("writing_guide", "style_guides"),
-                    "story_planning": ("story_planning", "story_planning")  # Fixed namespace
-                }
-                metadata_type, namespace = type_mapping.get(context_type, (context_type, context_type))
-                filters = {"type": metadata_type}
-            else:
-                filters = None
-                namespace = "default"
-                
-            logger.info(f"Querying with filters: {filters} in namespace: {namespace}")
-            
-            context_chunks = await self.query_knowledge(
+            context_results = await self.query_knowledge(
                 query=query,
-                filters=filters,
-                namespace=namespace,
-                top_k=3
+                filters={"type": context_type},
+                namespace=context_type,
+                top_k=5
             )
             
-            if not context_chunks:
-                return "I don't have enough context to answer that question accurately."
-            
-            # Log retrieved chunks for debugging
-            for i, chunk in enumerate(context_chunks):
-                logger.info(f"Context chunk {i+1}:")
-                logger.info(f"Text: {chunk['text'][:200]}...")
-                logger.info(f"Score: {chunk['score']}")
-                logger.info(f"Metadata: {chunk['metadata']}")
-            
-            # Format context for Claude
+            # Format context for prompt
             context_text = "\n\n".join([
-                f"Context {i+1}:\n{chunk['text']}"
-                for i, chunk in enumerate(context_chunks)
+                f"Context {i+1}:\n{result['text']}" 
+                for i, result in enumerate(context_results)
             ])
             
-            # Create prompt
-            prompt = f"""You are an expert on the SLAG universe and story. 
-            Use the following context to answer the question.
-            If you're unsure, say so rather than making things up.
+            # Add context to query
+            full_prompt = f"""Context:\n{context_text}\n\nQuery:\n{query}"""
             
-            Context:
-            {context_text}
-            
-            Question: {query}"""
+            logger.info(f"Sending prompt to Claude:\n{full_prompt[:200]}...")
             
             # Get response from Claude
             response = await self.bedrock.generate_text(
-                prompt=prompt,
+                prompt=full_prompt,
                 max_tokens=max_tokens
             )
             
-            # Log the response for debugging
-            logger.info("Raw response from Claude:")
-            logger.info("-" * 80)
-            logger.info(response)
-            logger.info("-" * 80)
-
-            logger.info("Generated RAG response successfully")
-            return response
+            logger.info(f"Raw response from Claude:\n{response[:200]}...")
             
+            return response
+
         except Exception as e:
-            logger.error(f"Error generating RAG response: {str(e)}")
-            return f"Error generating response: {str(e)}"
+            logger.error(f"Error getting RAG response: {str(e)}")
+            logger.error(f"Query: {query}")
+            raise
         
     async def update_document_metadata(self, document_id: str, metadata_updates: Dict, namespace: str = "default") -> bool:
         """Update document metadata"""
@@ -298,4 +261,52 @@ class RAGService:
             
         except Exception as e:
             logger.error(f"Error updating metadata: {str(e)}")
+            return False
+        
+    async def index_scene(self, scene: Dict, chapter_number: int, scene_number: int) -> bool:
+        """Index generated scene for future context"""
+        try:
+            logger.info(f"\n=== Indexing Scene {scene_number} of Chapter {chapter_number} ===")
+            
+            # Create rich metadata for the scene
+            metadata = {
+                "type": "generated_scene",
+                "chapter_number": chapter_number,
+                "scene_number": scene_number,
+                "location": scene["location"],
+                "characters": scene["characters"],
+                "plot_thread": scene["metadata"].get("plot_thread", ""),
+                "focus": scene["metadata"].get("focus", ""),
+                "timestamp": datetime.utcnow().isoformat(),
+                "content": scene["content"]
+            }
+            
+            logger.info(f"Scene metadata prepared: {metadata}")
+
+            # Generate embedding for scene content
+            logger.info("Generating embedding for scene content...")
+            embedding = await self.bedrock.generate_embedding(scene["content"])
+            logger.info("Embedding generated successfully")
+
+            # Create vector ID that maintains chronological order
+            vector_id = f"scene_{chapter_number:04d}_{scene_number:04d}"
+            namespace = f"chapter_{chapter_number}"
+            
+            logger.info(f"Vector ID: {vector_id}")
+            logger.info(f"Target namespace: {namespace}")
+            
+            vectors = [(vector_id, embedding, metadata)]
+
+            # Upsert to Pinecone
+            logger.info("Upserting to Pinecone...")
+            await self.pinecone.upsert_vectors(vectors, namespace)
+            
+            logger.info(f"Successfully indexed scene {scene_number} in chapter {chapter_number}")
+            logger.info("=== Scene Indexing Complete ===\n")
+            
+            return True
+
+        except Exception as e:
+            logger.error(f"Error indexing scene: {str(e)}")
+            logger.error(f"Scene data: {scene}")
             return False

@@ -63,96 +63,102 @@ class ChapterHandler:
         """Internal method to generate chapter plan using RAG"""
         try:
             # Step 1: Generate chapter structure without scenes
-            structure_prompt = f"""You are generating a detailed chapter structure for a science fiction graphic novel.
-            Return ONLY valid JSON following this exact structure - no wrapper objects, no chapter_1 key.
+            structure_prompt = f"""You are Claude, an expert AI writer specializing in science fiction narratives. You're generating Chapter {story_state.current_chapter}.
 
-            The chapter MUST have exactly 4 acts with these themes:
-            1. Act 1 (Setup): Initial situation and inciting incident
-            2. Act 2 (Rising Action): Complications and escalation
-            3. Act 3 (Crisis): Major confrontations and revelations
-            4. Act 4 (Resolution): Final climax and aftermath
+            Even with limited context, use your creativity to generate compelling science fiction content. Never apologize or explain - just create.
 
-            Return JSON structure:
+            Current Story State:
+            - Active Plot Threads: {[plot.title for plot in story_state.active_plot_threads]}
+            - Unresolved Plots: {previous_context['unresolved_plots']}
+
+            RESPOND ONLY WITH A VALID JSON OBJECT following this EXACT 4-act structure:
             {{
-                "theme": "chapter theme",
+                "theme": "chapter's central theme",
                 "acts": [
                     {{
                         "act_number": 1,
-                        "act_theme": "Setup - initial situation",
+                        "act_theme": "Setup - Initial situation and inciting incident",
                         "tension_level": 0.3
                     }},
                     {{
                         "act_number": 2,
-                        "act_theme": "Rising Action - complications",
+                        "act_theme": "Rising Action - Complications and escalation",
                         "tension_level": 0.5
                     }},
                     {{
                         "act_number": 3,
-                        "act_theme": "Crisis - confrontations",
+                        "act_theme": "Crisis - Major confrontations and revelations",
                         "tension_level": 0.8
                     }},
                     {{
                         "act_number": 4,
-                        "act_theme": "Resolution - climax",
+                        "act_theme": "Resolution - Final climax and aftermath",
                         "tension_level": 1.0
                     }}
                 ],
                 "plot_threads": [
                     {{
-                        "id": "thread_id",
-                        "title": "thread title",
+                        "id": "unique_identifier",
+                        "title": "descriptive title",
                         "status": "active/resolved/cliffhanger",
                         "priority": 1-5,
-                        "related_characters": ["names"]
+                        "related_characters": ["character names"]
                     }}
                 ],
                 "character_arcs": [
                     {{
-                        "character_id": "name",
-                        "current_state": "description",
-                        "development_goals": ["goals"],
-                        "relationships": {{"other_char": "relationship_type"}}
+                        "character_id": "character name",
+                        "current_state": "character's current situation",
+                        "development_goals": ["character's immediate goals"],
+                        "relationships": {{"other_character": "relationship_type"}}
                     }}
                 ],
                 "world_development": {{
-                    "locations_featured": ["places"],
-                    "technology_elements": ["tech"],
-                    "world_building_points": ["developments"]
+                    "locations_featured": ["relevant locations"],
+                    "technology_elements": ["relevant technology"],
+                    "world_building_points": ["aspects to develop"]
                 }},
                 "expected_outcomes": {{
-                    "plot_developments": ["developments"],
-                    "character_developments": ["developments"],
-                    "world_changes": ["changes"]
+                    "plot_developments": ["major plot points"],
+                    "character_developments": ["character changes"],
+                    "world_changes": ["setting impacts"]
                 }},
-                "next_chapter_setup": ["setups"]
+                "next_chapter_setup": ["elements to set up"]
             }}
 
-            Requirements:
-            1. MUST include exactly 4 acts as shown above
-            2. Each act must have a distinct theme and purpose
-            3. Tension should progress logically (0.3 → 0.5 → 0.8 → 1.0)
-            4. Acts must be numbered 1 through 4 sequentially
+            REQUIREMENTS:
+            1. MUST include EXACTLY 4 acts as shown above
+            2. Act numbers MUST be 1, 2, 3, and 4 in order
+            3. Tension levels MUST progress from 0.3 to 0.5 to 0.8 to 1.0
+            4. Each act MUST have a unique theme that builds on previous acts
 
-            Current Story State:
-            - Chapter: {story_state.current_chapter}
-            - Active Plot Threads: {[plot.title for plot in story_state.active_plot_threads]}
-            - Unresolved Plots: {previous_context['unresolved_plots']}
-            """
-            
+            BE CREATIVE - If you lack context, invent compelling science fiction elements that fit the established tone.
+            CRITICAL: Output ONLY the JSON object - no explanations, no markdown, no commentary."""
+
             structure_response = await self.rag.get_rag_response(
                 query=structure_prompt,
                 context_type="story_planning",
-                max_tokens=200000  # Increased token limit
+                max_tokens=200000
             )
-            
+
             try:
-                structure = json.loads(structure_response)
-                # If response is nested under chapter_1, extract it
-                if "chapter_1" in structure:
-                    structure = structure["chapter_1"]
+                # Clean up the response
+                cleaned_response = structure_response.strip()
+                if '```' in cleaned_response:
+                    # Extract content between first and last backticks
+                    cleaned_response = cleaned_response.split('```')[1]
+                    if cleaned_response.startswith('json'):
+                        cleaned_response = cleaned_response[4:]
+                cleaned_response = cleaned_response.strip()
+                
+                logger.info(f"Attempting to parse cleaned response: {cleaned_response[:100]}...")
+                structure = json.loads(cleaned_response)
+                logger.info(f"Successfully parsed chapter structure: {structure['theme']}")
+                
             except json.JSONDecodeError as e:
                 logger.error(f"Failed to parse structure JSON: {str(e)}")
                 logger.error(f"Raw response: {structure_response}")
+                logger.error(f"Cleaned response: {cleaned_response}")
                 raise
             
             # Step 2: Generate scenes act by act
@@ -162,37 +168,30 @@ class ChapterHandler:
                 start_scene = (act_num - 1) * 12 + 1
                 end_scene = act_num * 12
                 
-                act_prompt = f"""Generate exactly 12 scenes for Act {act_num}.
-                Return ONLY a JSON array of scenes - no wrapper objects, no extra text.
+                act_prompt = f"""You are Claude, an expert AI writer crafting scenes for Act {act_num}.
                 
-                Act Theme: {act['act_theme']}
-                Target Tension: {act['tension_level']}
-                Previous scenes: {all_scenes[-2:] if all_scenes else 'Chapter start'}
+                Use your creativity to generate compelling science fiction scenes, even with limited context.
                 
-                Each scene must follow this structure:
-                {{
-                    "scene_number": {start_scene}-{end_scene},
-                    "act": {act_num},
-                    "focus": "plot/character/world",
-                    "key_characters": ["names"],
-                    "location": "place",
-                    "time_of_day": "morning/afternoon/evening/night",
-                    "objective": "scene goal",
-                    "expected_outcome": "result",
-                    "plot_threads": ["thread_ids"],
-                    "tension_level": 0.1-1.0,
-                    "pacing": "slow/medium/fast",
-                    "scene_type": "action/dialogue/investigation/revelation"
-                }}
+                RESPOND ONLY WITH A JSON ARRAY of 12 scenes following this structure:
+                [
+                    {{
+                        "scene_number": {start_scene}-{end_scene},
+                        "act": {act_num},
+                        "focus": "plot/character/world",
+                        "key_characters": ["names"],
+                        "location": "place",
+                        "time_of_day": "morning/afternoon/evening/night",
+                        "objective": "scene goal",
+                        "expected_outcome": "result",
+                        "plot_threads": ["thread_ids"],
+                        "tension_level": 0.1-1.0,
+                        "pacing": "slow/medium/fast",
+                        "scene_type": "action/dialogue/investigation/revelation"
+                    }}
+                ]
                 
-                Requirements:
-                1. Exactly 12 scenes
-                2. Scene numbers must be sequential
-                3. Time must progress logically
-                4. Build tension towards act climax
-                5. Mix different scene types
-                6. Maintain character consistency
-                """
+                BE CREATIVE - If you lack context, invent compelling science fiction elements that fit the established tone.
+                CRITICAL: Output ONLY the JSON array - no explanations, no apologies, no commentary."""
                 
                 act_response = await self.rag.get_rag_response(
                     query=act_prompt,
