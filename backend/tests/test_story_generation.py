@@ -438,3 +438,114 @@ async def test_full_story_generation_flow():
                 logger.error(f"Error generating scene {scene_number}: {str(e)}")
                 f.write(f"\n## Scene {scene_number} - Generation Failed\n")
                 f.write(f"Error: {str(e)}\n\n---\n")
+
+@pytest.mark.asyncio
+async def test_multi_chapter_generation(story_engine):
+    """Test generation of first three chapters"""
+    engine = await story_engine
+    chapters = []
+    
+    for chapter_num in range(1, 4):
+        logger.info(f"\n{'='*20} Generating Chapter {chapter_num} {'='*20}")
+        
+        # Update story state for new chapter
+        engine.story_state = StoryState(
+            current_chapter=chapter_num,
+            current_scene=0,
+            active_plot_threads=[
+                PlotThread(
+                    id="initial_crisis",
+                    title="Strange Fragment Behavior",
+                    status=PlotStatus.ACTIVE,
+                    priority=1,
+                    related_characters=["Dr. James Chen"]
+                )
+            ],
+            character_states={
+                "Dr. James Chen": CharacterArc(
+                    character_id="Dr. James Chen",
+                    current_state="Working",
+                    development_goals=["Understand Fragment behavior"],
+                    relationships={"Commander Drake": "professional"},
+                    location="Station Omega"
+                )
+            },
+            chapter_summaries=chapters,  # Pass previous chapters
+            unresolved_plots=[],
+            unresolved_cliffhangers=[]
+        )
+        
+        # Get initial context including previous chapters
+        context = await get_rich_context(engine.rag, {
+            "location": "Station Omega",
+            "narrative_query": f"Chapter {chapter_num} development and progression"
+        })
+        
+        # Generate chapter plan
+        chapter_plan = await engine.chapter_handler.generate_chapter_plan(
+            engine.story_state, 
+            context
+        )
+        
+        assert chapter_plan is not None, f"Should generate plan for chapter {chapter_num}"
+        assert chapter_plan.theme, f"Chapter {chapter_num} should have a theme"
+        assert len(chapter_plan.scene_plans) > 0, f"Chapter {chapter_num} should have scene plans"
+        
+        # Create output file for this chapter
+        with open(f"chapter_{chapter_num}_narrative.md", "w") as f:
+            f.write(f"# Chapter {chapter_num}: {chapter_plan.theme}\n\n")
+            
+            # Generate scenes sequentially
+            for i, scene_plan in enumerate(chapter_plan.scene_plans, 1):
+                logger.info(f"\nGenerating scene {i}/{len(chapter_plan.scene_plans)}...")
+                
+                try:
+                    # Get scene-specific context
+                    scene_context = await get_rich_context(engine.rag, {
+                        "location": scene_plan.location,
+                        "narrative_query": f"Scene development for {scene_plan.scene_type}"
+                    })
+                    
+                    # Generate scene
+                    scene = await engine.generate_scene_content(
+                        scene_plan,
+                        scene_context
+                    )
+                    
+                    # Log scene details
+                    logger.info(f"\n--- Scene {i} ---")
+                    logger.info(f"Location: {scene['location']}")
+                    logger.info(f"Characters: {', '.join(scene['characters'])}")
+                    logger.info(f"Content length: {len(scene['content'])} chars")
+                    
+                    # Write to file
+                    f.write(f"\n## Scene {i}\n")
+                    f.write(f"Location: {scene['location']}\n")
+                    f.write(f"Characters: {', '.join(scene['characters'])}\n\n")
+                    f.write(f"{scene['content']}\n")
+                    f.write("\n---\n")
+                    
+                    # Basic validation
+                    assert scene['content'], f"Scene {i} should have content"
+                    assert len(scene['content']) >= 200, f"Scene {i} content too short"
+                    assert scene['characters'], f"Scene {i} should have characters"
+                    assert scene['location'], f"Scene {i} should have location"
+                    
+                except Exception as e:
+                    logger.error(f"Error generating scene {i}: {str(e)}")
+                    f.write(f"\n## Scene {i} - Generation Failed\n")
+                    f.write(f"Error: {str(e)}\n\n---\n")
+        
+        # Store chapter summary for continuity
+        chapters.append(ChapterSummary(
+            chapter_number=chapter_num,
+            theme=chapter_plan.theme,
+            major_developments=[scene.expected_outcome for scene in chapter_plan.scene_plans],
+            unresolved_plots=[plot for plot in engine.story_state.active_plot_threads 
+                            if plot.status == PlotStatus.ACTIVE],
+            character_developments=engine.story_state.character_states
+        ))
+        
+        logger.info(f"\nCompleted Chapter {chapter_num}: {chapter_plan.theme}")
+    
+    return chapters
