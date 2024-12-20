@@ -96,9 +96,9 @@ export default function InfoSection() {
         '<br/><br/>' +
         'It has no inherent value and is meant for entertainment purposes only.' +
         '<br/><br/>' +
-        'Purchasing cryptocurrencies is fraught with risk; you do so at your own risk.' +
+        'Purchasing cryptocurrencies is fraught with risk; you do so at your own risk and under your own free will.' +
         '<br/><br/>' +
-        'The token will be stealth launched on pump.fun in December 2024.'
+        'There is no token out yet. It will be stealth launched on pump.fun in December 2024. A Telegram announcement channel will be created to announce the launch. The launch will also be announced on our official X account.'
     },
     {
       image: '/images/officiallinks.png',
