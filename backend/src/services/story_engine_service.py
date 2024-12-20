@@ -12,21 +12,33 @@ import asyncio
 logger = logging.getLogger(__name__)
 
 class StoryEngineService:
+    @classmethod
+    async def initialize(cls, rag_service: RAGService):
+        """Initialize the story engine with all required components"""
+        instance = cls(rag_service)
+        instance.arc_manager = StoryArcManager()
+        instance.continuity_checker = ContinuityChecker(rag_service)
+        instance.chapter_handler = ChapterHandler(rag_service)
+        return instance
+
     def __init__(self, rag_service: RAGService):
         self.rag = rag_service
-        self.chapter_handler = ChapterHandler(self.rag)
-        self.arc_manager = StoryArcManager()
-        self.continuity_checker = ContinuityChecker(self.rag)
+        self.story_state = None
+        self.current_chapter_plan = None
+        # These will be initialized in the initialize class method
+        self.arc_manager = None
+        self.continuity_checker = None
+        self.chapter_handler = None
         self.current_chapter_plan: Optional[ChapterPlan] = None
         self.story_state = StoryState()
         self.context_window = 3
-
-    @classmethod
-    async def initialize(cls, rag_service: RAGService) -> 'StoryEngineService':
-        """Async factory method to create and initialize StoryEngineService"""
-        instance = cls(rag_service)
-        # Add any async initialization here if needed
-        return instance
+        self.environmental_state = {
+            "time_of_day": "morning",
+            "active_alerts": set(),
+            "compromised_sections": set(),
+            "fragment_effects": {},
+            "character_locations": {}
+        }
 
     async def get_chapter_context(self) -> Dict:
         """Get context from previous chapters including unresolved plots and cliffhangers"""
@@ -113,27 +125,30 @@ class StoryEngineService:
             logger.error(f"Error generating scene: {str(e)}")
             raise
 
-    async def generate_scene_content(self, scene_plan: ScenePlan) -> Dict:
+    async def generate_scene_content(self, scene_plan: ScenePlan, scene_context: Dict = None) -> Dict:
         """Generate detailed scene content from plan"""
         try:
-            # Get context from recent scenes
-            recent_scenes = await self.rag.query_knowledge(
-                query=f"Previous scenes in chapter {self.story_state.current_chapter}",
-                filters={"type": "generated_scene", "chapter_number": self.story_state.current_chapter},
-                namespace=f"chapter_{self.story_state.current_chapter}",
-                top_k=3
-            )
-
-            # Format previous scene context
-            previous_context = "Chapter start"
-            if recent_scenes:
-                previous_context = "\n".join([
-                    f"Scene {scene['metadata']['scene_number']}: {scene['text'][:300]}..."
-                    for scene in recent_scenes
-                ])
+            # Get context from recent scenes if not provided
+            if scene_context is None:
+                recent_scenes = await self.rag.query_knowledge(
+                    query=f"Previous scenes in chapter {self.story_state.current_chapter}",
+                    filters={"type": "generated_scene", "chapter_number": self.story_state.current_chapter},
+                    namespace=f"chapter_{self.story_state.current_chapter}",
+                    top_k=3
+                )
+                
+                # Format previous scene context
+                previous_context = "Chapter start"
+                if recent_scenes:
+                    previous_context = "\n".join([
+                        f"Scene {scene['metadata']['scene_number']}: {scene['text'][:300]}..."
+                        for scene in recent_scenes
+                    ])
+            else:
+                previous_context = scene_context.get('narrative', 'Chapter start')
 
             # Construct narrative prompt
-            narrative_prompt = f"""You are Claude, an expert storyteller who studied under Isaac Asimov, writing scene {scene_plan.scene_number} for SLAG: Starfall - Lost Age of Giants, a hard science fiction graphic novel.
+            narrative_prompt = f"""You are Claude, an expert storyteller and novelist. Your style, tone, pacing, and narrative structure resemble Asimov and Haldeman. You are writing a scifi novel, scene by scene, and are currently on scene {scene_plan.scene_number} for SLAG: Starfall - Lost Age of Giants. You are the creator of this story, and will progress the development of the plots, characters, and world as you see fit.
 
 Previous Scene Context:
 {previous_context}
@@ -150,11 +165,15 @@ Scene Parameters:
 
 Write a vivid, visual scene that:
 1. Shows rather than tells through detailed description
-2. Includes realistic scientific/technical elements
+2. Balance technical elements with human drama
 3. Balances dialogue with action
-4. Advances the plot toward the expected outcome
+4. Advances the plot toward the expected outcome, but feel free to be creative and deviate from the plan if it makes sense
+5. Focus on natural narrative flow without artificial scene markers; don't mention the scene number or chapter number, or acknowledge the reader; only mention Location or Time when relevant
+6. You are creating a story scene by scene, chapter by chapter. Treat each chapter holistically, seamlessly tieing together the scenes so that each chapter is a cohesive story.
+7. Make it fun, make it technical, make it nerdy and edgy. Create a captivating story that your heros Isaac Asimov and John Haldeman would be proud of.
 
-Focus on creating an engaging narrative that brings the scene to life. Write in present tense and maintain a cinematic quality suitable for a graphic novel.
+
+Focus on creating an engaging narrative that brings the scene to life. Write in present tense and maintain a cinematic quality suitable for a 1960s science fiction novel.
 
 Remember: This is scene {scene_plan.scene_number} of 48 in Chapter {self.story_state.current_chapter}."""
 
@@ -368,25 +387,39 @@ Remember: This is scene {scene_plan.scene_number} of 48 in Chapter {self.story_s
 Previous Scene Context:
 {previous_context}
 
-Scene Parameters:
-- Location: {scene_plan.location}
-- Characters: {', '.join(scene_plan.key_characters)}
-- Time: {scene_plan.time_of_day}
-- Objective: {scene_plan.objective}
-- Expected Outcome: {scene_plan.expected_outcome}
-- Scene Type: {scene_plan.scene_type}
-- Tension Level: {scene_plan.tension_level}
-- Pacing: {scene_plan.pacing}
+Scene Requirements:
+1. SETTING: {scene_plan.location}
+   - Maintain consistent environmental details
+   - Reference station systems and layout
+   - Use lighting and atmosphere to build mood
 
-Write a vivid, visual scene that:
-1. Shows rather than tells through detailed description
-2. Includes realistic scientific/technical elements
-3. Balances dialogue with action
-4. Advances the plot toward the expected outcome
+2. CHARACTERS: {', '.join(scene_plan.key_characters)}
+   - Maintain distinct voice patterns for each character
+   - Show emotional state through dialogue and action
+   - Reference previous character interactions
 
-Focus on creating an engaging narrative that brings the scene to life. Write in present tense and maintain a cinematic quality suitable for a graphic novel.
+3. TECHNICAL ELEMENTS:
+   - Ground all technology in realistic physics
+   - Balance technical detail with readability
+   - Maintain consistent Fragment behavior patterns
 
-Remember: This is scene {scene_number} of 48 in Chapter {self.story_state.current_chapter}."""
+4. SCENE STRUCTURE:
+   - Start with strong visual establishing shot
+   - Build tension through {scene_plan.pacing} pacing
+   - End with clear transition to next scene
+   - Use graphic novel panel format effectively
+
+5. CONTINUITY REQUIREMENTS:
+   - Reference previous scene's emotional impact
+   - Maintain consistent time-of-day progression
+   - Honor established character relationships
+
+Remember: This is scene {scene_number} of 48 in Chapter {self.story_state.current_chapter}. 
+Time of Day: {scene_plan.time_of_day}
+Tension Level: {scene_plan.tension_level}
+Scene Type: {scene_plan.scene_type}
+
+Write a vivid, visual scene that advances both plot and character while maintaining scientific credibility."""
 
             # Generate with retries
             max_retries = 3
@@ -442,3 +475,10 @@ Remember: This is scene {scene_number} of 48 in Chapter {self.story_state.curren
         except Exception as e:
             logger.error(f"Error generating scene {scene_number}: {str(e)}")
             raise
+
+    async def update_environmental_state(self, scene_content: Dict):
+        """Track environmental changes through scenes"""
+        # Update time
+        # Track damage
+        # Monitor Fragment spread
+        # Log character movements

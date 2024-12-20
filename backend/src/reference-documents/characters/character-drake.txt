@@ -260,6 +260,168 @@ Training Focus:
 - Technical proficiency
 ```
 
+### Military Leadership Style
+```markdown
+Command Philosophy:
+- Action over analysis
+- Protect humanity at all costs
+- Adapt or die doctrine
+- Trust but verify
+
+Decision Making:
+- Quick tactical assessments
+- Experience-based intuition
+- Risk-reward calculations
+- Contingency planning
+
+Leadership Traits:
+- Leads from front
+- Demands excellence
+- Rewards initiative
+- Protects subordinates
+```
+
+### Voice and Communication
+```markdown
+Speech Patterns:
+- Direct, concise orders
+- Military terminology
+- Strategic metaphors
+- Tactical clarity
+
+Command Voice:
+- Firm but controlled
+- Authoritative tone
+- Clear enunciation
+- Measured pace
+
+Characteristic Phrases:
+- "Situation assessment."
+- "Options and outcomes."
+- "Execute with precision."
+- "Protect the mission."
+```
+
+### Combat Psychology
+```markdown
+Tactical Mindset:
+- Constant threat assessment
+- Multiple escape routes
+- Asset preservation
+- Strategic positioning
+
+Battle Focus:
+- Clarity under pressure
+- Controlled aggression
+- Tactical adaptation
+- Resource management
+
+Combat Response:
+- Heightened awareness
+- Time dilation perception
+- Enhanced pattern recognition
+- Accelerated decision-making
+```
+
+### Personal Code
+```markdown
+Core Values:
+- Mission success
+- Crew survival
+- Tactical excellence
+- Honor in service
+
+Ethical Framework:
+- Protect the weak
+- Serve with honor
+- Lead by example
+- Never abandon crew
+
+Personal Rules:
+- Always have backup
+- Trust your instincts
+- Know your enemy
+- Protect your people
+```
+
+### Dialogue Examples
+```markdown
+Combat Orders:
+"Three targets, multiple vectors. Priority alpha: protect the research team. Execute pattern delta."
+
+Strategic Planning:
+"The Giants adapt. We adapt faster. Show me the pattern variations."
+
+Crisis Response:
+"Maintain formation. They're testing our response time. Let's show them what humanity can do."
+
+Leadership Moments:
+"Every decision costs lives. Make them count. Make them matter."
+```
+
+### Character Dynamics
+```markdown
+Command Style:
+- Clear chain of command
+- Merit-based trust
+- Professional distance
+- Tactical flexibility
+
+Team Relationships:
+- Respects expertise
+- Demands accountability
+- Fosters unit cohesion
+- Protects specialists
+
+Response to Authority:
+- Questions poor strategy
+- Defends crew decisions
+- Challenges bad orders
+- Maintains discipline
+```
+
+### Military Background
+```markdown
+Combat Experience:
+- Fragment War veteran
+- Giant encounter specialist
+- Tactical innovations
+- Battle scars earned
+
+Strategic Expertise:
+- Fleet operations
+- Ground combat
+- Special operations
+- Emergency response
+
+Military Innovation:
+- Giant combat tactics
+- Fragment containment
+- Team coordination
+- Resource optimization
+```
+
+### Writing Guidelines
+```markdown
+Scene Presentation:
+- Military precision
+- Tactical awareness
+- Strategic overview
+- Command presence
+
+Action Description:
+- Clear objectives
+- Precise movements
+- Tactical terminology
+- Combat realism
+
+Internal Monologue:
+- Threat assessment
+- Strategic planning
+- Resource calculation
+- Personnel evaluation
+```
+
 Would you like me to:
 1. Expand on any aspect of Commander Drake's profile?
 2. Detail specific missions or operations?

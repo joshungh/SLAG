@@ -36,7 +36,7 @@ class BedrockService:
                 body = json.dumps({
                     "messages": messages,
                     "max_tokens": max_tokens,
-                    "temperature": 0,
+                    "temperature": 0.7,
                     "anthropic_version": "bedrock-2023-05-31"
                 })
                 

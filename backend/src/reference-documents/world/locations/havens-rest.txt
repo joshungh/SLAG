@@ -1,0 +1,186 @@
+# Haven's Rest (Nova Terra Agricultural Center)
+
+## City Overview
+```markdown
+Physical Statistics:
+- Population: 3 million
+- Area: 1,500 km²
+- Climate: Controlled biosphere
+- Founding Date: 2275
+- Location: Fertile Valley Region
+
+Environmental Systems:
+- Multi-species atmosphere zones
+- Hybrid Earth-Nova Terra soil
+- Artificial weather control
+- Water purification network
+- Xenobiological containment
+```
+
+## Agricultural Complex
+```markdown
+Farming Zones:
+1. Earth Crop Section
+   - Traditional crops
+   - Modified Earth species
+   - Gravity-adjusted fields
+   - Atmospheric controls
+   - Soil enhancement
+
+2. Alien Agriculture
+   - Vess crystal gardens
+   - Aquarian hydroponic farms
+   - Aeron gas cultivation
+   - Mixed-species crops
+   - Experimental fields
+
+3. Hybrid Development
+   - Cross-species plants
+   - Nutrient research
+   - Adaptation studies
+   - Yield enhancement
+   - Environmental testing
+```
+
+## Research Facilities
+```markdown
+Xenobiology Institute:
+1. Main Complex
+   - Size: 100km²
+   - Staff: 50,000
+   - Labs: 500
+   - Species studied: 15
+   - Security: Maximum
+
+Research Focus:
+1. Agricultural Studies
+   - Cross-species cultivation
+   - Soil adaptation
+   - Atmospheric influence
+   - Nutrient development
+   - Growth optimization
+
+2. Species Integration
+   - Environmental adaptation
+   - Biological compatibility
+   - Nutrition research
+   - Medical applications
+   - Emergency protocols
+```
+
+## Diplomatic District
+```markdown
+Meridian Embassy:
+1. Main Complex
+   - Multi-species facilities
+   - Cultural exchange center
+   - Trade negotiations
+   - Scientific cooperation
+   - Emergency protocols
+
+2. Species Quarters
+   - Human district
+   - Vess crystal gardens
+   - Aquarian pools
+   - Aeron chambers
+   - Mixed zones
+```
+
+## Living Zones
+```markdown
+Residential Areas:
+1. Human Districts
+   - Earth-standard atmosphere
+   - Traditional architecture
+   - Familiar gravity
+   - Cultural centers
+   - Emergency systems
+
+2. Alien Quarters
+   - Species-specific environments
+   - Adapted architecture
+   - Custom atmospheric controls
+   - Cultural facilities
+   - Medical support
+
+3. Mixed Zones
+   - Variable environments
+   - Adaptive architecture
+   - Shared spaces
+   - Cultural fusion
+   - Emergency protocols
+```
+
+## Economic Structure
+```markdown
+Major Industries:
+1. Agriculture
+   - Food production
+   - Seed development
+   - Equipment manufacturing
+   - Resource processing
+   - Export management
+
+2. Research
+   - Xenobiology
+   - Agricultural science
+   - Environmental studies
+   - Medical research
+   - Technology development
+
+3. Trade
+   - Food export
+   - Technology exchange
+   - Research sharing
+   - Cultural goods
+   - Medical supplies
+```
+
+## Cultural Features
+```markdown
+Integration Programs:
+1. Mixed Communities
+   - Cultural exchange
+   - Shared festivals
+   - Educational programs
+   - Art collaboration
+   - Sports adaptation
+
+2. Research Culture
+   - Knowledge sharing
+   - Scientific cooperation
+   - Technology fusion
+   - Medical advancement
+   - Environmental studies
+
+3. Agricultural Traditions
+   - Harvest festivals
+   - Planting ceremonies
+   - Food celebrations
+   - Cultural exchange
+   - Species cooperation
+```
+
+## Security Systems
+```markdown
+Protection Grid:
+1. Environmental
+   - Atmosphere control
+   - Containment fields
+   - Species separation
+   - Emergency systems
+   - Evacuation protocols
+
+2. Agricultural
+   - Crop protection
+   - Disease control
+   - Pest management
+   - Resource security
+   - Emergency response
+
+3. Research
+   - Lab containment
+   - Species isolation
+   - Data protection
+   - Emergency protocols
+   - Evacuation plans

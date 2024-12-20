@@ -1,0 +1,8 @@
+# Scene Transition Patterns
+- Temporal transitions (time of day, duration)
+- Spatial transitions (movement through station)
+- Emotional transitions (tension, relief)
+- Causal transitions (event chains)
+
+# Examples:
+"The lab's emergency lights fade as Chen steps into the corridor, the Fragment's glow still burning in his retinas..." 

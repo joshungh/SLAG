@@ -41,7 +41,7 @@ Career Progression:
 - Station Engineer (4404-4408)
 - Salvage Captain (4408-4415)
 - Independent Contractor (4415-4420)
-- Chief Engineer "Quantum Horizon" (4420-Present)
+- Chief Engineer "Event Horizon" (4420-Present)
 
 Key Discoveries:
 - Fragment propulsion adaptation
@@ -53,7 +53,7 @@ Key Discoveries:
 ### Present Day (4424)
 ```markdown
 Current Status:
-- Location: Research Vessel "Quantum Horizon"
+- Location: Research Vessel "Event Horizon"
 - Position: Chief Engineer/Lead Pilot
 - Focus: Ship operations, Giant tech integration
 - Reputation: Miracle worker with machines
@@ -269,6 +269,126 @@ Innovation Focus:
 - Safety enhancements
 - Power management
 - System integration
+```
+
+## Engineering Philosophy
+```markdown
+Technical Approach:
+- Hands-on solutions
+- Practical innovation
+- System integration
+- Emergency adaptation
+
+Problem-Solving:
+- Intuitive mechanics
+- Real-time fixes
+- Resource optimization
+- Creative workarounds
+
+Engineering Style:
+- Direct interaction
+- Physical understanding
+- Trial and error
+- Quick adaptation
+```
+
+## Voice and Communication
+```markdown
+Speech Patterns:
+- Technical shorthand
+- Machine metaphors
+- Direct instructions
+- System analogies
+
+Characteristic Phrases:
+- "She's not built for that, but I can make her dance."
+- "The quantum drive speaks to me. Usually it's cursing."
+- "Physics is more of a suggestion really."
+- "Everything's fixable. Survival is optional."
+
+Technical Language:
+- Engineering jargon
+- System diagnostics
+- Machine empathy
+- Practical solutions
+```
+
+## Ship Relationship
+```markdown
+Connection:
+- Deep understanding
+- Intuitive bond
+- Protective instinct
+- System awareness
+
+Innovation:
+- Custom modifications
+- Emergency solutions
+- Efficiency improvements
+- Safety enhancements
+
+Maintenance:
+- Preventive care
+- System optimization
+- Quick repairs
+- Performance tuning
+```
+
+## Dialogue Examples
+```markdown
+Technical Assessment:
+"The quantum drive isn't happy. And when she's not happy, nobody's happy."
+
+Problem Solving:
+"Sure, it's impossible. Give me ten minutes and some duct tape."
+
+Crisis Response:
+"We've got three minutes until total system failure. I can fix it in four. Should be interesting."
+
+Ship Talk:
+"Come on, beautiful. Just hold together for five more minutes. I promise I'll give you a full maintenance cycle."
+```
+
+## Engineering Expertise
+```markdown
+Specializations:
+- Quantum drive systems
+- Giant tech integration
+- Emergency repairs
+- System optimization
+
+Innovation Areas:
+- Drive efficiency
+- Shield modifications
+- Power management
+- Safety systems
+
+Technical Skills:
+- Void engineering
+- Field repairs
+- System design
+- Resource management
+```
+
+## Personal Space
+```markdown
+Engineering Bay:
+- Organized chaos
+- Custom tools
+- Spare parts
+- Emergency supplies
+
+Workshop:
+- Experimental projects
+- Modified equipment
+- Technical displays
+- Repair station
+
+Personal Tools:
+- Custom toolkit
+- Diagnostic devices
+- Emergency gear
+- Lucky wrench
 ```
 
 Would you like me to:

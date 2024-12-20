@@ -1,0 +1,256 @@
+# SLAG: Comprehensive Generation Guide
+
+## Technical Documentation
+
+### Fragment Technology
+- Containment protocols and specifications
+- Quantum energy pattern analysis
+- Radiation effects and measurements
+- Interface systems documentation
+- Evolution patterns and predictions
+
+### Station Systems
+- Power grid specifications
+- Life support architecture
+- Emergency systems documentation
+- Communication networks
+- Security protocols
+
+### Scientific References
+- Quantum mechanics principles
+- Space-time distortion theory
+- Neural interface technology
+- Energy containment theory
+- Radiation shielding mechanics
+
+### Engineering Documentation
+- Station structural specs
+- System redundancy designs
+- Maintenance procedures
+- Emergency repairs
+- Critical system bypasses
+
+## Character Resources
+
+### Personal Documentation
+- Individual research logs
+- Mission reports
+- Medical histories
+- Performance reviews
+- Personal correspondence
+
+### Background Materials
+- Education records
+- Career histories
+- Psychological profiles
+- Relationship networks
+- Key life events
+
+### Role-Specific Knowledge
+- Area of expertise documents
+- Technical training records
+- Certification histories
+- Special clearances
+- Project involvement
+
+## Historical Context
+
+### Fragment History
+- Discovery records
+- Research evolution
+- Incident reports
+- Pattern analysis
+- Theory development
+
+### Station History
+- Construction records
+- Crew manifests
+- Major events
+- System upgrades
+- Emergency incidents
+
+### Research Evolution
+- Methodology development
+- Breakthrough timeline
+- Failed approaches
+- Theoretical advances
+- Technology progression
+
+## Scene Structure
+
+### Scene Transitions
+1. Temporal Transitions
+   - Time markers
+   - Duration indicators
+   - Shift changes
+   - Day/night cycles
+   - Emergency timestamps
+
+2. Spatial Transitions
+   - Station navigation
+   - Section connections
+   - Travel durations
+   - Access protocols
+   - Emergency routes
+
+3. Emotional Transitions
+   - Tension building
+   - Relief moments
+   - Crisis escalation
+   - Character reactions
+   - Mood progression
+
+4. Causal Transitions
+   - Event chains
+   - Consequence flows
+   - Response sequences
+   - System cascades
+   - Crisis development
+
+### Scene Components
+- Setting establishment
+- Character introduction
+- Technical elements
+- Dialogue integration
+- Action sequences
+- Resolution patterns
+
+## Character Voice Profiles
+
+### Dr. James Chen
+- Speech Patterns
+  - Technical precision
+  - Academic references
+  - Theoretical focus
+  - Research terminology
+  - Stress responses
+
+- Background Influence
+  - Academic training
+  - Research experience
+  - Personal history
+  - Technical expertise
+  - Relationship dynamics
+
+### Commander Drake
+- Speech Patterns
+  - Command presence
+  - Military precision
+  - Authority markers
+  - Crisis communication
+  - Leadership voice
+
+- Background Influence
+  - Military training
+  - Command experience
+  - Crisis management
+  - Personnel handling
+  - Strategic thinking
+
+### Technical Staff
+- Speech Patterns
+  - System terminology
+  - Technical jargon
+  - Problem-solving dialogue
+  - Emergency protocols
+  - Status reports
+
+## Station Technical Details
+
+### Physical Layout
+- Deck plans
+- Section connections
+- Critical system locations
+- Access points
+- Emergency routes
+
+### System Specifications
+- Power distribution
+- Life support coverage
+- Communication networks
+- Security zones
+- Environmental controls
+
+### Navigation Parameters
+- Travel times
+- Access protocols
+- Security clearances
+- Emergency bypasses
+- Section isolation
+
+## Writing Style Guidelines
+
+### Technical Description
+- System operation details
+- Scientific principle explanation
+- Technical problem-solving
+- Emergency response procedures
+- Equipment specifications
+
+### Character Interaction
+- Professional dynamics
+- Technical discussions
+- Crisis communication
+- Personal relationships
+- Command structure
+
+### Environment Description
+- Station atmosphere
+- Technical ambiance
+- System status indicators
+- Emergency conditions
+- Space elements
+
+## Crisis Development
+
+### Emergency Protocols
+- Response procedures
+- Command chain
+- Communication protocols
+- System priorities
+- Personnel management
+
+### Technical Challenges
+- System failures
+- Containment issues
+- Power problems
+- Life support crises
+- Fragment incidents
+
+### Human Elements
+- Stress reactions
+- Decision making
+- Team dynamics
+- Personal conflicts
+- Crisis leadership
+
+## Scientific Accuracy
+
+### Physics Principles
+- Quantum mechanics
+- Radiation effects
+- Energy containment
+- Space-time interactions
+- System dynamics
+
+### Technical Systems
+- Power generation
+- Life support
+- Communication
+- Security measures
+- Emergency backup
+
+### Research Methodology
+- Experimental procedures
+- Data analysis
+- Theory development
+- Problem-solving approaches
+- Documentation standards
+
+Would you like me to:
+1. Expand any specific section?
+2. Create detailed templates for scene generation?
+3. Develop specific technical documentation?
+4. Generate character-specific materials?
+
+This guide can serve as a foundation for consistent narrative generation while maintaining the hard sci-fi elements and character authenticity throughout the story.

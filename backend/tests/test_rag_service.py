@@ -6,7 +6,19 @@ from src.config.config import Settings
 import logging
 import os
 from src.utils.path_utils import get_reference_doc_path
-from src.models.metadata_schema import DocumentMetadata
+from src.models.metadata_schema import (
+    Species, Role, Expertise, LocationType, SecurityLevel, 
+    TechCategory, TimePeriod, NarrativeType, Affiliation,
+    ResearchField, ResearchStatus, SystemCategory, StationSystem,
+    StationZone, CharacterCategory, PersonalityTrait,
+    CommunicationStyle, WritingStyle, HistoricalSignificance,
+    PoliticalInfluence, CulturalEmphasis, UrbanStyle,
+    SocialStructure, TechnicalDetailLevel, ScientificAccuracy,
+    SecurityClearance, SystemStatus, MaintenanceType,
+    ManufacturerOrigin, MilitaryUnit, PersonnelRole,
+    CombatRating, TechLevel, AugmentationLevel,
+    OperationalStatus, ThreatLevel, DocumentMetadata
+)
 
 logger = logging.getLogger(__name__)
 

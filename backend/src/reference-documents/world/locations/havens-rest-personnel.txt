@@ -1,0 +1,159 @@
+# Haven's Rest Research Leadership
+
+## Executive Leadership
+```markdown
+Director of Research:
+1. Dr. William Blackwood
+   - Position: Chief Research Director
+   - Background: Xenobiology pioneer
+   - Speciality: Cross-species integration
+   - Years of service: 25
+   - Notable: First successful hybrid crop
+
+Deputy Directors:
+1. Dr. Sarah Mitchell
+   - Division: Agricultural Sciences
+   - Background: Earth crop modification
+   - Speciality: Genetic engineering
+   - Notable: Genesis Project lead
+   - Status: Active research
+
+2. Dr. Marcus Sullivan
+   - Division: Xenobiology
+   - Background: Vess biology expert
+   - Speciality: Crystal agriculture
+   - Notable: Harmony Project creator
+   - Status: Field research
+```
+
+## Department Heads
+```markdown
+Agricultural Division:
+1. Dr. James Henderson
+   - Department: Earth Crops
+   - Staff: 5,000
+   - Projects: 50
+   - Budget: Maximum
+   - Notable: Yield enhancement pioneer
+
+2. Dr. Victoria Reynolds
+   - Department: Alien Agriculture
+   - Staff: 3,000
+   - Projects: 30
+   - Focus: Cross-species farming
+   - Notable: First gas-based crops
+
+Research Division:
+1. Dr. Alexander Wright
+   - Department: Xenobiology
+   - Staff: 4,000
+   - Labs: 100
+   - Security: Omega
+   - Notable: Species integration expert
+
+2. Dr. Rachel Morrison
+   - Department: Medical Applications
+   - Staff: 2,000
+   - Focus: Cross-species medicine
+   - Projects: 25
+   - Notable: Universal nutrient pioneer
+```
+
+## Species Representatives
+```markdown
+Alien Research Leaders:
+1. Crystal-Mind Resonance (Vess)
+   - Role: Crystal Agriculture Director
+   - Focus: Silicon-based farming
+   - Staff: 1,000
+   - Projects: 15
+   - Notable: Quantum growth expert
+
+2. Deep-Current Navigator (Aquarian)
+   - Role: Hydroponic Research Lead
+   - Focus: Pressure farming
+   - Staff: 800
+   - Projects: 10
+   - Notable: Water chemistry pioneer
+
+3. Plasma-Flow Harmony (Aeron)
+   - Role: Atmospheric Agriculture
+   - Focus: Gas cultivation
+   - Staff: 500
+   - Projects: 5
+   - Notable: Energy farming expert
+```
+
+## Research Teams
+```markdown
+Project Leaders:
+1. HARMONY Team
+   - Lead: Dr. Thomas Sterling
+   - Members: 500
+   - Species: All known
+   - Focus: Cross-species crops
+   - Status: Phase 3
+
+2. GENESIS Team
+   - Lead: Dr. Emily Watson
+   - Members: 750
+   - Focus: Soil development
+   - Coverage: 500km²
+   - Status: Implementation
+
+3. SYNTHESIS Team
+   - Lead: Dr. Michael Brooks
+   - Members: 300
+   - Focus: Atmospheric farming
+   - Species involved: 4
+   - Status: Early trials
+```
+
+## Support Staff
+```markdown
+Technical Teams:
+1. Environmental Control
+   - Chief: Dr. Robert Chen
+   - Staff: 1,000
+   - Focus: Atmosphere management
+   - Systems: 100
+   - Status: 24/7 operation
+
+2. Safety Division
+   - Chief: Dr. Laura Martinez
+   - Staff: 2,000
+   - Focus: Containment
+   - Protocols: Maximum
+   - Status: Constant monitoring
+
+3. Medical Support
+   - Chief: Dr. David Wilson
+   - Staff: 1,500
+   - Focus: Cross-species care
+   - Facilities: 50
+   - Status: Full readiness
+```
+
+## Research Achievements
+```markdown
+Notable Breakthroughs:
+1. Universal Nutrient Matrix
+   - Team Lead: Dr. Sarah Mitchell
+   - Development: 5 years
+   - Species compatibility: 100%
+   - Status: Implementation
+   - Impact: Revolutionary
+
+2. Hybrid Growth Chambers
+   - Team Lead: Dr. James Henderson
+   - Development: 3 years
+   - Efficiency: 300%
+   - Status: Production
+   - Impact: Major
+
+3. Quantum Agriculture
+   - Team Lead: Crystal-Mind Resonance
+   - Development: 2 years
+   - Yield increase: 500%
+   - Status: Testing
+   - Impact: Groundbreaking

@@ -23,7 +23,8 @@ class ChapterHandler:
                 logger.info(f"- {plot.title} (Priority: {plot.priority}, Status: {plot.status})")
             
             logger.info(f"\nUnresolved Plots from Previous Chapters:")
-            for plot in previous_context['unresolved_plots']:
+            unresolved_plots = previous_context.get('unresolved_plots', [])
+            for plot in unresolved_plots:
                 logger.info(f"- {plot}")
             
             # Generate chapter plan...

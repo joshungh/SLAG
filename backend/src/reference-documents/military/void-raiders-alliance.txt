@@ -1,0 +1,181 @@
+# Void Raiders Alliance (VRA)
+
+## Organization Structure
+```markdown
+Leadership Council:
+- "Admiral" Marcus Blackthorne (Former Concordat Captain)
+- "Commander" Isabella Vega (Ex-Frontier Defense)
+- "Captain" Zhang Wei (Former Corporate Security)
+- "Chief" Viktor Petrov (Rogue Engineer)
+- "Director" Raven (Identity Unknown)
+
+Command Structure:
+- Decentralized fleet groups
+- Independent cell operations
+- Loose alliance framework
+- Merit-based advancement
+- Profit-sharing system
+```
+
+## Fleet Assets
+```markdown
+Converted Military Vessels:
+1. Heavy Raiders (Former Concordat Cruisers)
+   - Number in Service: 12
+   - Crew: 200-300
+   - Modifications: Enhanced FTL, Stealth Systems
+   - Special: Quantum Shield Scramblers
+   - Notable: Stripped military grade weapons
+
+2. Strike Ships (Modified Frontier Corvettes)
+   - Number in Service: 30
+   - Crew: 50-75
+   - Modifications: Boosted Engines
+   - Special: ECM Suites
+   - Notable: High maneuverability
+
+Civilian Conversions:
+1. Ghost Ships (Modified Cargo Haulers)
+   - Number in Service: 50+
+   - Crew: 20-30
+   - Modifications: Hidden Weapon Systems
+   - Special: Cargo Bay Conversions
+   - Notable: Appear as regular merchants
+
+2. Support Vessels
+   - Mobile Repair Stations: 8
+   - Refueling Tankers: 15
+   - Medical Ships: 5
+   - Supply Carriers: 20
+   - Intelligence Vessels: 10
+```
+
+## Base Operations
+```markdown
+Primary Haven:
+- Location: Asteroid Belt XJ-227 (Uncharted Space)
+- Facilities: Shipyards, Trading Post, Living Quarters
+- Population: ~50,000
+- Defense: Advanced Early Warning System
+- Special: Reality Phase Cloaking Field
+
+Secondary Bases:
+1. "The Labyrinth"
+   - Location: Abandoned Mining Complex
+   - Purpose: Ship Maintenance
+   - Population: 5,000
+   - Special: Natural Sensor Interference
+   - Defense: Automated Turret Network
+
+2. "Shadow Port"
+   - Location: Rogue Planet
+   - Purpose: Trading/Intelligence
+   - Population: 15,000
+   - Special: Subterranean Facility
+   - Defense: Stealth Shield System
+
+3. "The Sanctuary"
+   - Location: Gas Giant Orbital
+   - Purpose: Medical/R&D
+   - Population: 3,000
+   - Special: Research Facilities
+   - Defense: Atmospheric Interference
+```
+
+## Special Equipment
+```markdown
+Stolen/Modified Technology:
+1. Stealth Systems
+   - Quantum Signature Masking
+   - Neural Pattern Dampeners
+   - Reality Phase Cloaks
+   - ECM Suites
+   - Sensor Scramblers
+
+2. Weapons
+   - Modified Consciousness Disruptors
+   - Salvaged Military Grade Arms
+   - Custom Shield Breakers
+   - EMP Weapons
+   - Boarding Equipment
+
+3. Special Equipment
+   - Hacked Neural Interfaces
+   - Bootleg Quantum Tech
+   - Modified Jump Drives
+   - Stolen Military Gear
+   - Custom Combat Suits
+```
+
+## Operations & Tactics
+```markdown
+Primary Activities:
+1. Shipping Raids
+   - Corporate Target Focus
+   - Quick Strike Tactics
+   - Minimal Casualties Policy
+   - Intelligence-Based Operations
+   - Precision Targeting
+
+2. Technology Theft
+   - Research Facility Raids
+   - Prototype Acquisition
+   - Data System Hacks
+   - Corporate Espionage
+   - Military Tech Theft
+
+3. Smuggling Operations
+   - Restricted Technology
+   - Military Hardware
+   - Medical Supplies
+   - Quantum Tech Components
+   - Fragment Artifacts
+
+Combat Doctrine:
+- Hit and Run Tactics
+- Overwhelming Force
+- ECM Heavy Engagement
+- Multiple Vector Attacks
+- Quick Disengagement
+```
+
+## Intelligence Network
+```markdown
+Information Sources:
+- Corporate Insiders
+- Military Deserters
+- Station Workers
+- Merchant Contacts
+- Civilian Sympathizers
+
+Communication System:
+- Quantum Encrypted Channels
+- Dead Drop Networks
+- Coded Trade Manifests
+- Hidden Relay Stations
+- Mobile Command Posts
+```
+
+## Notable Members
+```markdown
+Key Operatives:
+1. "Ghost" Rodriguez
+   - Former Special Forces
+   - Raid Specialist
+   - Known Kills: 47
+   - Specialty: Stealth Ops
+   - Bounty: 5 million credits
+
+2. "The Engineer" Sullivan
+   - Ex-Corporate R&D
+   - Tech Specialist
+   - Notable: Shield Tech Expert
+   - Specialty: System Hacks
+   - Bounty: 3 million credits
+
+3. "Lady Death" Margot
+   - Former Assassin
+   - Intelligence Chief
+   - Known Operations: 89
+   - Specialty: Infiltration
+   - Bounty: 7 million credits

@@ -71,7 +71,7 @@ Character Arc:
 Role: Chief Engineer/Pilot
 Age: 35
 Species: Human (Void-born)
-Location: Research Vessel "Quantum Horizon"
+Location: Research Vessel "Event Horizon"
 
 Background:
 - Engineering prodigy
@@ -167,7 +167,7 @@ Character Arc:
 Role: Medical Officer/Xenobiologist
 Age: 38
 Species: Human (Earth-born)
-Location: Research Vessel "Quantum Horizon"
+Location: Research Vessel "Event Horizon"
 
 Background:
 - Expert in xenobiology

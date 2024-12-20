@@ -1,0 +1,13 @@
+# Character Voice Guidelines
+
+## Dr. James Chen
+- Primary speech pattern: Precise, analytical
+- Under stress: More colloquial
+- Key phrases: References to quantum mechanics, data patterns
+- Background influences: Academic training, research focus
+
+## Commander Drake
+- Primary speech pattern: Direct, authoritative
+- Military terminology usage
+- Command presence in dialogue
+- Background influences: Military training, leadership responsibility 

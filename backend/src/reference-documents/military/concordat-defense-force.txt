@@ -1,0 +1,110 @@
+# Concordat Defense Force (CDF)
+
+## Organization Structure
+```markdown
+High Command:
+- Supreme Defense Council
+- Joint Species Command
+- Strategic Operations Division
+- Giant Response Command
+- Fleet Command Authority
+
+Chain of Command:
+1. Supreme Commander
+2. Species Representatives
+3. Fleet Admirals
+4. Sector Commanders
+5. Battle Group Leaders
+```
+
+## Fleet Composition
+```markdown
+Capital Ships:
+1. Dreadnought Class
+   - Length: 2.5km
+   - Crew: 15,000
+   - Main Weapon: Reality Phase Cannon
+   - Shield: Quantum Matrix Field
+   - FTL: Advanced QTD Drive
+
+2. Carrier Class
+   - Length: 2km
+   - Crew: 12,000
+   - Fighter Complement: 500
+   - Drone Complement: 2,000
+   - Special: Neural Control Network
+
+3. Battleship Class
+   - Length: 1.5km
+   - Crew: 8,000
+   - Main Weapon: Consciousness Disruptor Array
+   - Shield: Hybrid Defense Matrix
+   - Special: Giant Tech Integration
+
+Support Vessels:
+1. Cruiser Squadrons
+   - 4-6 ships per group
+   - Length: 800m
+   - Crew: 2,000
+   - Role: Fleet Support
+   - Special: Quantum Shield Generation
+
+2. Destroyer Wings
+   - 8-12 ships per wing
+   - Length: 400m
+   - Crew: 500
+   - Role: Rapid Response
+   - Special: Stealth Systems
+```
+
+## Special Forces
+```markdown
+Giant Response Teams:
+- Quantum-enhanced soldiers
+- Neural interface training
+- Anti-Giant weaponry
+- Consciousness defense systems
+- Rapid deployment capability
+
+Void Operations Group:
+- Deep space specialists
+- Stealth operations
+- First contact protocols
+- Fragment recovery
+- Emergency response
+
+Neural Combat Division:
+- Consciousness warfare
+- Giant tech interface
+- Quantum field manipulation
+- Reality phase operations
+- Psychic defense
+```
+
+## Current Deployment
+```markdown
+Active Forces:
+- 50 Battle Groups
+- 200 Capital Ships
+- 1,000 Support Vessels
+- 10,000 Fighter Craft
+- 100,000 Combat Drones
+
+Strategic Locations:
+1. Earth Defense Sphere
+   - Primary fleet presence
+   - Giant monitoring network
+   - Jump point defense grid
+   - Emergency response center
+
+2. Mars Military Zone
+   - Secondary command center
+   - Training facilities
+   - Research and development
+   - Rapid response forces
+
+3. Frontier Sectors
+   - Border patrol groups
+   - First contact teams
+   - Emergency response units
+   - Fragment containment forces

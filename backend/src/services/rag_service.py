@@ -4,8 +4,20 @@ import os
 import json
 from .bedrock_service import BedrockService
 from .pinecone_service import PineconeService
-from ..models.metadata_schema import DocumentMetadata
 from datetime import datetime
+from ..models.metadata_schema import (
+    Species, Role, Expertise, LocationType, SecurityLevel, 
+    TechCategory, TimePeriod, NarrativeType, Affiliation,
+    ResearchField, ResearchStatus, SystemCategory, StationSystem,
+    StationZone, CharacterCategory, PersonalityTrait,
+    CommunicationStyle, WritingStyle, HistoricalSignificance,
+    PoliticalInfluence, CulturalEmphasis, UrbanStyle,
+    SocialStructure, TechnicalDetailLevel, ScientificAccuracy,
+    SecurityClearance, SystemStatus, MaintenanceType,
+    ManufacturerOrigin, MilitaryUnit, PersonnelRole,
+    CombatRating, TechLevel, AugmentationLevel,
+    OperationalStatus, ThreatLevel, DocumentMetadata
+)
 
 logger = logging.getLogger(__name__)
 
@@ -310,3 +322,37 @@ class RAGService:
             logger.error(f"Error indexing scene: {str(e)}")
             logger.error(f"Scene data: {scene}")
             return False
+        
+    async def get_scene_context(self, query: str, scene_number: int) -> List[Dict]:
+        """Get multi-faceted context for scene generation"""
+        results = []
+        
+        # Get technical context
+        tech_context = await self.query_knowledge(
+            query=query,
+            filters={"type": "technical"},
+            namespace="technical",
+            top_k=2
+        )
+        
+        # Get character context
+        character_context = await self.query_knowledge(
+            query=query,
+            filters={"type": "character_profile"},
+            namespace="characters",
+            top_k=3
+        )
+        
+        # Get recent scene context
+        scene_context = await self.query_knowledge(
+            query=query,
+            filters={"type": "generated_scene"},
+            namespace="chapter_1",
+            top_k=3
+        )
+        
+        return {
+            "technical": tech_context,
+            "characters": character_context,
+            "recent_scenes": scene_context
+        }

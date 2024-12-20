@@ -1,0 +1,104 @@
+# SLAG Universe Style Guide
+
+## Core Writing Principles
+```markdown
+Asimov-Inspired Elements:
+1. Clear, Direct Prose
+   - Precise language
+   - Minimal flowery descriptions
+   - Focus on ideas over atmosphere
+   - Scientific accuracy
+   - Logical progression
+
+2. Character Voice
+   - Intelligent but natural dialogue
+   - Technical discussions feel organic
+   - Humor through wit rather than slapstick
+   - Characters explain complex ideas clearly
+   - Professional tone for experts
+
+3. Scientific Elements
+   - Explain complex concepts through dialogue
+   - Use analogies for difficult concepts
+   - Keep technical details accurate
+   - Balance detail with readability
+   - Make science integral to plot
+```
+
+## Narrative Approach
+```markdown
+Story Structure:
+1. Scene Building
+   - Start with human element
+   - Introduce technical elements naturally
+   - Balance character and concept
+   - Use dialogue to explore ideas
+   - Keep action clear and logical
+
+2. Description Style
+   - Clean, efficient prose
+   - Focus on relevant details
+   - Avoid purple prose
+   - Technical accuracy
+   - Clear visualization
+
+3. Pacing
+   - Steady, methodical progression
+   - Build tension through understanding
+   - Use revelation as plot driver
+   - Balance action and exposition
+   - Keep scenes focused
+```
+
+## Dialogue Guidelines
+```markdown
+Character Interactions:
+1. Technical Discussions
+   - Natural flow
+   - Clear explanations
+   - Professional tone
+   - Appropriate expertise
+   - Logical progression
+
+2. Personal Conversations
+   - Reveal character through dialogue
+   - Show expertise naturally
+   - Maintain professionalism
+   - Include subtle humor
+   - Keep focus on plot
+```
+
+## Technical Writing
+```markdown
+Technology Description:
+1. Scientific Detail
+   - Accurate but accessible
+   - Explain through action
+   - Show practical applications
+   - Focus on relevance
+   - Clear visualization
+
+2. Complex Concepts
+   - Break down into digestible parts
+   - Use character expertise
+   - Show rather than tell
+   - Connect to human element
+   - Maintain story flow
+```
+
+## Military Elements
+```markdown
+Haldeman Influence:
+1. Combat Description
+   - Clear, direct language
+   - Focus on procedure
+   - Show technology in action
+   - Emphasize human cost
+   - Maintain tension
+
+2. Military Culture
+   - Professional atmosphere
+   - Technical expertise
+   - Chain of command
+   - Personal impact
+   - Realistic relationships

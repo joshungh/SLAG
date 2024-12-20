@@ -1,0 +1,162 @@
+# Scene Structure Guidelines
+
+## Scene Flow Patterns
+
+### Continuous Flow Example
+```markdown
+Scene Transition:
+"The lab's emergency lights fade as Chen steps into the corridor, the Fragment's glow still burning in his retinas. Ahead, he can hear the low hum of the station's life support systems, a sound so constant most forget it exists. But not today - today, the pitch is slightly off..."
+
+Connection Elements:
+- Sensory bridges (light, sound, smell)
+- Character movement through space
+- Emotional state carryover
+- Environmental continuity
+- Time progression markers
+```
+
+### Scene Types & Mixing
+
+1. Character-Focused (35% of scenes)
+```markdown
+Example Scene: "Coffee Break"
+Location: Station Omega Observation Lounge
+Time: Early Shift
+
+Dr. Chen stares through the reinforced viewport, his reflection ghosted against the gas giant's swirling storms. The coffee in his hand has gone cold, forgotten as his mind races through quantum calculations. Behind him, the lounge door whispers open.
+
+"You missed the staff meeting." Dr. Fontaine's dry voice carries equal parts medical concern and sardonic amusement. "Again."
+
+Chen doesn't turn. "Alex, look at this pattern. The Fragment's quantum signature - it's like watching a conversation, but we're only seeing one side."
+
+"Fascinating," Fontaine sets a fresh coffee beside him, the steam creating abstract patterns against the viewport. "And when was the last time you slept? The body wasn't designed for continuous quantum observation."
+
+Key Elements:
+- Personal dynamics
+- Character quirks
+- Professional relationships
+- Human needs and limitations
+- Subtle world-building through dialogue
+```
+
+2. Technical/Scientific (25% of scenes)
+```markdown
+Example Scene: "Pattern Recognition"
+Location: Fragment Containment Lab
+Time: Mid-Shift
+
+The holographic display bathes the lab in ethereal blue light as data streams past. Chen's fingers dance across the haptic interface, correlating quantum signatures against historical baselines. Each pattern tells a story - if only they could understand the language.
+
+"There." He freezes the display, zooming in on a particular waveform. "Every 47 seconds, this harmonic pattern repeats. It's too precise to be natural."
+
+Dr. Nash leans forward, his young face reflected in multiple displays. "Could it be some kind of clock? Or a heartbeat?"
+
+Key Elements:
+- Technical detail serves story
+- Human interpretation of data
+- Mentor/student dynamics
+- Discovery through collaboration
+- Building tension through understanding
+```
+
+3. Action/Crisis (20% of scenes)
+```markdown
+Example Scene: "Containment Breach"
+Location: Research Section 7
+Time: Emergency Response
+
+Warning klaxons pierce the air as red emergency lights paint the corridor in blood. Webb's magnetic boots click against the deck plating as he runs, each step precisely calculated in the fluctuating gravity field.
+
+"Talk to me, AI!" He shouts over the alarm.
+
+"Containment field at 47% and falling. Quantum resonance cascade imminent."
+
+He reaches the control panel, fingers flying over the interface. Numbers scroll past: power levels, field strength, containment metrics. All dropping.
+
+"Come on, come on..." Webb mutters, initiating the emergency protocols he'd hoped never to use. "Hold together, baby. Just hold together..."
+
+Key Elements:
+- Technical crisis drives action
+- Physical and mental pressure
+- Environmental hazards
+- Time constraints
+- Personal stakes
+```
+
+4. Political/Social (20% of scenes)
+```markdown
+Example Scene: "Command Decisions"
+Location: Station Commander's Office
+Time: Crisis Meeting
+
+Commander Drake stands at her viewport, hands clasped behind her back, as station department heads file into her office. The gas giant Helios fills the view, its storms a mirror to the turbulence in the room.
+
+"The Concordat is demanding we shut down all Fragment research," she states without turning. "They're citing safety concerns after the Ganymede incident."
+
+Dr. Chen's voice cuts through the ensuing murmurs. "If we shut down now, we lose our best chance to understand what's happening."
+
+"Understanding won't matter if we're dead," Security Chief Martinez counters.
+
+Key Elements:
+- Power dynamics
+- Competing priorities
+- Professional conflicts
+- Resource allocation
+- Ethical decisions
+```
+
+## Scene Integration Guidelines
+
+### Flow Management
+```markdown
+Pacing Balance:
+- Alternate intensity levels
+- Vary scene lengths (300-1200 words)
+- Mix scene types naturally
+- Maintain narrative momentum
+- Allow quiet moments
+
+Transition Types:
+- Direct continuation
+- Time skip (marked)
+- Location change
+- Perspective shift
+- Parallel action
+```
+
+### Chapter Rhythm (48 Scenes)
+```markdown
+Opening Arc (Scenes 1-12):
+- Establish situation
+- Introduce active characters
+- Set technical foundation
+- Build initial tension
+- Plant story seeds
+
+Development (Scenes 13-36):
+- Complicate situations
+- Deepen relationships
+- Advance technical understanding
+- Raise stakes
+- Multiple plot threads
+
+Resolution Arc (Scenes 37-48):
+- Crisis point
+- Technical breakthrough
+- Character decisions
+- Plot convergence
+- Chapter conclusion/hooks
+```
+
+### Scene Checklist
+```markdown
+Essential Elements:
+1. Clear POV character
+2. Sensory grounding
+3. Scene goal/purpose
+4. Character development
+5. Plot advancement
+6. World detail integration
+7. Next scene hook
+8. Emotional resonance
+```

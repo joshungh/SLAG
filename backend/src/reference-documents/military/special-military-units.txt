@@ -1,0 +1,184 @@
+# Special Military Units & Command Structure
+
+## Elite Combat Units
+```markdown
+1st Quantum Strike Force:
+- Commander: Col. John "Ghost" Blackwood
+- Size: 1,000 personnel
+- Base: Mars Military Complex
+- Specialty: Giant engagement
+- Notable: 100% survival rate in Fragment encounters
+
+Equipment:
+- Prototype quantum armor
+- Neural enhancement suite v7
+- Consciousness disruption weapons
+- Reality phase grenades
+- Emergency quantum shields
+
+Notable Operations:
+- Operation Deep Strike (4422)
+- Titan-class containment at Europa
+- Defense of Trinity Station
+- Fragment suppression at Ganymede
+```
+
+## Deep Space Operations
+```markdown
+Void Hunter Squadron:
+- Commander: Maj. Alexander "Void" Russell
+- Size: 500 personnel
+- Ships: 12 stealth corvettes
+- Specialty: Fragment tracking
+- Base: Mobile command
+
+Equipment:
+- Stealth field generators
+- Advanced sensor arrays
+- Modified QTD drives
+- Quantum camouflage
+- Consciousness dampeners
+
+Recent Missions:
+- Operation Silent Watch
+- Fragment collection at Kuiper Belt
+- Giant artifact recovery
+- Rogue Fragment pursuit
+```
+
+## Research & Development Command
+```markdown
+Giant Tech Integration Division:
+Director: Dr. William "Iron Bill" Steele
+- Former Special Forces
+- PhD in Giant Studies
+- Pioneer of weapon integration
+- Multiple combat decorations
+- Lost arm in Fragment encounter
+
+Key Projects:
+1. Project THUNDERBOLT
+   - Lead: Dr. Marcus Graves
+   - Focus: Giant weapon integration
+   - Status: Phase 3 testing
+   - Budget: 50 billion credits
+   - Notable: 300% power increase
+
+2. Project MINDSTORM
+   - Lead: Dr. Robert "Brain" Walsh
+   - Focus: Neural combat systems
+   - Status: Field testing
+   - Budget: 75 billion credits
+   - Notable: First consciousness weapon
+
+3. Project TITAN FALL
+   - Lead: Col. James "Hammer" Harrison
+   - Focus: Anti-Titan weaponry
+   - Status: Prototype phase
+   - Budget: 100 billion credits
+   - Notable: Recent breakthrough
+```
+
+## Command Leadership
+```markdown
+Supreme Military Command:
+1. Fleet Admiral Jack Morrison
+   - Position: Supreme Commander
+   - Background: Mars Defense Force
+   - Notable: Led Operation Steel Sky
+   - Years of Service: 45
+   - Combat Decorations: 23
+
+2. General Bradley "Iron Fist" Thompson
+   - Position: Ground Forces Commander
+   - Background: Earth Special Forces
+   - Notable: Titan-class kills: 3
+   - Years of Service: 38
+   - Combat Decorations: 17
+
+3. Admiral Christopher "Storm" Reynolds
+   - Position: Fleet Operations Director
+   - Background: Deep Space Command
+   - Notable: Fragment containment expert
+   - Years of Service: 32
+   - Combat Decorations: 15
+```
+
+## Special Operations Command
+```markdown
+Current Leadership:
+1. General Michael "Wraith" Sullivan
+   - Command: Special Operations
+   - Background: Void Operations
+   - Notable: Pioneer of stealth tactics
+   - Years of Service: 28
+   - Special Operations: 142
+
+2. Colonel Frank "Hammer" Davidson
+   - Command: Giant Response Teams
+   - Background: Neural Combat Division
+   - Notable: Most Giant engagements survived
+   - Years of Service: 25
+   - Giant Encounters: 47
+
+3. Major Thomas "Shadow" Walker
+   - Command: Stealth Operations
+   - Background: Deep Space Recon
+   - Notable: Most successful Fragment recovery
+   - Years of Service: 20
+   - Stealth Missions: 89
+```
+
+## Research & Development Facilities
+```markdown
+Mars Military Complex:
+Director: Dr. Victor "Mad Dog" Hawthorne
+- Focus: Weapons Development
+- Budget: 500 billion credits
+- Personnel: 10,000
+- Active Projects: 50
+- Success Rate: 72%
+
+Key Departments:
+1. Quantum Weapons Lab
+   - Head: Dr. Samuel "Boom" Richards
+   - Focus: Giant-killer weapons
+   - Team Size: 2,000
+   - Recent Success: Phase cannon
+
+2. Neural Combat Systems
+   - Head: Dr. George "Mind" Wilson
+   - Focus: Consciousness warfare
+   - Team Size: 1,500
+   - Recent Success: Neural disruptors
+
+3. Defense Systems Division
+   - Head: Dr. Edward "Shield" Morgan
+   - Focus: Advanced protection
+   - Team Size: 1,800
+   - Recent Success: Reality phase shields
+```
+
+## Combat Statistics
+```markdown
+Unit Performance (4424):
+1. 1st Quantum Strike Force
+   - Missions: 47
+   - Success Rate: 98%
+   - Casualties: 12
+   - Giant Kills: 3
+   - Fragment Containments: 23
+
+2. Void Hunter Squadron
+   - Missions: 89
+   - Success Rate: 95%
+   - Ships Lost: 2
+   - Fragment Recoveries: 34
+   - First Contact Events: 7
+
+3. Neural Combat Division
+   - Missions: 156
+   - Success Rate: 92%
+   - Consciousness Battles: 45
+   - Giant Containments: 5
+   - New Tactics Developed: 12
