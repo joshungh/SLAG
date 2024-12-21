@@ -106,7 +106,11 @@ export default function InfoSection() {
       backText: 
         '<a href="https://github.com/mango31/SLAG" target="_blank" rel="noopener noreferrer" class="text-green-600 hover:text-green-500 underline">GitHub</a>' +
         '<br/><br/>' +
-        '<a href="https://x.com/slag_ai" target="_blank" rel="noopener noreferrer" class="text-green-600 hover:text-green-500 underline">X/Twitter</a>'
+        '<a href="https://x.com/slag_ai" target="_blank" rel="noopener noreferrer" class="text-green-600 hover:text-green-500 underline">X/Twitter</a>' +
+        '<br/><br/>' +
+        '<a href="https://t.me/slag_official" target="_blank" rel="noopener noreferrer" class="text-green-600 hover:text-green-500 underline">Telegram</a>' +
+        '<br/><br/>' +
+        '<a href="mailto:support@lostage.io" class="text-green-600 hover:text-green-500 underline">support@lostage.io</a>'
     }
   ]
 
