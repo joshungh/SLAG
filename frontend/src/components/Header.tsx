@@ -86,12 +86,14 @@ export default function Header() {
               </Link>
             </li>
             <li>
-              <button 
-                onClick={() => scrollToSection('info')}
+              <Link 
+                href="https://docs.lostage.io"
                 className="hover:text-green-300 transition-colors"
+                target="_blank"
+                rel="noopener noreferrer"
               >
                 About
-              </button>
+              </Link>
             </li>
           </ul>
         </nav>
@@ -141,15 +143,15 @@ export default function Header() {
               </Link>
             </li>
             <li>
-              <button 
-                onClick={() => {
-                  scrollToSection('info')
-                  setIsMenuOpen(false)
-                }}
+              <Link 
+                href="https://docs.lostage.io"
                 className="hover:text-green-300 transition-colors"
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={() => setIsMenuOpen(false)}
               >
-                About
-              </button>
+                Docs
+              </Link>
             </li>
           </ul>
         </nav>

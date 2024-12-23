@@ -15,7 +15,15 @@ const nextConfig: NextConfig = {
     ],
     unoptimized: false,
     domains: ['vercel.app', 'localhost']
-  }
+  },
+  async rewrites() {
+    return [
+      {
+        source: '/docs/:path*',
+        destination: 'https://slag.gitbook.io/:path*', // Replace with your GitBook URL
+      },
+    ];
+  },
 };
 
 export default nextConfig;
