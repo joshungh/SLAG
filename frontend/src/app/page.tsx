@@ -1,9 +1,8 @@
 import Header from '@/components/Header'
 import Hero from '@/components/Hero'
-import StoryFeed from '@/components/StoryFeed'
 import Footer from '@/components/Footer'
-import CloudwatchLogsBox from '@/components/CloudwatchLogsBox'
 import InfoSection from '@/components/InfoSection'
+import SampleOutput from '@/components/SampleOutput'
 
 export default function Home() {
   return (
@@ -13,10 +12,7 @@ export default function Home() {
         <Hero />
         <main className="mt-12 space-y-16">
           <InfoSection />
-          <StoryFeed />
-          <section className="mt-8">
-            <CloudwatchLogsBox />
-          </section>
+          <SampleOutput />
         </main>
         <Footer />
       </div>

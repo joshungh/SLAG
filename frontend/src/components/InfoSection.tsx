@@ -78,27 +78,31 @@ export default function InfoSection() {
       image: '/images/whatisslag.png',
       alt: 'What is SLAG',
       backText: 
-        'Starfall: Lost Age of Giants (SLAG for short) is a human-guided but autonomously-generated epic graphic novel.' +
+        'SLAG is an AI-powered story engine that crafts long-form stories from a single user prompt.' +
         '<br/><br/>' +
-        'A love child born from two obsessions:' +
+        'By leveraging the power of LLMs, RAG, and parallelized recursive-prompting, SLAG is able to build complex worlds, develop rich characters, design and track plots, all autonomously.' +
         '<br/><br/>' +
-        'A deep rooted admiration towards the work of John Scalzi, Joe Haldeman, Isaac Asimov, and Frank Herbert among many others.' +
+        'What began as a project to generate a hard scifi graphic novel called "Starfall: Lost Age of Giants" has evolved into an abstract framework for generating any story in any genre.' +
         '<br/><br/>' +
-        'A fascination with LLMs and the brave new world we find ourselves in.' +
+        'SLAG is a tool built for artists, writers, creators, and communities alike.' +
         '<br/><br/>' +
-        'SLAG is first and foremost an artistic journey. As such, expect bumps, bruises, laughter, longing, and perhaps the occasional hallucination.'
+        'To learn more, check out our Docs.'
     },
     {
       image: '/images/whatis$slag.png',
       alt: 'What is $SLAG token',
       backText: 
-        '$SLAG is a community token deployed on Solana.' +
+        '$SLAG will be a community token deployed on Solana. IT HAS NOT BEEN LAUNCHED YET.' +
+        '<br/><br/>' +
+        'The token will be used for interacting with the SLAG Story Engine and participating in SLAG DAO governance.' +
         '<br/><br/>' +
         'It has no inherent value and is meant for entertainment purposes only.' +
         '<br/><br/>' +
-        'Purchasing cryptocurrencies is fraught with risk; you do so at your own risk and under your own free will.' +
+        'Purchasing cryptocurrencies is fraught with risk; you do so at your own peril and under your own free will.' +
         '<br/><br/>' +
-        'There is no token out yet. It will be stealth launched on pump.fun in December 2024. A Telegram announcement channel will be created to announce the launch. The launch will also be announced on our official X account.'
+        'Information regarding the token launch is detailed in our Docs (linked in header). Join our Telegram channel to stay up to date with the latest SLAG news.' +
+        '<br/><br/>' +
+        'None of this is financial advice. Do your own research and make your own decisions.',   
     },
     {
       image: '/images/officiallinks.png',
@@ -109,6 +113,8 @@ export default function InfoSection() {
         '<a href="https://x.com/slag_ai" target="_blank" rel="noopener noreferrer" class="text-green-600 hover:text-green-500 underline">X/Twitter</a>' +
         '<br/><br/>' +
         '<a href="https://t.me/slag_official" target="_blank" rel="noopener noreferrer" class="text-green-600 hover:text-green-500 underline">Telegram</a>' +
+        '<br/><br/>' +
+        '<a href="https://www.instagram.com/slag_ai" target="_blank" rel="noopener noreferrer" class="text-green-600 hover:text-green-500 underline">Instagram</a>' +
         '<br/><br/>' +
         '<a href="mailto:support@lostage.io" class="text-green-600 hover:text-green-500 underline">support@lostage.io</a>'
     }

@@ -12,11 +12,11 @@ export default function Hero() {
   }, [])
 
   const items = [
-    <span key="1" className="block text-[3rem] sm:text-[5rem] md:text-[8rem] lg:text-[12rem] mb-4 font-['Helvetica'] tracking-tighter text-[#fff1eb]">
-      STARFALL
+    <span key="1" className="block text-[2rem] sm:text-[3rem] md:text-[5rem] lg:text-[7rem] mb-4 font-['Helvetica'] tracking-tighter text-[#fff1eb]">
+      SLAG STORY ENGINE
     </span>,
-    <span key="2" className="block text-xl sm:text-2xl md:text-4xl lg:text-6xl font-['Helvetica'] tracking-widest text-[#fff1eb]">
-      LOST AGE OF GIANTS
+    <span key="2" className="block text-base sm:text-lg md:text-2xl lg:text-4xl font-['Helvetica'] tracking-widest text-[#fff1eb]">
+      A SINGLE PROMPT TO RULE THEM ALL
     </span>
   ]
 
