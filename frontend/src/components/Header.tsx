@@ -19,20 +19,6 @@ export default function Header() {
     return () => clearInterval(interval)
   }, [])
 
-  const scrollToSection = (sectionId: string) => {
-    if (!isHomePage) {
-      window.location.href = `/#${sectionId}`
-      return
-    }
-    const element = document.getElementById(sectionId)
-    if (element) {
-      element.scrollIntoView({
-        behavior: 'smooth',
-        block: 'start'
-      })
-    }
-  }
-
   const scrollToTop = () => {
     if (!isHomePage) {
       window.location.href = '/'
