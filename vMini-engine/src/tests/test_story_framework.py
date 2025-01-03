@@ -1,54 +1,61 @@
 import pytest
-import json
 from src.core.services.story_framework_service import StoryFrameworkService
 from src.core.services.llm_service import LLMService
-from src.core.services.validation_service import ValidationService
 from src.core.models.story_bible import StoryBible
+from src.core.models.story_framework import StoryFramework
 
-@pytest.fixture
-def llm_service():
-    return LLMService()
+@pytest.mark.asyncio
+async def test_framework_creation():
+    """Test creating a story framework from a bible"""
+    try:
+        service = StoryFrameworkService(LLMService())
+        
+        # Create test bible
+        bible_dict = {
+            "title": "Test Story",
+            "genre": "Science Fiction",
+            "universe": {"setting": "Mars", "era": "2145"},
+            "characters": [
+                {
+                    "name": "John Smith",
+                    "role": "Archaeologist",
+                    "description": "Lead scientist",
+                    "traits": ["curious", "determined"],
+                    "background": "PhD from MIT"
+                }
+            ],
+            "locations": [
+                {
+                    "name": "Olympus Base",
+                    "description": "Main research facility",
+                    "significance": "Central hub"
+                }
+            ],
+            "themes": ["discovery", "perseverance"],
+            "notes": []
+        }
+        
+        bible = StoryBible(**bible_dict)
+        
+        # Generate framework
+        framework = await service.create_framework(bible)
+        
+        # Validate framework
+        assert framework.title == bible.title
+        assert framework.genre == bible.genre
+        assert len(framework.arcs) > 0
+        assert all(arc.beats for arc in framework.arcs)
+        
+        # Test arc refinement
+        refined = await service.refine_arcs(framework, bible)
+        assert len(refined.arcs) >= len(framework.arcs)
+        
+        # Validate consistency
+        issues = await service.validate_framework(refined, bible)
+        assert not any(issues.values()), f"Framework validation failed: {issues}"
+        
+    except Exception as e:
+        pytest.fail(f"Test failed: {str(e)}")
 
-@pytest.fixture
-def validation_service(llm_service):
-    return ValidationService(llm_service)
-
-@pytest.fixture
-def framework_service(llm_service, validation_service):
-    return StoryFrameworkService(llm_service, validation_service)
-
-@pytest.fixture
-def sample_bible():
-    # Load test bible from JSON file
-    with open("src/tests/data/test_bible.json", "r") as f:
-        return StoryBible(**json.load(f))
-
-async def test_generate_initial_arc(framework_service, sample_bible):
-    arc = await framework_service.generate_initial_arc(sample_bible)
-    assert arc.title is not None
-    assert len(arc.main_plot) == 3  # beginning, middle, end
-    assert len(arc.character_arcs) > 0
-    assert len(arc.themes) > 0
-
-async def test_expand_story_arc(framework_service, sample_bible):
-    initial_arc = await framework_service.generate_initial_arc(sample_bible)
-    expanded_arc = await framework_service.expand_story_arc(initial_arc, sample_bible)
-    
-    # Verify expansion added more detail
-    assert len(expanded_arc.main_plot["beginning"].events) >= len(initial_arc.main_plot["beginning"].events)
-    assert len(expanded_arc.subplots) >= len(initial_arc.subplots)
-
-async def test_segment_into_parts(framework_service, sample_bible):
-    arc = await framework_service.generate_initial_arc(sample_bible)
-    parts = await framework_service.segment_into_parts(arc, target_parts=5)
-    
-    assert len(parts) == 5
-    assert all(isinstance(part.part_number, int) for part in parts)
-    assert all(len(part.scenes) > 0 for part in parts)
-
-async def test_create_framework(framework_service, sample_bible):
-    framework = await framework_service.create_framework(sample_bible, target_length=5000)
-    
-    assert framework.story_arc is not None
-    assert len(framework.parts) > 0
-    assert framework.metadata["target_length"] == 5000 
+if __name__ == "__main__":
+    pytest.main([__file__, "-v"]) 

@@ -5,10 +5,12 @@ from datetime import datetime
 from pydantic import ValidationError
 from src.core.models.story_bible import StoryBible
 from src.core.services.llm_service import LLMService
+from src.core.services.embedding_service import EmbeddingService
 import logging
 from pathlib import Path
 from src.core.utils.logging_config import setup_logging
 from src.config.config import settings
+from src.core.services.vector_store_service import VectorStoreService
 
 # Replace existing logging setup with:
 logger = setup_logging("world_generation", "world_generation.log")
@@ -16,26 +18,30 @@ logger = setup_logging("world_generation", "world_generation.log")
 class WorldGenerationService:
     def __init__(self, llm_service: LLMService):
         self.llm = llm_service
+        self.embedding_service = EmbeddingService()
         self.current_bible: StoryBible = None
         self.output_dir = Path("output")
         self.output_dir.mkdir(parents=True, exist_ok=True)
+        self.vector_store = VectorStoreService()
         logger.info("WorldGenerationService initialized")
 
-    def _save_bible(self, bible: StoryBible, stage: str):
+    def _save_bible(self, bible: StoryBible, stage: str, is_final: bool = False):
         """Save the bible to a JSON file with timestamp"""
         try:
             timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-            filename = f"{self.output_dir}/bible_{stage}_{timestamp}.json"
             
-            logger.info(f"Attempting to save bible to: {filename}")
-            logger.info(f"Output directory exists: {self.output_dir.exists()}")
-            logger.info(f"Output directory is writable: {os.access(self.output_dir, os.W_OK)}")
+            # For intermediate saves
+            if not is_final:
+                filename = f"{self.output_dir}/bible_{stage}_{timestamp}.json"
+            else:
+                # For the final comprehensive bible
+                filename = f"{self.output_dir}/final_story_bible_{timestamp}.json"
             
             with open(filename, 'w') as f:
                 json.dump(bible.model_dump(), f, indent=2)
             
             logger.info(f"Successfully saved bible to: {filename}")
-            print(f"\nSaved bible to: {filename}")
+            
         except Exception as e:
             logger.error(f"Error saving bible: {str(e)}")
             raise
@@ -67,7 +73,11 @@ class WorldGenerationService:
         full_prompt = f"{system_prompt}\n\nUser Story Prompt: {prompt}"
         try:
             logger.info(f"Initializing bible from prompt: {prompt[:100]}...")
-            response = await self.llm.generate(full_prompt)
+            response = await self.llm.generate(
+                full_prompt,
+                temperature=settings.WORLD_BUILDING_TEMPERATURE,
+                max_tokens=settings.WORLD_BUILDING_MAX_TOKENS
+            )
             
             logger.debug(f"Raw LLM response: {response[:200]}...")
             
@@ -101,118 +111,141 @@ class WorldGenerationService:
         bible_json = self.current_bible.model_dump_json()
         full_prompt = f"{system_prompt}\n\nCurrent Story Bible:\n{bible_json}"
         
-        response = await self.llm.generate(full_prompt)
+        response = await self.llm.generate(
+            full_prompt,
+            temperature=settings.WORLD_BUILDING_TEMPERATURE,
+            max_tokens=settings.WORLD_BUILDING_MAX_TOKENS
+        )
         return [area.strip() for area in response.split('\n') if area.strip()]
 
     async def expand_bible(self, bible: StoryBible, area: str) -> StoryBible:
-        """Expand a specific area of the story bible"""
+        """Expand story bible with content merging"""
         try:
             logger.info(f"Expanding area: {area}")
             
-            # Create expansion prompt
-            system_prompt = f"""You are a world-building expert. Expand the following area of the story bible: {area}
-
-            IMPORTANT: You must return your response as a valid JSON object that matches the story bible structure.
+            # Get similar past bibles using embeddings
+            query_embedding = await self.embedding_service.get_embedding(area)
+            similar_bibles = await self.vector_store.find_similar(query_embedding)
+            examples = "\n".join([b.model_dump_json() for b in similar_bibles]) if similar_bibles else ""
             
-            Rules:
-            1. Include ONLY the sections being expanded/modified
-            2. Maintain the EXACT same structure as the original
-            3. Include ALL required fields for any objects
-            4. Use ONLY these top-level keys: title, genre, universe, characters, locations, factions, technology, timeline, themes, notes
-            5. DO NOT include narrative descriptions or explanations outside the JSON structure
+            # Separate the example to avoid nested f-strings
+            example_tech = '''{
+                "technology": [{
+                    "name": "BioFilter Array",
+                    "description": "Advanced air purification system",
+                    "limitations": ["Monthly maintenance", "High power use"],
+                    "requirements": {"power": "50kW"},
+                    "risks": ["Filter contamination"]
+                }]
+            }'''
             
-            Required field formats:
-            - Factions: {{"name": "", "description": "", "goals": [], "relationships": {{}}}}
-            - Characters: {{"name": "", "role": "", "description": "", "traits": [], "background": ""}}
-            - Locations: {{"name": "", "description": "", "significance": ""}}
-            - Technology: {{"name": "", "description": "", "impact": ""}}
-            - Timeline events: {{"year": "", "event": "", "details": ""}}
-
-            Example response format:
+            system_prompt = f"""You are a world-building expert. Given this story bible and area for expansion,
+            provide additional details and content. You are expanding the '{self._determine_expansion_type(area)}' aspect.
+            
+            CRITICAL REQUIREMENTS:
+            1. Return ONLY valid JSON - no explanatory text before or after
+            2. Every object in a list MUST have a 'name' field
+            3. Social structures should be added as factions or notes
+            4. Follow these exact formats for new entries:
+            
+            Technology:
+            {example_tech}
+            
+            Character:
             {{
-                "factions": [
-                    {{
-                        "name": "Example Faction",
-                        "description": "Detailed description",
-                        "goals": ["goal1", "goal2"],
-                        "relationships": {{"other_faction": "relationship_type"}}
-                    }}
-                ],
-                "technology": [
-                    {{
-                        "name": "Example Tech",
-                        "description": "Detailed description",
-                        "impact": "Impact description"
-                    }}
+                "characters": [{{
+                    "name": "Dr. Sarah Chen",
+                    "role": "Lead Scientist",
+                    "description": "Brilliant xenobiologist",
+                    "background": "PhD from MIT",
+                    "traits": ["dedicated", "curious"]
+                }}]
+            }}
+            
+            Location:
+            {{
+                "locations": [{{
+                    "name": "Olympus Base",
+                    "description": "Main research facility",
+                    "features": ["Dome structure", "Labs"],
+                    "hazards": ["Dust storms", "Radiation"]
+                }}]
+            }}
+            
+            Faction or Social Group:
+            {{
+                "factions": [{{
+                    "name": "Mars Born Coalition",
+                    "description": "Political group representing Mars-born citizens",
+                    "goals": ["Colonial autonomy", "Resource rights"],
+                    "relationships": {{"Earth Government": "strained", "Corporate Council": "neutral"}}
+                }}]
+            }}
+            
+            For social structures without clear factions, add to notes array:
+            {{
+                "notes": [
+                    "Class hierarchy divides along professional specialization rather than traditional wealth",
+                    "Education system emphasizes practical engineering and survival skills"
                 ]
             }}"""
 
-            # Add current bible context
             bible_json = bible.model_dump_json()
-            full_prompt = f"{system_prompt}\n\nCurrent Story Bible:\n{bible_json}"
+            full_prompt = f"{system_prompt}\n\nCurrent Story Bible:\n{bible_json}\n\nExpand this area:\n{area}"
+            if examples:
+                full_prompt += f"\n\nSimilar examples for reference:\n{examples}"
             
-            # Get LLM response with lower temperature for more structured output
             response = await self.llm.generate(
-                prompt=full_prompt,
-                max_tokens=settings.WORLD_BUILDING_MAX_TOKENS,
-                temperature=0.3  # Lower temperature for more structured output
+                full_prompt,
+                temperature=settings.WORLD_BUILDING_TEMPERATURE,
+                max_tokens=settings.WORLD_BUILDING_MAX_TOKENS
             )
             
-            logger.info(f"LLM Response for {area}: {response[:200]}...")
-            
-            # Parse response
             try:
-                expansion_dict = json.loads(response)
-                logger.debug(f"Parsed expansion dict: {json.dumps(expansion_dict, indent=2)}")
-                
-                # Merge with existing bible
-                merged_dict = bible.model_dump()
-                for key, value in expansion_dict.items():
-                    logger.debug(f"Merging key '{key}' of type {type(value)}")
-                    if isinstance(value, list):
-                        if key not in merged_dict:
-                            merged_dict[key] = []
-                        merged_dict[key].extend(value)
-                        logger.debug(f"Extended list for key '{key}'")
-                    elif isinstance(value, dict):
-                        if key not in merged_dict:
-                            merged_dict[key] = {}
-                        merged_dict[key].update(value)
-                        logger.debug(f"Updated dict for key '{key}'")
+                # Clean up response to ensure it's valid JSON
+                response = response.strip()
+                if not response.startswith('{'):
+                    # Find the first { and last }
+                    start = response.find('{')
+                    end = response.rfind('}') + 1
+                    if start >= 0 and end > start:
+                        response = response[start:end]
                     else:
-                        merged_dict[key] = value
-                        logger.debug(f"Set value for key '{key}'")
-            
-            except json.JSONDecodeError:
-                # Try to extract JSON if wrapped in explanation
-                import re
-                json_match = re.search(r'\{[\s\S]*\}', response)
-                if json_match:
-                    expansion_dict = json.loads(json_match.group())
-                else:
-                    raise
-            
-            logger.info(f"Merged dict before validation: {json.dumps(merged_dict, indent=2)}")
-            
-            try:
-                # Validate merged structure
-                updated_bible = StoryBible(**merged_dict)
-                logger.info(f"Successfully validated merged bible for area: {area}")
-            except ValidationError as e:
-                logger.error(f"Schema validation error: {str(e)}")
-                logger.error(f"Failed validation for structure: {json.dumps(merged_dict, indent=2)}")
-                raise
+                        logger.error(f"Could not find valid JSON in response: {response[:200]}...")
+                        return bible
+                        
+                expansion_dict = json.loads(response)
                 
-            self._save_bible(updated_bible, f"expansion_{area[:20]}")
-            return updated_bible
-            
-        except json.JSONDecodeError as e:
-            logger.error(f"Failed to parse LLM response as JSON: {str(e)}")
-            logger.error(f"Raw response: {response}")
-            raise
+                # Validate expansion data
+                for key, value in expansion_dict.items():
+                    if isinstance(value, list):
+                        validated_items = []
+                        for item in value:
+                            if isinstance(item, dict):
+                                if "name" not in item:
+                                    logger.warning(f"Skipping item without name in {key}: {item}")
+                                    continue
+                                validated_items.append(item)
+                        expansion_dict[key] = validated_items
+                
+                # Only proceed if we have valid items
+                if any(isinstance(v, list) and v for v in expansion_dict.values()):
+                    bible.add_expansion(expansion_dict)
+                    logger.info(f"Successfully merged expansion for area: {area}")
+                else:
+                    logger.warning(f"No valid items found in expansion response for {area}")
+                
+                return bible
+                
+            except json.JSONDecodeError:
+                logger.error(f"Invalid JSON response: {response[:200]}...")
+                logger.debug(f"Full invalid response: {response}")
+                return bible
+                
         except Exception as e:
             logger.error(f"Error in expand_bible: {str(e)}")
-            raise
+            logger.error(f"Failed to expand area: {area}")
+            return bible  # Return original bible instead of raising
 
     async def enrich_story_elements(self, bible: StoryBible) -> StoryBible:
         """Add story-development focused details to the story bible to support future plot creation"""
@@ -244,18 +277,90 @@ class WorldGenerationService:
            - Social/political constraints
            - Timeline boundaries
 
-        Return the enhanced story bible in the same JSON format, maintaining all existing content while adding 
-        these story-development elements. Focus on concrete details that can drive plot development rather than 
-        atmospheric or narrative flourishes."""
+        Return ONLY a valid JSON object containing your additions/modifications to enrich the story bible.
+        Do not return the entire bible - only return the new/changed elements you want to add or modify."""
 
         bible_json = bible.model_dump_json()
         full_prompt = f"{system_prompt}\n\nCurrent Story Bible:\n{bible_json}"
         
         try:
-            response = await self.llm.generate(full_prompt)
-            enriched_bible = StoryBible(**json.loads(response))
-            self._save_bible(enriched_bible, "story_elements_enriched")
-            return enriched_bible
+            response = await self.llm.generate(
+                full_prompt,
+                temperature=settings.WORLD_BUILDING_TEMPERATURE,
+                max_tokens=settings.WORLD_BUILDING_MAX_TOKENS
+            )
+            # Add error handling for JSON parsing
+            try:
+                enrichment_dict = json.loads(response)
+            except json.JSONDecodeError:
+                logger.error(f"Invalid JSON in enrichment response. Response starts with: {response[:200]}...")
+                logger.debug(f"Full invalid response: {response}")
+                # Try to extract JSON if response contains it
+                try:
+                    # Look for JSON-like structure between curly braces
+                    import re
+                    json_match = re.search(r'\{.*\}', response, re.DOTALL)
+                    if json_match:
+                        enrichment_dict = json.loads(json_match.group())
+                    else:
+                        return bible
+                except:
+                    return bible
+            
+            # Use the add_expansion method to merge enrichments
+            bible.add_expansion(enrichment_dict)
+            self._save_bible(bible, "story_elements_enriched")
+            return bible
+            
         except Exception as e:
             logger.error(f"Error enriching story elements: {str(e)}")
+            return bible  # Return unchanged bible if enrichment fails 
+
+    async def generate_complete_bible(self, prompt: str) -> StoryBible:
+        """Generate complete story bible including all expansions"""
+        try:
+            # 1. Initialize base bible
+            self.current_bible = await self.initialize_bible(prompt)
+            
+            # 2. Identify areas for expansion
+            expansion_areas = await self.identify_expansion_areas()
+            
+            # 3. Expand each area and update current bible
+            for area in expansion_areas:
+                try:
+                    expanded_bible = await self.expand_bible(self.current_bible, area)
+                    self.current_bible = expanded_bible
+                except Exception as e:
+                    logger.error(f"Error expanding area '{area}': {str(e)}")
+                    continue
+            
+            # 4. Final enrichment pass
+            try:
+                enriched_bible = await self.enrich_story_elements(self.current_bible)
+                self.current_bible = enriched_bible
+            except Exception as e:
+                logger.error(f"Error in final enrichment: {str(e)}")
+            
+            # 5. Save final comprehensive bible
+            self._save_bible(self.current_bible, "complete", is_final=True)
+            
+            return self.current_bible
+            
+        except Exception as e:
+            logger.error(f"Error generating complete bible: {str(e)}")
             raise 
+
+    def _determine_expansion_type(self, area: str) -> str:
+        """Map expansion area to specific bible section"""
+        if any(term in area for term in ['infrastructure', 'system', 'technology', 'technical']):
+            return 'technology and infrastructure'
+        elif any(term in area for term in ['social', 'culture', 'society']):
+            return 'social and cultural'
+        elif any(term in area for term in ['character', 'relationship']):
+            return 'characters and relationships'
+        elif any(term in area for term in ['location', 'settlement', 'base']):
+            return 'locations and environment'
+        elif any(term in area for term in ['faction', 'group', 'organization']):
+            return 'factions and politics'
+        else:
+            return 'general world-building' 

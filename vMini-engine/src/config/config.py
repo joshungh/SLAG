@@ -38,10 +38,10 @@ class Settings(BaseSettings):
     REDIS_PORT: int = int(os.getenv("REDIS_PORT", "6379"))
     
     # LLM Generation Settings
-    WORLD_BUILDING_TEMPERATURE: float = 0.5
+    WORLD_BUILDING_TEMPERATURE: float = 0.3
     WORLD_BUILDING_MAX_TOKENS: int = 120000
     
-    FRAMEWORK_TEMPERATURE: float = 0.7
+    FRAMEWORK_TEMPERATURE: float = 0.6
     FRAMEWORK_MAX_TOKENS: int = 100000
     
     NARRATIVE_TEMPERATURE: float = 0.8

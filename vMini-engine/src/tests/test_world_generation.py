@@ -8,6 +8,14 @@ import pytest
 from typing import Dict, Any
 from src.core.services.world_generation_service import WorldGenerationService
 from src.core.services.llm_service import LLMService
+from pathlib import Path
+from src.core.models.story_bible import (
+    StoryBible, 
+    Technology,
+    Character,
+    Location,
+    Faction
+)
 
 load_dotenv()
 
@@ -91,27 +99,80 @@ async def test_timeline_handling():
         pytest.fail(f"Test failed: {str(e)}")
 
 @pytest.mark.asyncio
-async def test_bible_expansion():
-    """Test the bible expansion process"""
-    try:
-        service = WorldGenerationService(LLMService())
+class TestWorldGeneration:
+    """Test suite for world generation functionality"""
+    
+    @pytest.fixture(autouse=True)
+    async def setup(self):
+        """Setup test resources before each test"""
+        self.service = WorldGenerationService(LLMService())
+        self.test_prompt = "Write a story about Mars colonization with a detailed timeline of events"
+        self.base_bible = await self.service.initialize_bible(self.test_prompt)
+        yield
+        # Cleanup if needed
         
-        # Create initial bible
-        bible = await service.initialize_bible(
-            "Write a story about Mars colonization with a detailed timeline of events"
-        )
-        
-        # Test expansion
-        expansion_area = "Detail the Mars colony's infrastructure and life support systems"
-        expanded_bible = await service.expand_bible(bible, expansion_area)
-        
-        # Validate expansion
-        assert expanded_bible is not None
-        assert len(expanded_bible.technology) > len(bible.technology)
-        # Add more specific assertions based on what should be expanded
-        
-    except Exception as e:
-        pytest.fail(f"Bible expansion test failed: {str(e)}")
+    async def test_bible_expansion(self):
+        """Test the bible expansion process"""
+        try:
+            initial_tech_count = len(self.base_bible.technology)
+            initial_tech_names = {t.name for t in self.base_bible.technology}
+            
+            # Test expansion
+            expansion_area = "Detail the Mars colony's infrastructure and life support systems"
+            expanded_bible = await self.service.expand_bible(self.base_bible, expansion_area)
+            
+            # Validate expansion
+            assert expanded_bible is not None
+            
+            # Convert any dict items to proper models
+            if expanded_bible.technology:
+                expanded_bible.technology = [
+                    t if isinstance(t, Technology) else Technology(**t)
+                    for t in expanded_bible.technology
+                    if isinstance(t, (dict, Technology)) and hasattr(t, 'name')
+                ]
+            
+            # Now check the expansion results
+            assert len(expanded_bible.technology) >= initial_tech_count, "No new technology items added"
+            
+            new_tech_names = {t.name for t in expanded_bible.technology if isinstance(t, Technology)}
+            assert len(new_tech_names - initial_tech_names) > 0, "No new unique technology names added"
+            
+            # Verify new items have required fields
+            for tech in expanded_bible.technology:
+                if tech.name not in initial_tech_names:
+                    assert tech.limitations is not None, f"New tech {tech.name} missing limitations"
+                    assert tech.requirements is not None, f"New tech {tech.name} missing requirements"
+                    assert tech.risks is not None, f"New tech {tech.name} missing risks"
+            
+        except Exception as e:
+            pytest.fail(f"Bible expansion test failed: {str(e)}")
+
+    async def test_complete_bible_generation(self):
+        """Test generating a complete story bible with all expansions"""
+        try:
+            bible = await self.service.generate_complete_bible(self.test_prompt)
+            
+            # Verify comprehensive content
+            assert bible.title is not None
+            assert len(bible.characters) > 0
+            assert len(bible.locations) > 0
+            assert len(bible.timeline) > 0
+            assert len(bible.themes) > 0
+            assert len(bible.notes) > 0
+            
+            # Check for expanded content markers
+            all_content = json.dumps(bible.model_dump())
+            assert "timeline" in all_content
+            assert "factions" in all_content
+            assert "technology" in all_content
+            
+            # Verify file creation
+            final_files = list(Path("output").glob("final_story_bible_*.json"))
+            assert len(final_files) > 0
+            
+        except Exception as e:
+            pytest.fail(f"Test failed: {str(e)}")
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v"]) 
