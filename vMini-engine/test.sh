@@ -42,4 +42,10 @@ done
 echo "Service is ready! Running tests..."
 
 # Run the tests
-python -m pytest src/tests/test_world_generation.py -v 
+# If no specific tests specified, run all tests
+if [ $# -eq 0 ]; then
+    python -m pytest src/tests/ -v
+else
+    # Run specified tests
+    python -m pytest "$@" -v
+fi 

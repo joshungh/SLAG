@@ -1,7 +1,9 @@
-from typing import List, Dict, Any
+from typing import List, Dict
 import json
-from src.core.models.story_framework import StoryFramework, StoryArc, StoryBeat
+import os
+from datetime import datetime
 from src.core.models.story_bible import StoryBible
+from src.core.models.story_framework import StoryFramework, StoryArc, StoryBeat
 from src.core.services.llm_service import LLMService
 from src.core.utils.logging_config import setup_logging
 from src.config.config import settings
@@ -11,150 +13,170 @@ logger = setup_logging("story_framework", "story_framework.log")
 class StoryFrameworkService:
     def __init__(self, llm_service: LLMService):
         self.llm = llm_service
-        logger.info("StoryFrameworkService initialized")
 
     async def create_framework(self, bible: StoryBible) -> StoryFramework:
-        """Create initial story framework from story bible"""
+        """Create a story framework from a story bible"""
         try:
-            logger.info("Creating story framework from bible")
+            logger.info(f"Creating story framework for: {bible.title}")
             
-            # Generate main story structure
-            system_prompt = """You are a story structure expert. Using this story bible, create a detailed story framework.
-            Focus on creating compelling arcs that utilize the world-building elements effectively.
-            
-            Return a JSON object with this structure:
+            system_prompt = """You are a story structure expert. Analyze this story bible and create a 
+            compelling story framework. Focus on creating interconnected arcs that utilize the established 
+            world elements and conflict sources.
+
+            CRITICAL REQUIREMENTS:
+            1. Each story arc MUST have at least 3 beats (beginning, middle, end)
+            2. Use ONLY themes from the story bible
+            3. Each beat must involve characters from the bible
+            4. All locations must exist in the bible
+            5. Create meaningful character arcs that reflect the bible's conflicts
+
+            Return a JSON object with this exact structure:
             {
                 "title": "Story Title",
                 "genre": "Genre",
                 "main_conflict": "Core conflict description",
-                "central_theme": "Main theme",
+                "central_theme": "Main theme from bible",
                 "arcs": [
                     {
-                        "name": "Arc name",
+                        "name": "Main Arc Name",
                         "description": "Arc description",
                         "beats": [
                             {
-                                "name": "Beat name",
+                                "name": "Opening Beat",
                                 "description": "What happens",
                                 "purpose": "Story purpose",
-                                "characters_involved": ["Character names"],
-                                "location": "Where it happens",
+                                "characters_involved": ["Character names from bible"],
+                                "location": "Location from bible",
                                 "conflict_type": "Type of conflict",
                                 "resolution_type": "How it resolves"
+                            },
+                            {
+                                "name": "Middle Beat",
+                                "description": "...",
+                                "purpose": "...",
+                                "characters_involved": ["..."],
+                                "location": "...",
+                                "conflict_type": "...",
+                                "resolution_type": "..."
+                            },
+                            {
+                                "name": "Closing Beat",
+                                "description": "...",
+                                "purpose": "...",
+                                "characters_involved": ["..."],
+                                "location": "...",
+                                "conflict_type": "...",
+                                "resolution_type": "..."
                             }
                         ],
-                        "themes": ["Theme 1", "Theme 2"],
+                        "themes": ["Theme 1 from bible", "Theme 2 from bible"],
                         "character_arcs": {
-                            "Character Name": "Their development arc"
+                            "Character Name": "Their arc description"
                         }
                     }
                 ],
                 "subplot_connections": {
-                    "Subplot A": ["Connected subplot B", "Connected subplot C"]
+                    "Arc Name": ["Connected Arc 1", "Connected Arc 2"]
                 },
                 "pacing_notes": ["Pacing note 1", "Pacing note 2"]
-            }"""
+            }
+
+            Available themes from bible: ${bible.themes}
+            Available characters: ${[c.name for c in bible.characters]}
+            Available locations: ${[l.name for l in bible.locations]}"""
 
             bible_json = bible.model_dump_json()
             full_prompt = f"{system_prompt}\n\nStory Bible:\n{bible_json}"
             
             response = await self.llm.generate(
-                prompt=full_prompt,
-                max_tokens=settings.FRAMEWORK_MAX_TOKENS,
-                temperature=settings.FRAMEWORK_TEMPERATURE
+                full_prompt,
+                temperature=settings.FRAMEWORK_TEMPERATURE,
+                max_tokens=settings.FRAMEWORK_MAX_TOKENS
             )
             
-            logger.debug(f"Raw framework response: {response[:200]}...")
-            framework_dict = json.loads(response)
-            
-            # Validate and create framework
-            framework = StoryFramework(**framework_dict)
-            logger.info("Successfully created story framework")
-            
-            return framework
-            
+            try:
+                framework_dict = json.loads(response)
+                framework = StoryFramework(**framework_dict)
+                
+                # Add output directory check and creation
+                output_dir = "output/frameworks"
+                if not os.path.exists(output_dir):
+                    os.makedirs(output_dir)
+                    
+                # Save framework to file with timestamp
+                timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+                output_path = f"{output_dir}/framework_{timestamp}.json"
+                
+                with open(output_path, "w") as f:
+                    json.dump(framework.model_dump(), f, indent=2)
+                logger.info(f"Saved framework to: {output_path}")
+                
+                # Validate minimum beats
+                for arc in framework.arcs:
+                    if len(arc.beats) < 3:
+                        logger.warning(f"Arc {arc.name} has fewer than 3 beats. Regenerating...")
+                        return await self.create_framework(bible)  # Retry
+                        
+                # Validate themes
+                bible_themes = set(bible.themes)
+                framework_themes = {theme for arc in framework.arcs for theme in arc.themes}
+                if not framework_themes.intersection(bible_themes):
+                    logger.warning("No matching themes found. Regenerating...")
+                    return await self.create_framework(bible)  # Retry
+                    
+                logger.info(f"Successfully created framework with {len(framework.arcs)} arcs")
+                return framework
+                
+            except json.JSONDecodeError:
+                logger.error("Failed to parse framework response as JSON")
+                logger.debug(f"Invalid response: {response[:200]}...")
+                raise
+                
         except Exception as e:
             logger.error(f"Error creating story framework: {str(e)}")
             raise
 
-    async def refine_arcs(self, framework: StoryFramework, bible: StoryBible) -> StoryFramework:
-        """Refine and enhance story arcs"""
-        try:
-            logger.info("Refining story arcs")
-            
-            system_prompt = """Analyze these story arcs and enhance them for maximum dramatic impact.
-            Focus on:
-            1. Character motivation clarity
-            2. Conflict escalation
-            3. Theme reinforcement
-            4. Subplot integration
-            5. Pacing balance
-            
-            Return the enhanced framework maintaining the exact same JSON structure."""
-
-            framework_json = framework.model_dump_json()
-            bible_json = bible.model_dump_json()
-            full_prompt = f"{system_prompt}\n\nCurrent Framework:\n{framework_json}\n\nStory Bible:\n{bible_json}"
-            
-            response = await self.llm.generate(
-                prompt=full_prompt,
-                max_tokens=settings.FRAMEWORK_MAX_TOKENS,
-                temperature=settings.FRAMEWORK_TEMPERATURE
-            )
-            
-            refined_framework = StoryFramework(**json.loads(response))
-            logger.info("Successfully refined story arcs")
-            
-            return refined_framework
-            
-        except Exception as e:
-            logger.error(f"Error refining story arcs: {str(e)}")
-            raise
-
-    async def validate_framework(self, framework: StoryFramework, bible: StoryBible) -> Dict[str, Any]:
-        """Validate story framework for consistency and completeness"""
+    async def validate_framework(self, framework: StoryFramework, bible: StoryBible) -> Dict[str, List[str]]:
+        """Validate framework against story bible for consistency"""
         issues = {
-            "character_coverage": [],
-            "location_usage": [],
-            "theme_consistency": [],
-            "plot_holes": [],
-            "pacing_issues": []
+            "character_issues": [],
+            "location_issues": [],
+            "theme_issues": [],
+            "plot_issues": []
         }
         
-        try:
-            # Check character coverage
-            bible_characters = {char.name for char in bible.characters}
-            framework_characters = set()
-            for arc in framework.arcs:
-                for beat in arc.beats:
-                    framework_characters.update(beat.characters_involved)
-            
-            unused_characters = bible_characters - framework_characters
-            if unused_characters:
-                issues["character_coverage"].append(
-                    f"Characters not used in framework: {unused_characters}"
-                )
-
-            # Check location usage
-            bible_locations = {loc.name for loc in bible.locations}
-            for arc in framework.arcs:
-                for beat in arc.beats:
-                    if beat.location not in bible_locations:
-                        issues["location_usage"].append(
-                            f"Beat '{beat.name}' uses undefined location: {beat.location}"
+        # Check characters
+        bible_characters = {char.name for char in bible.characters}
+        framework_characters = set()
+        for arc in framework.arcs:
+            for beat in arc.beats:
+                for char in beat.characters_involved:
+                    if char not in bible_characters:
+                        issues["character_issues"].append(
+                            f"Character '{char}' in beat '{beat.name}' not found in bible"
                         )
-
-            # Check theme consistency
-            bible_themes = set(bible.themes)
-            framework_themes = {theme for arc in framework.arcs for theme in arc.themes}
+                    framework_characters.add(char)
+        
+        # Check locations
+        bible_locations = {loc.name for loc in bible.locations}
+        for arc in framework.arcs:
+            for beat in arc.beats:
+                if beat.location not in bible_locations:
+                    issues["location_issues"].append(
+                        f"Location '{beat.location}' in beat '{beat.name}' not found in bible"
+                    )
+        
+        # Check themes
+        bible_themes = set(bible.themes)
+        framework_themes = {theme for arc in framework.arcs for theme in arc.themes}
+        if not framework_themes.intersection(bible_themes):
+            issues["theme_issues"].append("No themes from bible used in framework")
+        
+        # Check plot elements
+        if not any(arc.character_arcs for arc in framework.arcs):
+            issues["plot_issues"].append("No character arcs defined")
             
-            if not framework_themes.intersection(bible_themes):
-                issues["theme_consistency"].append(
-                    "No overlap between bible themes and framework themes"
-                )
-
-            return issues
+        if not framework.subplot_connections:
+            issues["plot_issues"].append("No subplot connections defined")
             
-        except Exception as e:
-            logger.error(f"Error validating framework: {str(e)}")
-            raise 
+        return issues 
