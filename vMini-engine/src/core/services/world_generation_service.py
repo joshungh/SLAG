@@ -7,17 +7,11 @@ from src.core.models.story_bible import StoryBible
 from src.core.services.llm_service import LLMService
 import logging
 from pathlib import Path
+from src.core.utils.logging_config import setup_logging
+from src.config.config import settings
 
-# Set up logging
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-    handlers=[
-        logging.FileHandler('logs/world_generation.log'),
-        logging.StreamHandler()
-    ]
-)
-logger = logging.getLogger(__name__)
+# Replace existing logging setup with:
+logger = setup_logging("world_generation", "world_generation.log")
 
 class WorldGenerationService:
     def __init__(self, llm_service: LLMService):
@@ -57,23 +51,42 @@ class WorldGenerationService:
             "universe": {"setting": "", "era": ""},
             "characters": [{"name": "", "role": "", "description": ""}],
             "locations": [{"name": "", "description": ""}],
-            "factions": [{"name": "", "description": "", "goals": []}],
+            "factions": [{"name": "", "description": "", "goals": [], "relationships": {}}],
             "technology": [{"name": "", "description": ""}],
-            "timeline": {},
+            "timeline": {
+                "pre_2145_mars_exploration": [
+                    {"year": "2028", "event": "First Mars landing", "details": "..."}
+                ]
+            },
             "themes": [],
             "notes": []
-        }"""
+        }
+        
+        Ensure all timeline entries follow the format of year, event, and optional details."""
 
         full_prompt = f"{system_prompt}\n\nUser Story Prompt: {prompt}"
-        response = await self.llm.generate(full_prompt)
-        
         try:
+            logger.info(f"Initializing bible from prompt: {prompt[:100]}...")
+            response = await self.llm.generate(full_prompt)
+            
+            logger.debug(f"Raw LLM response: {response[:200]}...")
+            
             bible_dict = json.loads(response)
             self.current_bible = StoryBible(**bible_dict)
+            
+            logger.info("Successfully created initial bible")
             self._save_bible(self.current_bible, "initial")
             return self.current_bible
+            
+        except json.JSONDecodeError as e:
+            logger.error(f"Failed to parse LLM response as JSON: {str(e)}")
+            logger.debug(f"Invalid JSON response: {response}")
+            raise
+        except ValidationError as e:
+            logger.error(f"Bible validation failed: {str(e)}")
+            raise
         except Exception as e:
-            print(f"Error parsing LLM response to StoryBible: {str(e)}")
+            logger.error(f"Unexpected error in initialize_bible: {str(e)}")
             raise
 
     async def identify_expansion_areas(self) -> list[str]:
@@ -91,69 +104,112 @@ class WorldGenerationService:
         response = await self.llm.generate(full_prompt)
         return [area.strip() for area in response.split('\n') if area.strip()]
 
-    async def expand_bible(self, expansion_area: str) -> StoryBible:
+    async def expand_bible(self, bible: StoryBible, area: str) -> StoryBible:
         """Expand a specific area of the story bible"""
-        if not self.current_bible:
-            raise ValueError("No story bible initialized")
-
-        system_prompt = f"""Given the current story bible, expand and add more detail to this specific area: 
-        {expansion_area}. 
-
-        IMPORTANT: When modifying any section, you must maintain the complete structure for each element:
-        - Characters must have: name, role, description, traits, background
-        - Locations must have: name, description, significance
-        - Factions must have: name, description, goals, relationships
-        - Technology must have: name, description, impact
-
-        Return only the new or modified content in valid JSON format that matches the original structure.
-        Do not omit any required fields when modifying elements."""
-
         try:
-            bible_json = self.current_bible.model_dump_json()
-            full_prompt = f"{system_prompt}\n\nCurrent Story Bible:\n{bible_json}\n\n"
-            full_prompt += """IMPORTANT: Your response must be valid JSON and include ALL required fields.
-            For factions, you MUST include: name, description, goals, and relationships.
-            Example faction structure:
-            {
-                "factions": [{
-                    "name": "Example Faction",
-                    "description": "Detailed description here",
-                    "goals": ["goal1", "goal2"],
-                    "relationships": {}
-                }]
-            }"""
+            logger.info(f"Expanding area: {area}")
             
-            response = await self.llm.generate(full_prompt)
+            # Create expansion prompt
+            system_prompt = f"""You are a world-building expert. Expand the following area of the story bible: {area}
+
+            IMPORTANT: You must return your response as a valid JSON object that matches the story bible structure.
             
-            # Log the response for debugging
-            logger.info(f"LLM Response for {expansion_area}: {response[:200]}...")
+            Rules:
+            1. Include ONLY the sections being expanded/modified
+            2. Maintain the EXACT same structure as the original
+            3. Include ALL required fields for any objects
+            4. Use ONLY these top-level keys: title, genre, universe, characters, locations, factions, technology, timeline, themes, notes
+            5. DO NOT include narrative descriptions or explanations outside the JSON structure
             
+            Required field formats:
+            - Factions: {{"name": "", "description": "", "goals": [], "relationships": {{}}}}
+            - Characters: {{"name": "", "role": "", "description": "", "traits": [], "background": ""}}
+            - Locations: {{"name": "", "description": "", "significance": ""}}
+            - Technology: {{"name": "", "description": "", "impact": ""}}
+            - Timeline events: {{"year": "", "event": "", "details": ""}}
+
+            Example response format:
+            {{
+                "factions": [
+                    {{
+                        "name": "Example Faction",
+                        "description": "Detailed description",
+                        "goals": ["goal1", "goal2"],
+                        "relationships": {{"other_faction": "relationship_type"}}
+                    }}
+                ],
+                "technology": [
+                    {{
+                        "name": "Example Tech",
+                        "description": "Detailed description",
+                        "impact": "Impact description"
+                    }}
+                ]
+            }}"""
+
+            # Add current bible context
+            bible_json = bible.model_dump_json()
+            full_prompt = f"{system_prompt}\n\nCurrent Story Bible:\n{bible_json}"
+            
+            # Get LLM response with lower temperature for more structured output
+            response = await self.llm.generate(
+                prompt=full_prompt,
+                max_tokens=settings.WORLD_BUILDING_MAX_TOKENS,
+                temperature=0.3  # Lower temperature for more structured output
+            )
+            
+            logger.info(f"LLM Response for {area}: {response[:200]}...")
+            
+            # Parse response
             try:
                 expansion_dict = json.loads(response)
+                logger.debug(f"Parsed expansion dict: {json.dumps(expansion_dict, indent=2)}")
                 
-                # Pre-validate faction structure
-                if 'factions' in expansion_dict:
-                    for faction in expansion_dict['factions']:
-                        if 'description' not in faction:
-                            logger.error(f"Missing description in faction: {faction}")
-                            faction['description'] = "Description pending"  # Add default
-                
-                current_dict = self.current_bible.model_dump()
-                updated_dict = {**current_dict, **expansion_dict}
-                
-                # Log the merged dictionary before validation
-                logger.info(f"Merged dict before validation: {json.dumps(updated_dict, indent=2)[:200]}...")
-                
-                self.current_bible = StoryBible(**updated_dict)
-                
+                # Merge with existing bible
+                merged_dict = bible.model_dump()
+                for key, value in expansion_dict.items():
+                    logger.debug(f"Merging key '{key}' of type {type(value)}")
+                    if isinstance(value, list):
+                        if key not in merged_dict:
+                            merged_dict[key] = []
+                        merged_dict[key].extend(value)
+                        logger.debug(f"Extended list for key '{key}'")
+                    elif isinstance(value, dict):
+                        if key not in merged_dict:
+                            merged_dict[key] = {}
+                        merged_dict[key].update(value)
+                        logger.debug(f"Updated dict for key '{key}'")
+                    else:
+                        merged_dict[key] = value
+                        logger.debug(f"Set value for key '{key}'")
+            
+            except json.JSONDecodeError:
+                # Try to extract JSON if wrapped in explanation
+                import re
+                json_match = re.search(r'\{[\s\S]*\}', response)
+                if json_match:
+                    expansion_dict = json.loads(json_match.group())
+                else:
+                    raise
+            
+            logger.info(f"Merged dict before validation: {json.dumps(merged_dict, indent=2)}")
+            
+            try:
+                # Validate merged structure
+                updated_bible = StoryBible(**merged_dict)
+                logger.info(f"Successfully validated merged bible for area: {area}")
             except ValidationError as e:
                 logger.error(f"Schema validation error: {str(e)}")
-                logger.error(f"Failed validation for structure: {json.dumps(updated_dict, indent=2)}")
+                logger.error(f"Failed validation for structure: {json.dumps(merged_dict, indent=2)}")
                 raise
-
-            self._save_bible(self.current_bible, f"expansion_{expansion_area[:20]}")
-            return self.current_bible
+                
+            self._save_bible(updated_bible, f"expansion_{area[:20]}")
+            return updated_bible
             
+        except json.JSONDecodeError as e:
+            logger.error(f"Failed to parse LLM response as JSON: {str(e)}")
+            logger.error(f"Raw response: {response}")
+            raise
         except Exception as e:
             logger.error(f"Error in expand_bible: {str(e)}")
             raise

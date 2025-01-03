@@ -1,5 +1,5 @@
 from typing import List, Dict, Optional
-from pydantic import BaseModel, field_validator
+from pydantic import BaseModel, field_validator, Field
 import json
 
 class Universe(BaseModel):
@@ -34,6 +34,15 @@ class Technology(BaseModel):
     description: str
     impact: Optional[str] = None
 
+class TimelineEvent(BaseModel):
+    year: str
+    event: str
+    details: Optional[str] = None
+
+class Timeline(BaseModel):
+    pre_2145_mars_exploration: List[TimelineEvent] = Field(default_factory=list)
+    # Add other timeline sections as needed
+    
 class StoryBible(BaseModel):
     title: str
     genre: str
@@ -42,7 +51,7 @@ class StoryBible(BaseModel):
     locations: List[Location]
     factions: List[Faction]
     technology: List[Technology]
-    timeline: Dict[str, str] = {}
+    timeline: Timeline = Field(default_factory=Timeline)
     themes: List[str] = []
     notes: List[str] = []
 

@@ -6,9 +6,21 @@ check_health() {
     return $?
 }
 
+# Clean up function
+cleanup() {
+    echo "Cleaning up..."
+    docker-compose down
+    exit 1
+}
+
+# Trap Ctrl+C and call cleanup
+trap cleanup INT
+
 # Ensure the container is running
 if ! docker-compose ps | grep -q "Up"; then
     echo "Starting services..."
+    docker-compose down  # Clean up any existing containers
+    docker-compose build --no-cache  # Rebuild without cache
     docker-compose up -d
 fi
 
@@ -21,7 +33,7 @@ while ! check_health; do
     if [ $count -eq $max_retries ]; then
         echo "Service failed to start after $max_retries attempts"
         docker-compose logs app  # Print app logs for debugging
-        exit 1
+        cleanup
     fi
     echo "Attempt $count/$max_retries..."
     sleep 2
@@ -29,5 +41,5 @@ done
 
 echo "Service is ready! Running tests..."
 
-# Run the test
-python -m src.tests.test_world_generation 
+# Run the tests
+python -m pytest src/tests/test_world_generation.py -v 

@@ -13,11 +13,19 @@ class LLMService:
         )
         self.model_id = settings.BEDROCK_MODEL_ID
 
-    async def generate(self, prompt: str, max_tokens: int = 4096) -> str:
+    async def generate(
+        self, 
+        prompt: str, 
+        max_tokens: int = 4096,
+        temperature: float = 0.7,
+        top_p: float = 0.9
+    ) -> str:
         try:
             body = json.dumps({
                 "anthropic_version": "bedrock-2023-05-31",
                 "max_tokens": max_tokens,
+                "temperature": temperature,
+                "top_p": top_p,
                 "messages": [{"role": "user", "content": prompt}]
             })
             

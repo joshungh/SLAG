@@ -37,6 +37,19 @@ class Settings(BaseSettings):
     REDIS_HOST: str = os.getenv("REDIS_HOST", "redis")
     REDIS_PORT: int = int(os.getenv("REDIS_PORT", "6379"))
     
+    # LLM Generation Settings
+    WORLD_BUILDING_TEMPERATURE: float = 0.5
+    WORLD_BUILDING_MAX_TOKENS: int = 120000
+    
+    FRAMEWORK_TEMPERATURE: float = 0.7
+    FRAMEWORK_MAX_TOKENS: int = 100000
+    
+    NARRATIVE_TEMPERATURE: float = 0.8
+    NARRATIVE_MAX_TOKENS: int = 60000
+    
+    # Default top_p value
+    TOP_P: float = 0.9
+    
     model_config = ConfigDict(
         env_file=".env",
         env_file_encoding="utf-8"
