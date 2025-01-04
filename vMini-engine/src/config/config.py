@@ -43,12 +43,18 @@ class Settings(BaseSettings):
     
     FRAMEWORK_TEMPERATURE: float = 0.6
     FRAMEWORK_MAX_TOKENS: int = 100000
-    
-    NARRATIVE_TEMPERATURE: float = 0.8
-    NARRATIVE_MAX_TOKENS: int = 60000
+
+    # Story Generation Settings
+    STORY_TEMPERATURE: float = 0.7
+    STORY_MAX_TOKENS: int = 200000  # Full context window
+    SECTION_MAX_TOKENS: int = 200000  # Nearly full window per beat
     
     # Default top_p value
     TOP_P: float = 0.9
+    
+    # Story Improvement Settings
+    IMPROVEMENT_TEMPERATURE: float = 0.8
+    IMPROVEMENT_MAX_TOKENS: int = 200000  # Full context for improvements
     
     model_config = ConfigDict(
         env_file=".env",
