@@ -13,30 +13,34 @@ def sample_bible():
     with open("output/final_story_bible_20250104_141839.json") as f:
         return json.load(f)
 
+@pytest.mark.asyncio
 async def test_framework_generation(framework_service, sample_bible):
     """Test basic framework generation"""
     try:
         framework = await framework_service.generate_framework(sample_bible)
         
         # Basic validation
-        assert framework.title is not None
-        assert framework.genre is not None
-        assert framework.main_conflict is not None
-        assert framework.central_theme is not None
-        assert len(framework.arcs) > 0
+        assert framework.title is not None, "Framework must have a title"
+        assert framework.genre is not None, "Framework must have a genre"
+        assert framework.main_conflict is not None, "Framework must have a main conflict"
+        assert framework.central_theme is not None, "Framework must have a central theme"
+        assert len(framework.arcs) > 0, "Framework must have at least one arc"
         
-        # Check first arc
-        first_arc = framework.arcs[0]
-        assert len(first_arc.beats) >= 3  # At least beginning, middle, end
-        assert first_arc.themes
-        assert first_arc.character_arcs
-        
-        # Validate characters exist in bible (this constraint makes sense)
-        bible_characters = {char["name"] for char in sample_bible["characters"]}
-        for arc in framework.arcs:
+        # Check each arc
+        for i, arc in enumerate(framework.arcs):
+            assert len(arc.beats) >= 3, f"Arc {i} ({arc.name}) must have at least 3 beats"
+            assert arc.themes, f"Arc {i} ({arc.name}) must have themes"
+            assert arc.character_arcs, f"Arc {i} ({arc.name}) must have character arcs"
+            
+            # Validate characters exist in bible
+            bible_characters = {char["name"] for char in sample_bible["characters"]}
             for beat in arc.beats:
                 for char in beat.characters_involved:
-                    assert char in bible_characters
+                    assert char in bible_characters, f"Character {char} in beat {beat.name} not found in bible"
+                
+                # Validate location exists in bible
+                bible_locations = {loc["name"] for loc in sample_bible["locations"]}
+                assert beat.location in bible_locations, f"Location {beat.location} in beat {beat.name} not found in bible"
         
         # Save the framework for review
         print(json.dumps(framework.model_dump(), indent=2))

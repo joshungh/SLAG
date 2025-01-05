@@ -96,6 +96,10 @@ class StoryFrameworkService:
             
             try:
                 framework_dict = json.loads(response)
+                
+                # Add beat validation before creating framework
+                framework_dict = await self._validate_arc_beats(framework_dict)
+                
                 framework = StoryFramework(**framework_dict)
                 
                 # Add output directory check and creation
@@ -180,3 +184,44 @@ class StoryFrameworkService:
             issues["plot_issues"].append("No subplot connections defined")
             
         return issues 
+
+    async def _validate_arc_beats(self, framework_dict: dict) -> dict:
+        """Ensure each arc has at least 3 beats (beginning, middle, end)"""
+        if "arcs" not in framework_dict:
+            return framework_dict
+        
+        for arc in framework_dict["arcs"]:
+            if len(arc.get("beats", [])) < 3:
+                # Get context from the arc
+                arc_name = arc.get("name", "")
+                arc_desc = arc.get("description", "")
+                existing_beats = arc.get("beats", [])
+                
+                # Construct prompt for additional beats
+                prompt = f"""Given this story arc:
+                Name: {arc_name}
+                Description: {arc_desc}
+                Current Beats: {json.dumps(existing_beats, indent=2)}
+                
+                Add additional story beats to ensure we have a complete beginning, middle, and end. 
+                Return ONLY the new beats as a JSON array. Each beat must have:
+                - name
+                - description
+                - characters_involved (array)
+                - location
+                
+                Current locations and characters must be maintained for consistency."""
+                
+                try:
+                    response = await self.llm.generate(prompt, temperature=0.7)
+                    new_beats = json.loads(response)
+                    
+                    # Merge new beats with existing ones
+                    arc["beats"].extend(new_beats)
+                    
+                    logger.info(f"Added {len(new_beats)} beats to arc '{arc_name}'")
+                    
+                except Exception as e:
+                    logger.error(f"Error adding beats to arc: {str(e)}")
+                    
+        return framework_dict 

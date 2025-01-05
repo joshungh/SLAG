@@ -42,7 +42,7 @@ class Settings(BaseSettings):
     WORLD_BUILDING_MAX_TOKENS: int = 120000
     
     FRAMEWORK_TEMPERATURE: float = 0.6
-    FRAMEWORK_MAX_TOKENS: int = 100000
+    FRAMEWORK_MAX_TOKENS: int = 200000
 
     # Story Generation Settings
     STORY_TEMPERATURE: float = 0.7
