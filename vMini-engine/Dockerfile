@@ -11,9 +11,10 @@ RUN apt-get update && apt-get install -y \
     libssl-dev \
     && rm -rf /var/lib/apt/lists/*
 
-# Create output and logs directories
-RUN mkdir -p /app/output /app/logs && \
-    chmod 777 /app/output /app/logs
+# Create all directories with proper permissions
+RUN mkdir -p /app/output/stories /app/output/frameworks /app/logs /app/.pytest_cache && \
+    chmod -R 777 /app/output /app/logs /app/.pytest_cache && \
+    chown -R nobody:nogroup /app/output /app/logs /app/.pytest_cache
 
 # Copy requirements and setup files first
 COPY requirements.txt setup.py ./
@@ -29,5 +30,12 @@ RUN pip install --no-cache-dir -r requirements.txt && \
 ENV PYTHONPATH=/app
 ENV PYTHONUNBUFFERED=1
 
+# Switch to non-root user
+USER nobody
+
 # Run the API service
 CMD ["uvicorn", "src.api.main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"] 
+
+# After creating other directories
+RUN mkdir -p /app/.pytest_cache && \
+    chmod -R 777 /app/.pytest_cache 

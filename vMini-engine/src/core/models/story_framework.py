@@ -1,22 +1,24 @@
 from typing import List, Dict, Optional
-from pydantic import BaseModel
+from .story_bible import ExtensibleModel
+from datetime import datetime
 
-class StoryBeat(BaseModel):
+class StoryBeat(ExtensibleModel):
     name: str
     description: str
     characters_involved: List[str]
     location: str
 
-class StoryArc(BaseModel):
+class StoryArc(ExtensibleModel):
     name: str
     description: str
     beats: List[StoryBeat]
     themes: List[str]
     character_arcs: Dict[str, str]
 
-class StoryFramework(BaseModel):
+class StoryFramework(ExtensibleModel):
     title: str
     genre: str
+    created: datetime = datetime.now()
     main_conflict: str
     central_theme: str
     arcs: List[StoryArc] 

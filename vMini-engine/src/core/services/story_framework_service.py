@@ -7,6 +7,7 @@ from src.core.models.story_framework import StoryFramework, StoryArc, StoryBeat
 from src.core.services.llm_service import LLMService
 from src.core.utils.logging_config import setup_logging
 from src.config.config import settings
+from pathlib import Path
 
 logger = setup_logging("story_framework", "story_framework.log")
 
@@ -108,7 +109,7 @@ class StoryFrameworkService:
                     os.makedirs(output_dir)
                     
                 # Save framework to file with timestamp
-                timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+                timestamp = framework.created.strftime("%Y%m%d_%H%M%S")
                 output_path = f"{output_dir}/framework_{timestamp}.json"
                 
                 with open(output_path, "w") as f:
@@ -225,3 +226,9 @@ class StoryFrameworkService:
                     logger.error(f"Error adding beats to arc: {str(e)}")
                     
         return framework_dict 
+
+    async def save_framework(self, framework: StoryFramework) -> Path:
+        """Save framework to file with timestamp"""
+        timestamp = framework.created.strftime("%Y%m%d_%H%M%S")
+        filename = f"framework_{timestamp}.json"
+        output_path = Path("output/frameworks") / filename

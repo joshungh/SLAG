@@ -47,5 +47,5 @@ if [ $# -eq 0 ]; then
     python -m pytest src/tests/ -v
 else
     # Run specified tests
-    python -m pytest "$@" -v
+    docker-compose run -T app pytest -s "$@"
 fi 

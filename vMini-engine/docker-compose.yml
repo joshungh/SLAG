@@ -6,9 +6,9 @@ services:
     ports:
       - "8000:8000"
     volumes:
-      - ./src:/app/src
-      - ./output:/app/output
-      - ./logs:/app/logs
+      - ./src:/app/src:ro
+      - ./output:/app/output:rw
+      - ./logs:/app/logs:rw
     env_file:
       - .env
     environment:

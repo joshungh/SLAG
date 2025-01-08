@@ -3,7 +3,7 @@ import json
 import os
 from datetime import datetime
 from pydantic import ValidationError
-from src.core.models.story_bible import StoryBible
+from src.core.models.story_bible import StoryBible, TimelineEvent
 from src.core.services.llm_service import LLMService
 from src.core.services.embedding_service import EmbeddingService
 import logging
@@ -28,7 +28,7 @@ class WorldGenerationService:
     def _save_bible(self, bible: StoryBible, stage: str, is_final: bool = False):
         """Save the bible to a JSON file with timestamp"""
         try:
-            timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+            timestamp = bible.created.strftime("%Y%m%d_%H%M%S")
             
             # For intermediate saves
             if not is_final:
@@ -82,6 +82,10 @@ class WorldGenerationService:
             logger.debug(f"Raw LLM response: {response[:200]}...")
             
             bible_dict = json.loads(response)
+            
+            # Convert timeline events using the model's helper method
+            bible_dict = StoryBible.convert_timeline_events(bible_dict)
+            
             self.current_bible = StoryBible(**bible_dict)
             
             logger.info("Successfully created initial bible")
@@ -131,11 +135,31 @@ class WorldGenerationService:
             # Separate the example to avoid nested f-strings
             example_tech = '''{
                 "technology": [{
-                    "name": "BioFilter Array",
-                    "description": "Advanced air purification system",
-                    "limitations": ["Monthly maintenance", "High power use"],
-                    "requirements": {"power": "50kW"},
-                    "risks": ["Filter contamination"]
+                    "name": "Key Technology Name",
+                    "description": "What it does and its significance",
+                    "limitations": ["Known limitations"],
+                    "requirements": {"key": "value"},
+                    "risks": ["Potential risks"]
+                }]
+            }'''
+            
+            example_locations = '''{
+                "locations": [{
+                    "name": "Location Name",
+                    "type": "Location Type",
+                    "description": "Physical description",
+                    "significance": "Key story importance",
+                    "features": ["Notable feature 1", "Notable feature 2"]
+                }]
+            }'''
+            
+            example_social = '''{
+                "social_structures": [{
+                    "name": "Structure Name",
+                    "type": "Structure Type",
+                    "description": "How it works",
+                    "significance": "Impact on story",
+                    "members": ["Group 1", "Group 2"]
                 }]
             }'''
             
@@ -154,41 +178,38 @@ class WorldGenerationService:
             Character:
             {{
                 "characters": [{{
-                    "name": "Dr. Sarah Chen",
-                    "role": "Lead Scientist",
-                    "description": "Brilliant xenobiologist",
-                    "background": "PhD from MIT",
-                    "traits": ["dedicated", "curious"]
+                    "name": "Character Name",
+                    "role": "Primary Role",
+                    "description": "Key characteristics",
+                    "background": "Relevant history",
+                    "traits": ["trait1", "trait2"]
                 }}]
             }}
             
             Location:
             {{
                 "locations": [{{
-                    "name": "Olympus Base",
-                    "description": "Main research facility",
-                    "features": ["Dome structure", "Labs"],
-                    "hazards": ["Dust storms", "Radiation"]
+                    "name": "Location Name",
+                    "description": "What makes it significant",
+                    "features": ["Notable features"],
+                    "significance": ["Story relevance"]
                 }}]
             }}
             
-            Faction or Social Group:
+            Timeline Events:
             {{
-                "factions": [{{
-                    "name": "Mars Born Coalition",
-                    "description": "Political group representing Mars-born citizens",
-                    "goals": ["Colonial autonomy", "Resource rights"],
-                    "relationships": {{"Earth Government": "strained", "Corporate Council": "neutral"}}
-                }}]
+                "timeline": {{
+                    "key_period": [
+                        {{
+                            "year": "YYYY",
+                            "event": "Significant event",
+                            "impact": "How it affects the story"
+                        }}
+                    ]
+                }}
             }}
             
-            For social structures without clear factions, add to notes array:
-            {{
-                "notes": [
-                    "Class hierarchy divides along professional specialization rather than traditional wealth",
-                    "Education system emphasizes practical engineering and survival skills"
-                ]
-            }}"""
+            Be creative and expansive - if you see opportunities to add relevant details beyond the basic format, do so."""
 
             bible_json = bible.model_dump_json()
             full_prompt = f"{system_prompt}\n\nCurrent Story Bible:\n{bible_json}\n\nExpand this area:\n{area}"
@@ -205,7 +226,6 @@ class WorldGenerationService:
                 # Clean up response to ensure it's valid JSON
                 response = response.strip()
                 if not response.startswith('{'):
-                    # Find the first { and last }
                     start = response.find('{')
                     end = response.rfind('}') + 1
                     if start >= 0 and end > start:
@@ -216,20 +236,23 @@ class WorldGenerationService:
                         
                 expansion_dict = json.loads(response)
                 
-                # Validate expansion data
+                # Convert any timeline events in the expansion
+                expansion_dict = StoryBible.convert_timeline_events(expansion_dict)
+                
+                # Validate expansion data more flexibly
                 for key, value in expansion_dict.items():
                     if isinstance(value, list):
                         validated_items = []
                         for item in value:
                             if isinstance(item, dict):
-                                if "name" not in item:
-                                    logger.warning(f"Skipping item without name in {key}: {item}")
-                                    continue
+                                # Accept items with any identifying field
+                                if not any(id_field in item for id_field in ["name", "year", "title", "id"]):
+                                    logger.warning(f"Item in {key} lacks identifier: {item}")
                                 validated_items.append(item)
                         expansion_dict[key] = validated_items
                 
                 # Only proceed if we have valid items
-                if any(isinstance(v, list) and v for v in expansion_dict.values()):
+                if any(isinstance(v, (list, dict)) and v for v in expansion_dict.values()):
                     bible.add_expansion(expansion_dict)
                     logger.info(f"Successfully merged expansion for area: {area}")
                 else:
@@ -364,3 +387,10 @@ class WorldGenerationService:
             return 'factions and politics'
         else:
             return 'general world-building' 
+
+    async def save_bible(self, bible: StoryBible, suffix: str = "") -> Path:
+        """Save bible to file with timestamp"""
+        timestamp = bible.created.strftime("%Y%m%d_%H%M%S")
+        filename = f"bible_{suffix}_{timestamp}.json"
+        output_path = Path("output") / filename
+        return output_path 
