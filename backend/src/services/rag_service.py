@@ -18,7 +18,6 @@ from ..models.metadata_schema import (
     CombatRating, TechLevel, AugmentationLevel,
     OperationalStatus, ThreatLevel, DocumentMetadata
 )
-from ..models.story_schema import ChapterSummary
 
 logger = logging.getLogger(__name__)
 
