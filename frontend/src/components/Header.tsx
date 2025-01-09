@@ -60,7 +60,17 @@ export default function Header() {
           <ul className="flex space-x-4 font-['IBM_Plex_Mono'] text-sm">
             <li className="flex items-center">
               <div className="flex space-x-4">
+<<<<<<< HEAD
                 <Link
+=======
+                <Link 
+                  href="/dashboard"
+                  className="hover:text-green-300 transition-colors"
+                >
+                  Dashboard
+                </Link>
+                <Link 
+>>>>>>> 689abf8cefcb9bd45b3cf0cb4c74cf2ff1d83785
                   href="https://docs.lostage.io"
                   className="hover:text-green-300 transition-colors"
                   target="_blank"
@@ -130,7 +140,20 @@ export default function Header() {
         <nav className="md:hidden mt-4">
           <ul className="flex flex-col space-y-4 font-['IBM_Plex_Mono'] text-sm">
             <li>
+<<<<<<< HEAD
               <Link
+=======
+              <Link 
+                href="/dashboard"
+                className="hover:text-green-300 transition-colors"
+                onClick={() => setIsMenuOpen(false)}
+              >
+                Dashboard
+              </Link>
+            </li>
+            <li>
+              <Link 
+>>>>>>> 689abf8cefcb9bd45b3cf0cb4c74cf2ff1d83785
                 href="https://docs.lostage.io"
                 className="hover:text-green-300 transition-colors"
                 target="_blank"
