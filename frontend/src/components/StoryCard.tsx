@@ -45,13 +45,13 @@ export default function StoryCard({
   };
 
   return (
-    <div className="group relative bg-gray-900/50 rounded-lg overflow-hidden">
+    <div className="relative bg-gray-900/50 rounded-lg overflow-hidden hover:bg-gray-900/70">
       {/* Book Cover */}
       <div className="aspect-[3/4] relative overflow-hidden">
         <img
           src={coverImage}
           alt={title}
-          className="object-cover w-full h-full group-hover:scale-105 transition-transform duration-300"
+          className="object-cover w-full h-full hover:scale-105 transition-transform duration-300"
         />
         {/* Likes Badge */}
         <div className="absolute top-2 right-2 bg-black/60 px-2 py-1 rounded text-sm flex items-center space-x-1">
@@ -62,7 +62,8 @@ export default function StoryCard({
           />
           <span>{formatNumber(likes)}</span>
         </div>
-        <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+        {/* Preview Button - Only show on individual card hover */}
+        <div className="absolute inset-0 bg-black/40 opacity-0 hover:opacity-100 transition-opacity flex items-center justify-center">
           <button
             onClick={onPreview}
             className="bg-green-400 text-black rounded-lg px-3 py-1.5 flex items-center space-x-1 hover:bg-green-300 transition-colors text-sm"

@@ -71,9 +71,12 @@ class ChapterSummary(BaseModel):
     chapter_number: int
     theme: str
     major_developments: List[str]
-    unresolved_plots: List[str]
-    cliffhangers: List[Dict[str, str]]  # Maps plot_thread_id to cliffhanger description
-    character_developments: Dict[str, str]
+    unresolved_plots: List[PlotThread]
+    character_developments: Dict[str, CharacterArc]
+    cliffhangers: List[str] = []  # Add default empty list
+    
+    class Config:
+        arbitrary_types_allowed = True
 
 class StoryState(BaseModel):
     model_config = ConfigDict(arbitrary_types_allowed=True)
@@ -86,6 +89,37 @@ class StoryState(BaseModel):
     timeline: List[Dict] = []
     chapter_summaries: List[ChapterSummary] = []
     unresolved_cliffhangers: List[Dict[str, str]] = []
+
+    def update_for_new_chapter(self, chapter_number: int, previous_context: Dict, arc_analysis: Dict):
+        """Update story state for a new chapter"""
+        self.current_chapter = chapter_number
+        self.current_scene = 0
+
+        # For first chapter, initialize with default state
+        if chapter_number == 1:
+            return  # Keep initial state from story initialization
+
+        # For subsequent chapters...
+        # Update plot threads based on arc analysis
+        if arc_analysis.get("plot_suggestions", {}).get("new_plots_needed"):
+            # Keep existing active plots
+            self.active_plot_threads = [
+                plot for plot in self.active_plot_threads 
+                if plot.status == PlotStatus.ACTIVE
+            ]
+
+        # Update character states based on previous chapter
+        for char_id, char_arc in previous_context.get("character_arcs", {}).items():
+            if char_id in self.character_states:
+                self.character_states[char_id].current_state = char_arc.get("current_state", "active")
+                self.character_states[char_id].development_goals = char_arc.get("development_goals", [])
+
+        # Update world state
+        self.world_state.update(arc_analysis.get("world_state", {}))
+
+        # Add previous chapter summary if exists
+        if previous_context.get("chapter_summary"):
+            self.chapter_summaries.append(previous_context["chapter_summary"])
 
 class SceneConfig(BaseModel):
     """Configuration for scene generation"""
