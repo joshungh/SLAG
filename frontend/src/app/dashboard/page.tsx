@@ -115,43 +115,52 @@ export default function DashboardPage() {
           <Icon className="w-6 h-6 text-green-400" />
           <h2 className="text-2xl font-serif">{title}</h2>
         </div>
-        <div className="flex items-center space-x-4">
-          {actions}
-          <div className="flex space-x-2">
-            <button
-              onClick={() => scrollContainer("left", id)}
-              className="p-2 rounded-full bg-gray-800 hover:bg-gray-700"
-            >
-              <ChevronLeft className="w-5 h-5" />
-            </button>
-            <button
-              onClick={() => scrollContainer("right", id)}
-              className="p-2 rounded-full bg-gray-800 hover:bg-gray-700"
-            >
-              <ChevronRight className="w-5 h-5" />
-            </button>
-          </div>
-        </div>
+        {actions}
       </div>
 
       <div className="relative">
-        <div
-          id={id}
-          className="flex gap-4 overflow-x-auto scrollbar-hide"
-          style={{
-            scrollSnapType: "x mandatory",
-            WebkitOverflowScrolling: "touch",
-          }}
-        >
-          {stories.map((story) => (
-            <div
-              key={story.id}
-              className="flex-none w-[calc((100%-32px)/2)] sm:w-[calc((100%-48px)/3)] md:w-[calc((100%-64px)/4)] lg:w-[calc((100%-64px)/5)]"
-              style={{ scrollSnapAlign: "start" }}
-            >
-              <StoryCard {...story} onPreview={() => setSelectedStory(story)} />
-            </div>
-          ))}
+        {/* Left Arrow - Keep group hover only for arrows */}
+        <div className="group">
+          <button
+            onClick={() => scrollContainer("left", id)}
+            className="absolute left-0 top-1/2 -translate-y-1/2 z-10 p-2 rounded-full bg-black/60 hover:bg-black/80 transition-all opacity-0 group-hover:opacity-100 -translate-x-1/2"
+            aria-label="Scroll left"
+          >
+            <ChevronLeft className="w-6 h-6 text-white" />
+          </button>
+
+          {/* Right Arrow */}
+          <button
+            onClick={() => scrollContainer("right", id)}
+            className="absolute right-0 top-1/2 -translate-y-1/2 z-10 p-2 rounded-full bg-black/60 hover:bg-black/80 transition-all opacity-0 group-hover:opacity-100 translate-x-1/2"
+            aria-label="Scroll right"
+          >
+            <ChevronRight className="w-6 h-6 text-white" />
+          </button>
+
+          <div
+            id={id}
+            className="flex gap-4 overflow-x-auto scrollbar-hide scroll-smooth"
+            style={{
+              scrollSnapType: "x mandatory",
+              WebkitOverflowScrolling: "touch",
+              msOverflowStyle: "none",
+              scrollbarWidth: "none",
+            }}
+          >
+            {stories.map((story) => (
+              <div
+                key={story.id}
+                className="flex-none w-[calc((100%-32px)/2)] sm:w-[calc((100%-48px)/3)] md:w-[calc((100%-64px)/4)] lg:w-[calc((100%-64px)/5)]"
+                style={{ scrollSnapAlign: "start" }}
+              >
+                <StoryCard
+                  {...story}
+                  onPreview={() => setSelectedStory(story)}
+                />
+              </div>
+            ))}
+          </div>
         </div>
       </div>
     </section>
