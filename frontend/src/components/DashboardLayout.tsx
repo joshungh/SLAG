@@ -18,7 +18,7 @@ export default function DashboardLayout({
       {/* Sidebar */}
       <div className="w-64 bg-black border-r border-white/10">
         <div className="p-6">
-          <Link href="/dashboard" className="text-2xl font-bold text-green-400">
+          <Link href="/dashboard" className="text-xl font-bold text-green-400">
             SLAG
           </Link>
         </div>
@@ -26,7 +26,7 @@ export default function DashboardLayout({
         <nav className="mt-6">
           <Link
             href="/dashboard"
-            className={`flex items-center px-6 py-3 text-xl font-medium ${
+            className={`flex items-center px-6 py-3 text-base font-medium ${
               pathname === "/dashboard"
                 ? "bg-white/10 text-white"
                 : "text-gray-400 hover:text-white"
@@ -36,7 +36,7 @@ export default function DashboardLayout({
           </Link>
           <Link
             href="/dashboard/create"
-            className={`flex items-center px-6 py-3 text-xl font-medium ${
+            className={`flex items-center px-6 py-3 text-base font-medium ${
               pathname === "/dashboard/create"
                 ? "bg-white/10 text-white"
                 : "text-gray-400 hover:text-white"
@@ -46,7 +46,7 @@ export default function DashboardLayout({
           </Link>
           <Link
             href="/dashboard/library"
-            className={`flex items-center px-6 py-3 text-xl font-medium ${
+            className={`flex items-center px-6 py-3 text-base font-medium ${
               pathname === "/dashboard/library"
                 ? "bg-white/10 text-white"
                 : "text-gray-400 hover:text-white"
@@ -56,7 +56,7 @@ export default function DashboardLayout({
           </Link>
           <Link
             href="/dashboard/explore"
-            className={`flex items-center px-6 py-3 text-xl font-medium ${
+            className={`flex items-center px-6 py-3 text-base font-medium ${
               pathname === "/dashboard/explore"
                 ? "bg-white/10 text-white"
                 : "text-gray-400 hover:text-white"
@@ -66,7 +66,7 @@ export default function DashboardLayout({
           </Link>
           <Link
             href="/dashboard/search"
-            className={`flex items-center px-6 py-3 text-xl font-medium ${
+            className={`flex items-center px-6 py-3 text-base font-medium ${
               pathname === "/dashboard/search"
                 ? "bg-white/10 text-white"
                 : "text-gray-400 hover:text-white"
