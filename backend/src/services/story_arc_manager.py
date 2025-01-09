@@ -7,18 +7,13 @@ logger = logging.getLogger(__name__)
 class StoryArcManager:
     """Manages long-term story arcs, plot threads, and character development"""
     
-    def __init__(self, story_state: Optional[StoryState] = None):
+    def __init__(self):
         self.major_arcs: List[PlotThread] = []
         self.minor_arcs: List[PlotThread] = []
         self.character_arcs: Dict[str, List[CharacterArc]] = {}
         self.tension_curve: Dict[int, float] = {}  # Maps chapter numbers to tension levels
         self.tension_threshold = 0.2  # Minimum change to be considered significant
-        self.story_state = story_state
         
-    def update_story_state(self, story_state: StoryState):
-        """Update the story state reference"""
-        self.story_state = story_state
-
     async def analyze_tension_curve(self, chapter_number: int) -> Dict:
         """Analyze story tension and recommend adjustments"""
         recent_tension = [self.tension_curve.get(i, 0.5) 
@@ -42,28 +37,21 @@ class StoryArcManager:
             "introduce_conflict": tension_analysis["trend"] == "falling",
             "provide_resolution": tension_analysis["needs_relief"],
             "build_to_climax": tension_analysis["needs_climax"],
-            "recommended_focus": self._determine_focus(tension_analysis)
+            "recommended_focus": self._determine_focus(story_state, tension_analysis)
         }
         
         return suggestions
     
-    def _determine_focus(self, tension_analysis: Dict) -> str:
-        """Determine narrative focus based on tension analysis"""
-        current_tension = tension_analysis.get("current_tension", 0.5)
-        trend = tension_analysis.get("trend", "stable")
-        needs_climax = tension_analysis.get("needs_climax", False)
-        needs_relief = tension_analysis.get("needs_relief", False)
-        
-        if needs_climax:
-            return "climax"
-        elif needs_relief:
-            return "relief"
-        elif trend == "rising":
-            return "escalation"
-        elif trend == "falling":
-            return "development"
+    def _determine_focus(self, story_state: StoryState, tension: Dict) -> str:
+        """Determine recommended focus for next chapter"""
+        if tension["needs_relief"]:
+            return "character_development"
+        elif tension["needs_climax"]:
+            return "plot_resolution"
+        elif tension["trend"] == "falling":
+            return "conflict_introduction"
         else:
-            return "setup"
+            return "world_building" 
 
     async def analyze_world_state(self, story_state: StoryState) -> Dict:
         """Analyze world state and suggest developments"""
@@ -157,67 +145,3 @@ class StoryArcManager:
             return 0
         return sum(1 for i in range(len(tension_values)-1)
                   if abs(tension_values[i+1] - tension_values[i]) > self.tension_threshold)
-
-    async def get_chapter_transition_analysis(self, current_chapter: int) -> Dict:
-        """Analyze previous chapter and suggest next developments"""
-        if not self.story_state:
-            return {
-                "tension_state": await self.analyze_tension_patterns(current_chapter),
-                "recommended_focus": "setup",
-                "plot_suggestions": {},
-                "world_state": {}
-            }
-            
-        tension_analysis = await self.analyze_tension_patterns(current_chapter)
-        
-        return {
-            "tension_state": tension_analysis,
-            "recommended_focus": self._determine_focus(tension_analysis),
-            "plot_suggestions": await self.suggest_plot_developments(self.story_state),
-            "world_state": await self.analyze_world_state(self.story_state)
-        }
-
-    async def synthesize_chapter_context(self, previous_chapter: int) -> Dict:
-        """Get key context from previous chapter"""
-        return {
-            "major_developments": self._extract_major_developments(previous_chapter),
-            "unresolved_plots": self._get_unresolved_plots(),
-            "character_arcs": self._get_active_character_arcs(),
-            "tension_curve": self.tension_curve.get(previous_chapter, {})
-        }
-
-    def _suggest_world_focus(self, locations: set, tech: set, factions: set) -> str:
-        """Suggest which world-building aspect needs most attention"""
-        focus_scores = {
-            "locations": len(locations),
-            "technology": len(tech),
-            "factions": len(factions)
-        }
-        
-        # Find area with least development
-        min_area = min(focus_scores.items(), key=lambda x: x[1])
-        
-        if min_area[1] < 2:  # If area has less than 2 elements
-            return f"{min_area[0]}_development"
-        
-        # If all areas well developed, suggest integration
-        if all(score >= 3 for score in focus_scores.values()):
-            return "world_integration"
-        
-        return "balanced_development"
-
-    def _extract_locations(self, event: str) -> set:
-        """Extract location mentions from text"""
-        # Simple implementation - could be enhanced with NLP
-        locations = {"Station Omega", "Research Lab", "Command Center", "Habitat Ring"}
-        return {loc for loc in locations if loc.lower() in event.lower()}
-
-    def _extract_technology(self, event: str) -> set:
-        """Extract technology mentions from text"""
-        tech = {"Fragment", "quantum", "containment field", "AI Core"}
-        return {t for t in tech if t.lower() in event.lower()}
-
-    def _extract_factions(self, event: str) -> set:
-        """Extract faction mentions from text"""
-        factions = {"Command", "Research Team", "Security", "Engineering"}
-        return {f for f in factions if f.lower() in event.lower()}

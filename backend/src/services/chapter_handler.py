@@ -68,16 +68,10 @@ class ChapterHandler:
 
             Even with limited context, use your creativity to generate compelling science fiction content. Never apologize or explain - just create.
 
-            Previous Chapter Context:
-            {previous_context.get('chapter_summary', 'First chapter')}
-            
-            Active Plot Threads: {[plot.title for plot in story_state.active_plot_threads]}
-            Unresolved Plots: {previous_context.get('unresolved_plots', [])}
-            
-            Story Arc Analysis:
-            - Tension State: {previous_context.get('tension_state', 'initial')}
-            - Recommended Focus: {previous_context.get('recommended_focus', 'setup')}
-            
+            Current Story State:
+            - Active Plot Threads: {[plot.title for plot in story_state.active_plot_threads]}
+            - Unresolved Plots: {previous_context['unresolved_plots']}
+
             RESPOND ONLY WITH A VALID JSON OBJECT following this EXACT 4-act structure:
             {{
                 "theme": "chapter's central theme",
