@@ -41,88 +41,111 @@ class StoryEngineService:
         }
 
     async def get_chapter_context(self) -> Dict:
-        """Get rich context from previous chapters including unresolved plots and key developments"""
-        if self.story_state.current_chapter <= 1:
-            return {}
+        """Get context from previous chapters including unresolved plots and cliffhangers"""
+        recent_chapters = self.story_state.chapter_summaries[-self.context_window:]
         
-        previous_chapter = self.story_state.current_chapter - 1
-        
-        # Get key scenes from previous chapter
-        final_scenes = await self.rag.query_knowledge(
-            query="Key developments and climactic moments",
-            filters={"type": "generated_scene", "chapter_number": previous_chapter},
-            namespace=f"chapter_{previous_chapter}",
-            top_k=5  # Get last few scenes for context
-        )
-        
-        # Get unresolved plot threads
-        unresolved_plots = [
-            plot for plot in self.story_state.active_plot_threads 
-            if plot.status != PlotStatus.RESOLVED
-        ]
-        
-        return {
-            "recent_developments": [scene['content'] for scene in final_scenes],
-            "unresolved_plots": unresolved_plots,
-            "character_states": self.story_state.character_states,
-            "world_state": self.story_state.world_state
+        # Collect unresolved elements
+        context = {
+            "unresolved_plots": [],
+            "active_cliffhangers": [],
+            "character_arcs": {},
+            "recent_developments": []
         }
+        
+        for chapter in recent_chapters:
+            context["unresolved_plots"].extend(chapter.unresolved_plots)
+            context["active_cliffhangers"].extend(chapter.cliffhangers)
+            context["recent_developments"].extend(chapter.major_developments)
+            
+            # Update character developments
+            for char_id, development in chapter.character_developments.items():
+                if char_id not in context["character_arcs"]:
+                    context["character_arcs"][char_id] = []
+                context["character_arcs"][char_id].append(development)
+        
+        return context
 
     async def generate_next_scene(self) -> Dict:
         """Generate the next scene based on chapter plan and story state"""
         try:
-            # Check if we need to transition chapters
-            if (self.current_chapter_plan and 
-                self.story_state.current_scene >= len(self.current_chapter_plan.scene_plans)):
-                logger.info("Reached end of chapter, initiating transition...")
-                success = await self.transition_to_next_chapter()
-                if not success:
-                    raise ValueError("Failed to transition to next chapter")
-            
             # Get chapter plan if not already loaded
             if not self.current_chapter_plan:
-                logger.info(f"Generating plan for Chapter {self.story_state.current_chapter}")
                 context = await self.get_chapter_context()
                 self.current_chapter_plan = await self.chapter_handler.generate_chapter_plan(
                     self.story_state,
                     context
                 )
             
-            # Generate and index scene
-            scene_content = await self.generate_scene_content(self.story_state.current_scene + 1)
+            # Get current scene plan using current_scene counter
+            scene_plan = self.current_chapter_plan.scene_plans[self.story_state.current_scene]
             
-            # Increment scene counter
+            # Generate scene content
+            scene_content = await self.generate_scene_content(scene_plan)
+            
+            # Validate scene content before proceeding
+            if not scene_content or 'content' not in scene_content:
+                logger.error("Invalid scene content generated")
+                # Create a default scene structure
+                scene_content = {
+                    "content": "Scene generation failed - using fallback content",
+                    "characters": scene_plan.key_characters,
+                    "location": scene_plan.location,
+                    "metadata": {
+                        "plot_thread": scene_plan.plot_threads[0] if scene_plan.plot_threads else "initial_crisis",
+                        "focus": scene_plan.focus,
+                        "scene_number": self.story_state.current_scene + 1
+                    }
+                }
+            
+            logger.info(f"Generated scene content: {len(scene_content['content'])} characters")
+            
+            # Index the validated scene
+            logger.info("Indexing scene...")
+            indexed = await self.rag.index_scene(
+                scene=scene_content,
+                chapter_number=self.story_state.current_chapter,
+                scene_number=self.story_state.current_scene + 1
+            )
+            
+            if not indexed:
+                logger.error("Failed to index scene")
+            else:
+                logger.info("Scene successfully indexed")
+
+            # Increment scene counter for next time
             self.story_state.current_scene += 1
-            
+            if self.story_state.current_scene >= len(self.current_chapter_plan.scene_plans):
+                self.story_state.current_scene = 0
+                self.story_state.current_chapter += 1
+                self.current_chapter_plan = None
+
             return scene_content
 
         except Exception as e:
             logger.error(f"Error generating scene: {str(e)}")
             raise
 
-    async def generate_scene_content(self, scene_number: int) -> Dict:
-        """Generate narrative for a specific scene using stored chapter plan"""
+    async def generate_scene_content(self, scene_plan: ScenePlan, scene_context: Dict = None) -> Dict:
+        """Generate detailed scene content from plan"""
         try:
-            if not self.current_chapter_plan:
-                raise ValueError("No chapter plan loaded - must run generate_chapter_outline first")
-            
-            scene_plan = self.current_chapter_plan.scene_plans[scene_number - 1]
-            
-            # Get context from recent scenes
-            recent_scenes = await self.rag.query_knowledge(
-                query=f"Previous scenes in chapter {self.story_state.current_chapter}",
-                filters={"type": "generated_scene", "chapter_number": self.story_state.current_chapter},
-                namespace=f"chapter_{self.story_state.current_chapter}",
-                top_k=3
-            )
-            
-            # Format context
-            previous_context = "Chapter start"
-            if recent_scenes:
-                previous_context = "\n".join([
-                    f"Scene {scene['metadata']['scene_number']}: {scene['text'][:300]}..."
-                    for scene in recent_scenes
-                ])
+            # Get context from recent scenes if not provided
+            if scene_context is None:
+                recent_scenes = await self.rag.query_knowledge(
+                    query=f"Previous scenes in chapter {self.story_state.current_chapter}",
+                    filters={"type": "generated_scene", "chapter_number": self.story_state.current_chapter},
+                    namespace=f"chapter_{self.story_state.current_chapter}",
+                    top_k=3
+                )
+                
+                # Format previous scene context
+                previous_context = "Chapter start"
+                if recent_scenes:
+                    previous_context = "\n".join([
+                        f"Scene {scene['metadata']['scene_number']}: {scene['text'][:300]}..."
+                        for scene in recent_scenes
+                    ])
+            else:
+                previous_context = scene_context.get('narrative', 'Chapter start')
 
             # Construct narrative prompt
             narrative_prompt = f"""You are Claude, an expert storyteller and novelist. Your style, tone, pacing, and narrative structure resemble Asimov and Haldeman. You are writing a scifi novel, scene by scene, and are currently on scene {scene_plan.scene_number} for SLAG: Starfall - Lost Age of Giants. You are the creator of this story, and will progress the development of the plots, characters, and world as you see fit.
@@ -148,9 +171,7 @@ Write a vivid, visual scene that:
 5. Focus on natural narrative flow without artificial scene markers; don't mention the scene number or chapter number, or acknowledge the reader; only mention Location or Time when relevant
 6. You are creating a story scene by scene, chapter by chapter. Treat each chapter holistically, seamlessly tieing together the scenes so that each chapter is a cohesive story.
 7. Make it fun, make it technical, make it nerdy and edgy. Create a captivating story that your heros Isaac Asimov and John Haldeman would be proud of.
-8. Reference previous scene's emotional impact and maintain character relationship continuity
-9. Ground all technology in realistic physics while balancing technical detail with drama
-10. Build tension gradually through careful pacing and atmosphere
+
 
 Focus on creating an engaging narrative that brings the scene to life. Write in present tense and maintain a cinematic quality suitable for a 1960s science fiction novel.
 
@@ -335,54 +356,129 @@ Remember: This is scene {scene_plan.scene_number} of 48 in Chapter {self.story_s
             logger.error(f"Error generating chapter outline: {str(e)}")
             raise
 
+    async def generate_scene_narrative(self, scene_number: int) -> Dict:
+        """Generate narrative for a specific scene using stored chapter plan"""
+        try:
+            if not self.current_chapter_plan:
+                raise ValueError("No chapter plan loaded - must run generate_chapter_outline first")
+            
+            # Get the scene plan for this time slot
+            scene_plan = self.current_chapter_plan.scene_plans[scene_number - 1]
+            
+            # Get context from recent scenes
+            recent_scenes = await self.rag.query_knowledge(
+                query=f"Previous scenes in chapter {self.story_state.current_chapter}",
+                filters={"type": "generated_scene", "chapter_number": self.story_state.current_chapter},
+                namespace=f"chapter_{self.story_state.current_chapter}",
+                top_k=3
+            )
+
+            # Format context
+            previous_context = "Chapter start"
+            if recent_scenes:
+                previous_context = "\n".join([
+                    f"Scene {scene['metadata']['scene_number']}: {scene['text'][:300]}..."
+                    for scene in recent_scenes
+                ])
+
+            # Generate the narrative
+            narrative_prompt = f"""You are Claude, an expert storyteller who studied under Isaac Asimov, writing scene {scene_number} for SLAG: Starfall - Lost Age of Giants, a hard science fiction graphic novel.
+
+Previous Scene Context:
+{previous_context}
+
+Scene Requirements:
+1. SETTING: {scene_plan.location}
+   - Maintain consistent environmental details
+   - Reference station systems and layout
+   - Use lighting and atmosphere to build mood
+
+2. CHARACTERS: {', '.join(scene_plan.key_characters)}
+   - Maintain distinct voice patterns for each character
+   - Show emotional state through dialogue and action
+   - Reference previous character interactions
+
+3. TECHNICAL ELEMENTS:
+   - Ground all technology in realistic physics
+   - Balance technical detail with readability
+   - Maintain consistent Fragment behavior patterns
+
+4. SCENE STRUCTURE:
+   - Start with strong visual establishing shot
+   - Build tension through {scene_plan.pacing} pacing
+   - End with clear transition to next scene
+   - Use graphic novel panel format effectively
+
+5. CONTINUITY REQUIREMENTS:
+   - Reference previous scene's emotional impact
+   - Maintain consistent time-of-day progression
+   - Honor established character relationships
+
+Remember: This is scene {scene_number} of 48 in Chapter {self.story_state.current_chapter}. 
+Time of Day: {scene_plan.time_of_day}
+Tension Level: {scene_plan.tension_level}
+Scene Type: {scene_plan.scene_type}
+
+Write a vivid, visual scene that advances both plot and character while maintaining scientific credibility."""
+
+            # Generate with retries
+            max_retries = 3
+            for attempt in range(max_retries):
+                try:
+                    narrative = await self.rag.get_rag_response(
+                        query=narrative_prompt,
+                        context_type="story_planning",
+                        max_tokens=4096
+                    )
+
+                    if not narrative or len(narrative.strip()) < 100:
+                        if attempt < max_retries - 1:
+                            logger.warning(f"Generated narrative too short on attempt {attempt + 1}, retrying...")
+                            continue
+                        else:
+                            raise ValueError("Failed to generate valid narrative content")
+
+                    # Package scene
+                    scene_content = {
+                        "content": narrative.strip(),
+                        "characters": scene_plan.key_characters,
+                        "location": scene_plan.location,
+                        "metadata": {
+                            "plot_thread": scene_plan.plot_threads[0] if scene_plan.plot_threads else "initial_crisis",
+                            "focus": scene_plan.focus,
+                            "scene_number": scene_number,
+                            "chapter_number": self.story_state.current_chapter,
+                            "generated_at": datetime.utcnow().isoformat()
+                        }
+                    }
+
+                    # Index for future context
+                    indexed = await self.rag.index_scene(
+                        scene=scene_content,
+                        chapter_number=self.story_state.current_chapter,
+                        scene_number=scene_number
+                    )
+
+                    if indexed:
+                        logger.info(f"Successfully generated and indexed scene {scene_number}")
+                        return scene_content
+                    else:
+                        raise ValueError("Failed to index scene")
+
+                except Exception as e:
+                    if attempt < max_retries - 1:
+                        logger.warning(f"Attempt {attempt + 1} failed: {str(e)}, retrying...")
+                        await asyncio.sleep(2 ** attempt)
+                    else:
+                        raise
+
+        except Exception as e:
+            logger.error(f"Error generating scene {scene_number}: {str(e)}")
+            raise
+
     async def update_environmental_state(self, scene_content: Dict):
         """Track environmental changes through scenes"""
         # Update time
         # Track damage
         # Monitor Fragment spread
         # Log character movements
-
-    async def transition_to_next_chapter(self) -> bool:
-        """Handle transition between chapters"""
-        try:
-            previous_chapter = self.story_state.current_chapter
-            logger.info(f"Transitioning from Chapter {previous_chapter} to {previous_chapter + 1}")
-            
-            # Get final state of previous chapter
-            final_scenes = await self.rag.query_knowledge(
-                query="Key developments and climactic moments from chapter ending",
-                filters={"type": "generated_scene", "chapter_number": previous_chapter},
-                namespace=f"chapter_{previous_chapter}",
-                top_k=5
-            )
-            
-            logger.info("Analyzing final chapter state...")
-            # Update plot threads based on final scenes
-            for plot in self.story_state.active_plot_threads:
-                # Check if plot was resolved in final scenes
-                if any(plot.id in scene['content'] and "resolved" in scene['content'].lower() 
-                      for scene in final_scenes):
-                    plot.status = PlotStatus.RESOLVED
-                # Check for cliffhangers
-                elif any(plot.id in scene['content'] and "cliffhanger" in scene['content'].lower() 
-                        for scene in final_scenes):
-                    plot.status = PlotStatus.CLIFFHANGER
-            
-            # Clean up resolved plots
-            self.story_state.active_plot_threads = [
-                plot for plot in self.story_state.active_plot_threads 
-                if plot.status != PlotStatus.RESOLVED
-            ]
-            
-            # Update state for next chapter
-            self.story_state.current_chapter += 1
-            self.story_state.current_scene = 0
-            self.current_chapter_plan = None
-            
-            logger.info(f"Successfully transitioned to Chapter {self.story_state.current_chapter}")
-            logger.info(f"Active plots remaining: {len(self.story_state.active_plot_threads)}")
-            return True
-            
-        except Exception as e:
-            logger.error(f"Error during chapter transition: {str(e)}")
-            return False

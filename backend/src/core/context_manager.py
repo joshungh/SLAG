@@ -1,7 +1,7 @@
 from typing import List, Dict, Optional
 from datetime import datetime, timedelta
 import json
-from src.models.context import StoryContext, ChapterContext, SceneContext, FullContext
+from models.context import StoryContext, ChapterContext, SceneContext, FullContext
 
 class ContextWindowManager:
     def __init__(self):
@@ -66,24 +66,3 @@ class ContextWindowManager:
         """Get current environmental context"""
         # Implementation to return current environment details
         pass 
-    
-    async def prepare_next_chapter_context(self, previous_chapter: int) -> Dict:
-        """Prepare context for next chapter generation"""
-        if previous_chapter > 0:
-            previous_context = {
-                "story": self.story_context,
-                "chapter": self.chapter_context,
-                "scenes": self.scene_contexts[-3:],  # Last 3 scenes
-                "chapter_number": previous_chapter,
-                "namespace": f"chapter_{previous_chapter}"
-            }
-        else:
-            previous_context = {
-                "story": self.story_context,
-                "chapter": None,
-                "scenes": [],
-                "chapter_number": 0,
-                "namespace": None
-            }
-            
-        return previous_context

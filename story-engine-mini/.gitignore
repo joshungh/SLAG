@@ -1,7 +1,0 @@
-# Logs
-logs/
-*.log
-
-# Output
-output/
-*.json 
