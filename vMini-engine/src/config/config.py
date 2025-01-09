@@ -2,11 +2,39 @@ from pydantic_settings import BaseSettings
 from pydantic import ConfigDict
 from functools import lru_cache
 from dotenv import load_dotenv
+import boto3
 import os
+import logging
 
-load_dotenv()
+logger = logging.getLogger(__name__)
 
 class Settings(BaseSettings):
+    @classmethod
+    def get_aws_parameters(cls) -> dict:
+        """Fetch parameters from AWS Parameter Store"""
+        try:
+            ssm = boto3.client('ssm', region_name=os.getenv('AWS_REGION', 'us-west-2'))
+            path = os.getenv('AWS_PARAMETER_PATH', '/vMini-engine/dev')
+            
+            params = {}
+            paginator = ssm.get_paginator('get_parameters_by_path')
+            
+            for page in paginator.paginate(
+                Path=path,
+                Recursive=True,
+                WithDecryption=True
+            ):
+                for param in page['Parameters']:
+                    # Convert /vMini-engine/dev/aws/access_key_id to AWS_ACCESS_KEY_ID
+                    name = param['Name'].split('/')[-2:]
+                    env_name = f"{name[0]}_{name[1]}".upper()
+                    params[env_name] = param['Value']
+            
+            return params
+        except Exception as e:
+            logger.error(f"Error fetching AWS parameters: {e}")
+            return {}
+
     # Environment
     ENVIRONMENT: str = os.getenv("ENVIRONMENT", "development")
     
@@ -16,8 +44,8 @@ class Settings(BaseSettings):
     
     # AWS Bedrock
     AWS_REGION: str = os.getenv("AWS_REGION", "us-west-2")
-    AWS_ACCESS_KEY_ID: str = os.getenv("AWS_ACCESS_KEY_ID")
-    AWS_SECRET_ACCESS_KEY: str = os.getenv("AWS_SECRET_ACCESS_KEY")
+    AWS_ACCESS_KEY_ID: str | None = None  # Will be loaded from Parameter Store
+    AWS_SECRET_ACCESS_KEY: str | None = None  # Will be loaded from Parameter Store
     BEDROCK_MODEL_ID: str = os.getenv(
         "BEDROCK_MODEL_ID", 
         "anthropic.claude-3-5-sonnet-20241022-v2:0"
@@ -28,8 +56,8 @@ class Settings(BaseSettings):
     )
     
     # Pinecone
-    PINECONE_API_KEY: str = os.getenv("PINECONE_API_KEY")
-    PINECONE_ENVIRONMENT: str = os.getenv("PINECONE_ENVIRONMENT")
+    PINECONE_API_KEY: str | None = None  # Will be loaded from Parameter Store
+    PINECONE_ENVIRONMENT: str | None = None  # Will be loaded from Parameter Store
     PINECONE_INDEX: str = os.getenv("PINECONE_INDEX", "story-engine-mini")
     PINECONE_DIMENSION: int = 1536
     
@@ -39,13 +67,13 @@ class Settings(BaseSettings):
     
     # LLM Generation Settings
     WORLD_BUILDING_TEMPERATURE: float = 0.3
-    WORLD_BUILDING_MAX_TOKENS: int = 120000
+    WORLD_BUILDING_MAX_TOKENS: int = 200000
     
     FRAMEWORK_TEMPERATURE: float = 0.6
     FRAMEWORK_MAX_TOKENS: int = 200000
 
     # Story Generation Settings
-    STORY_TEMPERATURE: float = 0.7
+    STORY_TEMPERATURE: float = 0.8
     STORY_MAX_TOKENS: int = 200000  # Full context window
     SECTION_MAX_TOKENS: int = 200000  # Nearly full window per beat
     
@@ -55,6 +83,17 @@ class Settings(BaseSettings):
     # Story Improvement Settings
     IMPROVEMENT_TEMPERATURE: float = 0.8
     IMPROVEMENT_MAX_TOKENS: int = 200000  # Full context for improvements
+    
+    def __init__(self, **kwargs):
+        # First load environment variables
+        load_dotenv()
+        
+        # Then load AWS parameters if not in local environment
+        if os.getenv('ENVIRONMENT') != 'local':
+            aws_params = self.get_aws_parameters()
+            kwargs.update(aws_params)
+            
+        super().__init__(**kwargs)
     
     model_config = ConfigDict(
         env_file=".env",
