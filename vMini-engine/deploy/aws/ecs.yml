@@ -45,7 +45,7 @@ Resources:
       ExecutionRoleArn: !ImportValue vMini-engine-security-ECSTaskRoleArn
       ContainerDefinitions:
         - Name: app
-          Image: !Sub ${AWS::AccountId}.dkr.ecr.${AWS::Region}.amazonaws.com/vMini-engine-${Environment}:latest
+          Image: !Sub ${AWS::AccountId}.dkr.ecr.${AWS::Region}.amazonaws.com/vmini-engine-${Environment}:latest
           PortMappings:
             - ContainerPort: 8000
           LogConfiguration:

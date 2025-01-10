@@ -1,14 +1,24 @@
 import time
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Request
 from pydantic import BaseModel
 import logging
 from src.core.services.llm_service import LLMService
 from src.core.services.world_generation_service import WorldGenerationService
 from src.core.utils.logging_config import setup_logging
+from fastapi.middleware.cors import CORSMiddleware
 
 logger = setup_logging("api", "api.log")
 
 app = FastAPI()
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # For testing only, restrict in production
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 llm_service = LLMService()
 world_generation_service = WorldGenerationService(llm_service)
 
@@ -46,4 +56,12 @@ async def generate_world(request: PromptRequest):
 
 @app.get("/health")
 async def health_check():
-    return {"status": "healthy"} 
+    logger.info("Health check endpoint called")
+    return {"status": "healthy"}
+
+@app.middleware("http")
+async def log_requests(request: Request, call_next):
+    logger.info(f"Incoming request: {request.method} {request.url}")
+    logger.info(f"Client host: {request.client.host if request.client else 'Unknown'}")
+    response = await call_next(request)
+    return response 

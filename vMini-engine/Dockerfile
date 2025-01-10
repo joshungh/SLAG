@@ -1,5 +1,5 @@
-# Build stage
-FROM python:3.11-slim AS builder
+# syntax=docker/dockerfile:1.4
+FROM --platform=linux/amd64 python:3.11-slim AS builder
 
 WORKDIR /app
 
@@ -25,14 +25,21 @@ COPY src ./src
 RUN pip install -e .
 
 # Production stage
-FROM python:3.11-slim
+FROM --platform=linux/amd64 python:3.11-slim
 
 WORKDIR /app
+
+# Install production dependencies
+RUN apt-get update && apt-get install -y \
+    curl \
+    && rm -rf /var/lib/apt/lists/*
 
 # Copy installed packages from builder
 COPY --from=builder /usr/local/lib/python3.11/site-packages /usr/local/lib/python3.11/site-packages
 COPY --from=builder /app/src ./src
-COPY --from=builder /usr/local/bin/uvicorn /usr/local/bin/
+
+# Install uvicorn directly in production stage
+RUN pip install uvicorn==0.24.0
 
 # Create necessary directories with proper permissions
 RUN mkdir -p /app/output/stories /app/output/frameworks /app/logs && \
@@ -51,4 +58,4 @@ HEALTHCHECK --interval=30s --timeout=3s \
 USER nobody
 
 # Run the API service (no reload in production)
-CMD ["uvicorn", "src.api.main:app", "--host", "0.0.0.0", "--port", "8000"] 
+CMD ["python", "-m", "uvicorn", "src.api.main:app", "--host", "0.0.0.0", "--port", "8000"] 

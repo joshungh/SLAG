@@ -49,7 +49,7 @@ Resources:
         - IpProtocol: tcp
           FromPort: 8000
           ToPort: 8000
-          CidrIp: 0.0.0.0/0
+          SourceSecurityGroupId: !Ref LoadBalancerSecurityGroup
       Tags:
         - Key: Name
           Value: !Sub vMini-engine-app-sg-${Environment}
@@ -69,6 +69,21 @@ Resources:
       Tags:
         - Key: Name
           Value: !Sub vMini-engine-redis-sg-${Environment}
+
+  LoadBalancerSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupName: !Sub vMini-engine-alb-sg-${Environment}
+      GroupDescription: Security group for Application Load Balancer
+      VpcId: !Ref VpcId
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 80
+          ToPort: 80
+          CidrIp: 0.0.0.0/0
+      Tags:
+        - Key: Name
+          Value: !Sub vMini-engine-alb-sg-${Environment}
 
 Outputs:
   ECSTaskRoleArn:

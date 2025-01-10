@@ -25,9 +25,9 @@ class Settings(BaseSettings):
                 WithDecryption=True
             ):
                 for param in page['Parameters']:
-                    # Convert /vMini-engine/dev/aws/access_key_id to AWS_ACCESS_KEY_ID
-                    name = param['Name'].split('/')[-2:]
-                    env_name = f"{name[0]}_{name[1]}".upper()
+                    # Convert /vMini-engine/prod/pinecone/api_key to PINECONE_API_KEY
+                    name_parts = param['Name'].split('/')[-2:]  # ['pinecone', 'api_key']
+                    env_name = f"{name_parts[0]}_{name_parts[1]}".upper()
                     params[env_name] = param['Value']
             
             return params
