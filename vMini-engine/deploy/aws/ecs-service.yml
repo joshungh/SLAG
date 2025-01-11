@@ -30,7 +30,7 @@ Resources:
         - !Ref PublicSubnet1
         - !Ref PublicSubnet2
       SecurityGroups:
-        - !ImportValue vMini-engine-security-AppSecurityGroupId
+        - !ImportValue vMini-engine-security-LoadBalancerSecurityGroupId
       Tags:
         - Key: Environment
           Value: !Ref Environment
