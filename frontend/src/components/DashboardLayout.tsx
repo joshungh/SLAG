@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useWeb3 } from "./Web3Provider";
-import { formatBalance } from "@/lib/utils";
+import { formatBalance } from "../lib/utils";
 
 export default function DashboardLayout({
   children,
