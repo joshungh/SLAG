@@ -1,24 +1,18 @@
 "use client";
 
-import {
-  createContext,
-  useContext,
-  useState,
-  useEffect,
-  ReactNode,
-} from "react";
+import React, { createContext, useContext, useState, useEffect } from "react";
 import { Connection, PublicKey, clusterApiUrl } from "@solana/web3.js";
 
 // Initialize Solana connection
-const connection = new Connection(clusterApiUrl("devnet"));
+const connection = new Connection(clusterApiUrl("devnet"), "confirmed");
 
-interface Web3ContextType {
+type Web3ContextType = {
   connected: boolean;
   publicKey: string | null;
   balance: number | null;
   connect: () => Promise<void>;
   disconnect: () => void;
-}
+};
 
 const Web3Context = createContext<Web3ContextType>({
   connected: false,
@@ -28,7 +22,7 @@ const Web3Context = createContext<Web3ContextType>({
   disconnect: () => {},
 });
 
-export function Web3Provider({ children }: { children: ReactNode }) {
+export function Web3Provider({ children }: { children: React.ReactNode }) {
   const [connected, setConnected] = useState(false);
   const [publicKey, setPublicKey] = useState<string | null>(null);
   const [balance, setBalance] = useState<number | null>(null);
@@ -51,7 +45,7 @@ export function Web3Provider({ children }: { children: ReactNode }) {
         return;
       }
 
-      const provider = (window as any).phantom?.solana;
+      const provider = window?.phantom?.solana;
       if (provider?.isPhantom) {
         // Check if already connected
         if (provider.isConnected && provider.publicKey) {
@@ -67,6 +61,9 @@ export function Web3Provider({ children }: { children: ReactNode }) {
   };
 
   useEffect(() => {
+    // Only run in browser environment
+    if (typeof window === "undefined") return;
+
     // Check connection on mount
     checkAndUpdateConnection();
 
@@ -83,35 +80,27 @@ export function Web3Provider({ children }: { children: ReactNode }) {
       localStorage.setItem("wallet_disconnected", "true");
     };
 
-    if (typeof window !== "undefined") {
-      (window as any).phantom?.solana?.on("connect", handleConnect);
-      (window as any).phantom?.solana?.on("disconnect", handleDisconnect);
-      (window as any).phantom?.solana?.on("accountChanged", handleConnect);
+    const provider = window.phantom?.solana;
+    if (provider) {
+      provider.on("connect", handleConnect);
+      provider.on("disconnect", handleDisconnect);
+      provider.on("accountChanged", handleConnect);
 
       return () => {
-        (window as any).phantom?.solana?.removeListener(
-          "connect",
-          handleConnect
-        );
-        (window as any).phantom?.solana?.removeListener(
-          "disconnect",
-          handleDisconnect
-        );
-        (window as any).phantom?.solana?.removeListener(
-          "accountChanged",
-          handleConnect
-        );
+        provider.removeListener("connect", handleConnect);
+        provider.removeListener("disconnect", handleDisconnect);
+        provider.removeListener("accountChanged", handleConnect);
       };
     }
   }, []);
 
   const connect = async () => {
     try {
-      const provider = (window as any).phantom?.solana;
+      const provider = window?.phantom?.solana;
       if (provider?.isPhantom) {
         const response = await provider.connect();
         const pubKey = response.publicKey.toString();
-        localStorage.removeItem("wallet_disconnected"); // Remove disconnected flag when user explicitly connects
+        localStorage.removeItem("wallet_disconnected");
         setConnected(true);
         setPublicKey(pubKey);
         await fetchBalance(pubKey);
@@ -122,10 +111,10 @@ export function Web3Provider({ children }: { children: ReactNode }) {
   };
 
   const disconnect = () => {
-    const provider = (window as any).phantom?.solana;
+    const provider = window?.phantom?.solana;
     if (provider?.isPhantom) {
       provider.disconnect();
-      localStorage.setItem("wallet_disconnected", "true"); // Set disconnected flag when user explicitly disconnects
+      localStorage.setItem("wallet_disconnected", "true");
       setConnected(false);
       setPublicKey(null);
       setBalance(null);
