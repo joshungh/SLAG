@@ -58,4 +58,4 @@ HEALTHCHECK --interval=30s --timeout=3s \
 USER nobody
 
 # Run the API service (no reload in production)
-CMD ["python", "-m", "uvicorn", "src.api.main:app", "--host", "0.0.0.0", "--port", "8000"] 
+CMD ["python", "-m", "uvicorn", "src.api.main:app", "--host", "0.0.0.0", "--port", "8000", "--timeout-keep-alive", "900"] 

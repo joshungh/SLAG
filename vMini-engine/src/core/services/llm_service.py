@@ -7,9 +7,7 @@ class LLMService:
     def __init__(self):
         self.bedrock = boto3.client(
             service_name='bedrock-runtime',
-            region_name=settings.AWS_REGION,
-            aws_access_key_id=settings.AWS_ACCESS_KEY_ID,
-            aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY
+            region_name=settings.AWS_REGION
         )
         self.model_id = settings.BEDROCK_MODEL_ID
 

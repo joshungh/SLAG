@@ -35,8 +35,26 @@ Resources:
                 Action:
                   - ssm:GetParameters
                   - ssm:GetParametersByPath
-                  - bedrock:InvokeModel
-                Resource: '*'
+                  - ssm:GetParameter
+                  - kms:Decrypt
+                  - logs:CreateLogStream
+                  - logs:PutLogEvents
+                  - s3:PutObject
+                  - s3:GetObject
+                  - s3:ListBucket
+                  - s3:CreateBucket
+                  - s3:PutBucketPolicy
+                  - s3:PutBucketEncryption
+                  - s3:PutBucketVersioning
+                  - s3:PutBucketPublicAccessBlock
+                Resource:
+                  - "arn:aws:ssm:us-west-2:047719630676:parameter/vMini-engine/prod/*"
+                  - "arn:aws:kms:us-west-2:047719630676:key/*"
+                  - "arn:aws:logs:us-west-2:047719630676:log-group:/ecs/vMini-engine-production:*"
+                  - "arn:aws:s3:::vmini-engine-stories/*"
+                  - "arn:aws:s3:::vmini-engine-stories"
+                  - "arn:aws:s3:::vmini-engine-stories-production/*"
+                  - "arn:aws:s3:::vmini-engine-stories-production"
 
   # Application Security Group
   AppSecurityGroup:

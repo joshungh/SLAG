@@ -4,26 +4,16 @@ from datetime import datetime
 from src.core.models.story import Story
 from src.core.models.story_framework import StoryFramework
 from src.core.services.llm_service import LLMService
+from src.core.services.s3_service import S3Service
 from src.core.utils.logging_config import setup_logging
 from src.config.config import settings
-import os
-from pathlib import Path
 
 logger = setup_logging("story_generation", "story_generation.log")
 
 class StoryGenerationService:
     def __init__(self, llm_service: LLMService):
         self.llm = llm_service
-        # Define base paths
-        self.base_dir = Path("/app")
-        self.output_dir = self.base_dir / "output"
-        self.stories_dir = self.output_dir / "stories"
-        
-        # Ensure directories exist with proper permissions
-        for directory in [self.output_dir, self.stories_dir]:
-            directory.mkdir(parents=True, exist_ok=True)
-            # Ensure directory is writable
-            directory.chmod(0o777)
+        self.s3 = S3Service()
 
     async def _generate_section(
         self,
@@ -118,8 +108,8 @@ class StoryGenerationService:
                 file_path=None
             )
             
-            file_path = await self._save_story(story)
-            story.file_path = Path(file_path)
+            story_url = await self._save_story(story)
+            story.file_path = story_url
             
             logger.info(f"Successfully generated complete story of {story.word_count} words")
             return story
@@ -131,19 +121,7 @@ class StoryGenerationService:
     async def _save_story(self, story: Story) -> str:
         """Save story content as markdown with front matter"""
         try:
-            timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-            filename = self.stories_dir / f"story_{timestamp}.md"
-            
-            # Debug logging
-            logger.debug(f"Base directory: {self.base_dir}")
-            logger.debug(f"Output directory: {self.output_dir}")
-            logger.debug(f"Stories directory: {self.stories_dir}")
-            logger.debug(f"Attempting to save story to: {filename}")
-            logger.debug(f"Directory exists: {self.stories_dir.exists()}")
-            logger.debug(f"Directory is writable: {os.access(self.stories_dir, os.W_OK)}")
-            
-            # Write the file
-            filename.write_text(f"""---
+            content = f"""---
 title: {story.title}
 genre: {story.genre}
 author: {story.author}
@@ -156,13 +134,16 @@ bible: {story.bible_id}
 # {story.title}
 
 {story.content}
-""")
+"""
             
-            logger.info(f"Saved story to: {filename}")
-            return str(filename)
+            story_url = await self.s3.save_story(
+                content=content,
+                story_id=story.title.lower().replace(' ', '_'),
+                story_type='story'
+            )
+            
+            return story_url
             
         except Exception as e:
-            logger.error(f"Error saving story: {str(e)}")
-            logger.error(f"Current working directory: {os.getcwd()}")
-            logger.error(f"Directory contents: {list(self.stories_dir.glob('*'))}")
+            logger.error(f"Error saving story to S3: {str(e)}")
             raise 

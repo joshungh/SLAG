@@ -5,6 +5,7 @@ from datetime import datetime
 from src.core.models.story_bible import StoryBible
 from src.core.models.story_framework import StoryFramework, StoryArc, StoryBeat
 from src.core.services.llm_service import LLMService
+from src.core.services.s3_service import S3Service
 from src.core.utils.logging_config import setup_logging
 from src.config.config import settings
 from pathlib import Path
@@ -14,6 +15,7 @@ logger = setup_logging("story_framework", "story_framework.log")
 class StoryFrameworkService:
     def __init__(self, llm_service: LLMService):
         self.llm = llm_service
+        self.s3 = S3Service()
 
     async def create_framework(self, bible: StoryBible) -> StoryFramework:
         """Create a story framework from a story bible"""
@@ -103,18 +105,9 @@ class StoryFrameworkService:
                 
                 framework = StoryFramework(**framework_dict)
                 
-                # Add output directory check and creation
-                output_dir = "output/frameworks"
-                if not os.path.exists(output_dir):
-                    os.makedirs(output_dir)
-                    
-                # Save framework to file with timestamp
-                timestamp = framework.created.strftime("%Y%m%d_%H%M%S")
-                output_path = f"{output_dir}/framework_{timestamp}.json"
-                
-                with open(output_path, "w") as f:
-                    json.dump(framework.model_dump(), f, indent=2)
-                logger.info(f"Saved framework to: {output_path}")
+                # Save framework to S3
+                framework_url = await self.save_framework(framework)
+                logger.info(f"Saved framework to: {framework_url}")
                 
                 # Validate minimum beats
                 for arc in framework.arcs:
@@ -227,8 +220,12 @@ class StoryFrameworkService:
                     
         return framework_dict 
 
-    async def save_framework(self, framework: StoryFramework) -> Path:
+    async def save_framework(self, framework: StoryFramework) -> str:
         """Save framework to file with timestamp"""
-        timestamp = framework.created.strftime("%Y%m%d_%H%M%S")
-        filename = f"framework_{timestamp}.json"
-        output_path = Path("output/frameworks") / filename
+        try:
+            content = framework.model_dump_json(indent=2)
+            framework_id = framework.title.lower().replace(' ', '_')
+            return await self.s3.save_story(content, framework_id, 'framework')
+        except Exception as e:
+            logger.error(f"Error saving framework: {str(e)}")
+            raise

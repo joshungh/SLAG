@@ -1,4 +1,4 @@
-Last login: Fri Jan 10 12:16:05 on ttys004
+Last login: Fri Jan 10 21:33:41 on ttys006
 cmcoca@Mac vMini-engine % tree -L 4
 .
 ├── Dockerfile
@@ -19,11 +19,14 @@ cmcoca@Mac vMini-engine % tree -L 4
 │   │   │   ├── vmini-engine-combined-policy.json
 │   │   │   ├── vmini-engine-task-role-policy.json
 │   │   │   └── vpc-policy.json
+│   │   ├── redis.yml
+│   │   ├── requirements.txt
 │   │   ├── security.yml
 │   │   ├── task-definition.json
 │   │   └── vpc.yml
 │   └── deploy.sh
 ├── deployment.md
+├── directory.md
 ├── docker-compose.yml
 ├── logs
 │   ├── api.log
@@ -168,6 +171,7 @@ cmcoca@Mac vMini-engine % tree -L 4
 │   │   │   ├── embedding_service.py
 │   │   │   ├── framework_generation_service.py
 │   │   │   ├── llm_service.py
+│   │   │   ├── redis_service.py
 │   │   │   ├── story_framework_service.py
 │   │   │   ├── story_generation_service.py
 │   │   │   ├── story_improvement_service.py
@@ -237,5 +241,5 @@ cmcoca@Mac vMini-engine % tree -L 4
     │       └── site-packages
     └── pyvenv.cfg
 
-33 directories, 203 files
+33 directories, 207 files
 cmcoca@Mac vMini-engine % 

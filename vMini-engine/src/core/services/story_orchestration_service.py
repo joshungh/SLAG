@@ -1,13 +1,13 @@
 from typing import Optional, Dict, Any
-from src.core.services.world_generation_service import WorldGenerationService
-from src.core.services.framework_generation_service import FrameworkGenerationService
-from src.core.services.story_generation_service import StoryGenerationService
+import logging
+from src.core.utils.logging_config import setup_logging
 from src.core.models.story_bible import StoryBible
 from src.core.models.story_framework import StoryFramework
 from src.core.models.story import Story
-from src.core.utils.logging_config import setup_logging
-from pathlib import Path
-import os
+from src.core.services.world_generation_service import WorldGenerationService
+from src.core.services.story_framework_service import StoryFrameworkService
+from src.core.services.story_generation_service import StoryGenerationService
+from src.core.services.validation_service import ValidationService
 
 logger = setup_logging("orchestration", "orchestration.log")
 
@@ -15,8 +15,9 @@ class StoryOrchestrationService:
     def __init__(
         self,
         world_service: WorldGenerationService,
-        framework_service: FrameworkGenerationService,
-        story_service: StoryGenerationService
+        framework_service: StoryFrameworkService,
+        story_service: StoryGenerationService,
+        validation_service: ValidationService
     ):
         if not all([world_service, framework_service, story_service]):
             raise ValueError("All services must be provided")
@@ -24,56 +25,43 @@ class StoryOrchestrationService:
         self.world_service = world_service
         self.framework_service = framework_service
         self.story_service = story_service
+        self.validation = validation_service
         self.current_state: Dict[str, Any] = {}
         
-        # Define base paths
-        self.base_dir = Path("/app")
-        self.output_dir = self.base_dir / "output"
-        self.stories_dir = self.output_dir / "stories"
-        self.frameworks_dir = self.output_dir / "frameworks"
-        
-        # Ensure directories exist with proper permissions
-        for directory in [self.output_dir, self.stories_dir, self.frameworks_dir]:
-            directory.mkdir(parents=True, exist_ok=True)
-            directory.chmod(0o777)
-            
-        logger.debug(f"Initialized directories:")
-        logger.debug(f"Base dir: {self.base_dir}")
-        logger.debug(f"Output dir: {self.output_dir}")
-        logger.debug(f"Stories dir: {self.stories_dir}")
-        logger.debug(f"Frameworks dir: {self.frameworks_dir}")
-
-    async def generate_complete_story(self, prompt: str) -> Story:
-        """Orchestrate the complete story generation pipeline"""
+    async def generate_complete_story(self, prompt: str) -> Dict[str, Any]:
         try:
             logger.info(f"Starting story generation for prompt: {prompt}")
             
             # Step 1: Generate Story Bible
-            logger.info("Generating story bible...")
             bible = await self.world_service.generate_complete_bible(prompt)
             self.current_state["bible"] = bible
-            logger.info("Story bible generated successfully")
-
+            
+            # Step 1.5: Validate bible
+            issues = await self.validation.check_cohesiveness(bible)
+            if any(issues.values()):
+                bible = await self.validation.fix_inconsistencies(bible, issues)
+                logger.info("Fixed bible inconsistencies")
+            
             # Step 2: Create Story Framework
-            logger.info("Generating story framework...")
-            framework = await self.framework_service.generate_framework(bible.model_dump())
+            framework = await self.framework_service.create_framework(bible)
             self.current_state["framework"] = framework
-            logger.info("Story framework generated successfully")
-
+            
             # Step 3: Generate Story
-            logger.info("Generating final story...")
             story = await self.story_service.generate_story(
                 story_bible=bible.model_dump(),
                 framework=framework
             )
             self.current_state["story"] = story
-            logger.info("Story generation complete")
-
-            return story
-
+            
+            return {
+                "bible": bible.model_dump(),
+                "framework": framework.model_dump(),
+                "story": story.model_dump(),
+                "word_count": story.word_count
+            }
+            
         except Exception as e:
             logger.error(f"Error in story generation pipeline: {str(e)}")
-            # Could add recovery/retry logic here
             raise
 
     def get_generation_status(self) -> Dict[str, Any]:
