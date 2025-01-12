@@ -1,395 +1,624 @@
 "use client";
 
-import { useState } from "react";
-import { Switch } from "@/components/ui/switch";
-import {
-  BookOpen,
-  Settings2,
-  Sparkles,
-  Brain,
-  Globe,
-  Info,
-  Layers,
-  FileText,
-} from "lucide-react";
+import { useState, useEffect } from "react";
+import { motion } from "framer-motion";
+import { Wand2 } from "lucide-react";
+import GenerationProgress, {
+  GenerationStep,
+} from "@/components/GenerationProgress";
+import { useWeb3 } from "../../../contexts/Web3Context";
+import StoryGenerationTest from "@/components/StoryGenerationTest";
 
-interface StorySettings {
-  // Phase 1: Story Bible Settings
-  genre: string[];
-  worldBuilding: {
-    characters: boolean;
-    locations: boolean;
-    lore: boolean;
-    technology: boolean;
-    fragments: boolean; // For SLAG-specific lore
-    giants: boolean; // For mechanical-sentient beings
+interface StoryResponse {
+  bible: {
+    title: string;
+    genre: string;
+    universe: {
+      setting: string;
+      era: string;
+    };
+    characters: Array<{
+      name: string;
+      role: string;
+      description: string;
+      traits: any;
+      background: any;
+      relationships: any;
+      arc: any;
+    }>;
+    locations: Array<{
+      name: string;
+      description: string;
+      significance: any;
+      features: any;
+      hazards: any;
+      infrastructure: any;
+    }>;
+    factions: Array<{
+      name: string;
+      description: string;
+      goals: string[];
+      relationships: Record<string, string>;
+      resources: any;
+      territory: any;
+    }>;
+    technology: Array<{
+      name: string;
+      description: string;
+      limitations: any;
+      requirements: any;
+      risks: any;
+      development_stage: any;
+    }>;
+    timeline: {
+      main_events: Array<{
+        year: string;
+        event: string;
+        details: string;
+        impact: any;
+        key_figures: any;
+      }>;
+    };
+    themes: string[];
+    notes: string[];
   };
-  timelinePlacement: "pre-fragment" | "post-fragment" | "current-era";
-  location: string[];
-
-  // Phase 2: Story Arc Settings
-  structure: "three-act" | "five-act" | "hero-journey";
-  length: "short" | "medium" | "long";
-  chapters: number;
-  subplots: number;
-  aiIntegration: {
-    claude: boolean;
-    titan: boolean;
+  framework: {
+    title: string;
+    genre: string;
+    main_conflict: string;
+    central_theme: string;
+    arcs: Array<{
+      name: string;
+      description: string;
+      beats: Array<{
+        name: string;
+        description: string;
+        characters_involved: string[];
+        location: string;
+        purpose: string;
+        conflict_type: string;
+        resolution_type: string;
+      }>;
+      themes: string[];
+      character_arcs: Record<string, string>;
+    }>;
   };
-
-  // Phase 3: Narrative Settings
-  pov: "first" | "third" | "omniscient";
-  targetAudience: string;
-  tone: string[];
-  narrativeStyle: string[];
-  artStyle: string[];
+  story: {
+    title: string;
+    author: string;
+    genre: string;
+    content: string;
+    word_count: number;
+  };
+  word_count: number;
 }
 
 export default function CreatePage() {
-  const [currentPhase, setCurrentPhase] = useState<1 | 2 | 3>(1);
+  const { connected, publicKey } = useWeb3();
   const [prompt, setPrompt] = useState("");
-  const [isAdvancedMode, setIsAdvancedMode] = useState(false);
-  const [settings, setSettings] = useState<StorySettings>({
-    // Phase 1 defaults
-    genre: [],
-    worldBuilding: {
-      characters: true,
-      locations: true,
-      lore: true,
-      technology: false,
-      fragments: false,
-      giants: false,
-    },
-    timelinePlacement: "current-era",
-    location: [],
-
-    // Phase 2 defaults
-    structure: "three-act",
-    length: "medium",
-    chapters: 5,
-    subplots: 2,
-    aiIntegration: {
-      claude: false,
-      titan: false,
-    },
-
-    // Phase 3 defaults
-    pov: "third",
-    targetAudience: "young-adult",
-    tone: [],
-    narrativeStyle: [],
-    artStyle: [],
-  });
-
-  const defaultGenres = [
-    "Sci-Fi",
-    "Mecha",
-    "Post-Apocalyptic",
-    "Space Opera",
-    "Cyberpunk",
-    "Military SF",
-  ];
-
-  const defaultLocations = [
-    "Station Omega",
-    "Fragment Research Zone",
-    "Giant Ruins",
-    "Abandoned Megastructures",
-    "Underground Facilities",
-  ];
-
-  const PhaseIndicator = () => (
-    <div className="flex items-center space-x-2 mb-8">
-      {[1, 2, 3].map((phase) => (
-        <button
-          key={phase}
-          onClick={() => setCurrentPhase(phase as 1 | 2 | 3)}
-          className={`flex items-center space-x-2 px-4 py-2 rounded-lg ${
-            currentPhase === phase
-              ? "bg-green-400 text-black"
-              : "bg-gray-800 text-gray-400"
-          }`}
-        >
-          {phase === 1 && <Globe className="w-4 h-4" />}
-          {phase === 2 && <Layers className="w-4 h-4" />}
-          {phase === 3 && <FileText className="w-4 h-4" />}
-          <span>Phase {phase}</span>
-        </button>
-      ))}
-    </div>
+  const [isGenerating, setIsGenerating] = useState(false);
+  const [currentStepIndex, setCurrentStepIndex] = useState(0);
+  const [overallProgress, setOverallProgress] = useState(0);
+  // Commented out for testing
+  // const [freePromptsUsed, setFreePromptsUsed] = useState(0);
+  const [generatedStory, setGeneratedStory] = useState<StoryResponse | null>(
+    null
   );
+  const [error, setError] = useState<string | null>(null);
+  const [showCursor, setShowCursor] = useState(true);
 
-  const renderPhaseContent = () => {
-    switch (currentPhase) {
-      case 1:
-        return (
-          <div className="space-y-6">
-            <h2 className="text-xl font-medium">Story Bible Creation</h2>
+  // Commented out for testing
+  /* useEffect(() => {
+    if (publicKey) {
+      const storedPrompts = localStorage.getItem(`freePrompts_${publicKey}`);
+      if (storedPrompts) {
+        setFreePromptsUsed(parseInt(storedPrompts));
+      } else {
+        setFreePromptsUsed(0);
+      }
+    }
+  }, [publicKey]); */
 
-            {/* Genre Selection */}
-            <div>
-              <label className="text-lg font-medium mb-2 block">
-                Genre Mix
-              </label>
-              <div className="flex flex-wrap gap-2">
-                {defaultGenres.map((genre) => (
-                  <button
-                    key={genre}
-                    className={`px-3 py-1.5 rounded-full text-sm ${
-                      settings.genre.includes(genre)
-                        ? "bg-green-400 text-black"
-                        : "bg-gray-800 text-gray-300 hover:bg-gray-700"
-                    }`}
-                    onClick={() => toggleGenre(genre)}
-                  >
-                    {genre}
-                  </button>
-                ))}
-              </div>
-            </div>
+  // Add cursor blink effect
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setShowCursor((prev) => !prev);
+    }, 530);
+    return () => clearInterval(interval);
+  }, []);
 
-            {/* Location Selection */}
-            <div>
-              <label className="text-lg font-medium mb-2 block">
-                Primary Location
-              </label>
-              <div className="flex flex-wrap gap-2">
-                {defaultLocations.map((loc) => (
-                  <button
-                    key={loc}
-                    className={`px-3 py-1.5 rounded-full text-sm ${
-                      settings.location.includes(loc)
-                        ? "bg-green-400 text-black"
-                        : "bg-gray-800 text-gray-300 hover:bg-gray-700"
-                    }`}
-                    onClick={() => toggleLocation(loc)}
-                  >
-                    {loc}
-                  </button>
-                ))}
-              </div>
-            </div>
+  const steps: GenerationStep[] = [
+    {
+      id: "prompt",
+      title: "Analyzing Prompt",
+      description: "Processing your story idea and extracting key elements",
+      status: "pending",
+      estimatedTime: "30s",
+    },
+    {
+      id: "generation",
+      title: "Generating Story",
+      description: "Creating your unique story with characters and plot",
+      status: "pending",
+      estimatedTime: "1m",
+    },
+  ];
 
-            {/* World Building Options */}
-            <div className="grid grid-cols-2 gap-4">
-              {Object.entries(settings.worldBuilding).map(([key, value]) => (
-                <div
-                  key={key}
-                  className="flex items-center justify-between p-4 bg-gray-900/50 rounded-lg"
-                >
-                  <span className="capitalize">{key}</span>
-                  <Switch
-                    checked={value}
-                    onCheckedChange={(checked) =>
-                      setSettings({
-                        ...settings,
-                        worldBuilding: {
-                          ...settings.worldBuilding,
-                          [key]: checked,
-                        },
-                      })
-                    }
-                  />
-                </div>
-              ))}
-            </div>
+  const startGeneration = async () => {
+    if (!connected) {
+      setError("Please connect your wallet to generate stories");
+      return;
+    }
 
-            {/* Timeline Placement */}
-            <div>
-              <label className="text-lg font-medium mb-2 block">
-                Timeline Era
-              </label>
-              <select
-                className="w-full bg-gray-800 rounded-lg px-4 py-2 text-white"
-                value={settings.timelinePlacement}
-                onChange={(e) =>
-                  setSettings({
-                    ...settings,
-                    timelinePlacement: e.target.value as any,
-                  })
-                }
-              >
-                <option value="pre-fragment">Pre-Fragment Era</option>
-                <option value="post-fragment">Post-Fragment Era</option>
-                <option value="current-era">Current Era (4424 CE)</option>
-              </select>
-            </div>
-          </div>
+    if (!prompt.trim()) {
+      setError("Please enter a prompt first");
+      return;
+    }
+
+    setError(null);
+    setIsGenerating(true);
+    setCurrentStepIndex(0);
+    setOverallProgress(0);
+
+    // TEMPORARILY USING TEST VERSION
+    // Comment out the real API call
+    /*
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 30 * 60 * 1000); // 30 minute timeout
+
+    try {
+      // Make API call to generate story
+      const response = await fetch(
+        "http://vmini-engine-alb-production-943444221.us-west-2.elb.amazonaws.com/generate",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ prompt }),
+          signal: controller.signal,
+          // Increase timeouts
+          keepalive: true,
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error(
+          `Failed to generate story: ${response.status} ${response.statusText}`
         );
+      }
 
-      case 2:
-        return (
-          <div className="space-y-6">
-            <h2 className="text-xl font-medium">Story Arc Development</h2>
-            {/* Story Structure Options */}
-            <div>
-              <label className="text-lg font-medium mb-2 block">
-                Story Structure
-              </label>
-              <select className="w-full bg-gray-800 rounded-lg px-4 py-2 text-white">
-                <option value="three-act">Three Act Structure</option>
-                <option value="five-act">Five Act Structure</option>
-                <option value="hero-journey">Hero's Journey</option>
-              </select>
-            </div>
-            {/* Chapter and Subplot Controls */}
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="text-lg font-medium mb-2 block">
-                  Number of Chapters
-                </label>
-                <input
-                  type="number"
-                  min={1}
-                  max={20}
-                  value={settings.chapters}
-                  onChange={(e) =>
-                    setSettings({ ...settings, chapters: +e.target.value })
-                  }
-                  className="w-full bg-gray-800 rounded-lg px-4 py-2 text-white"
-                />
-              </div>
-              <div>
-                <label className="text-lg font-medium mb-2 block">
-                  Number of Subplots
-                </label>
-                <input
-                  type="number"
-                  min={0}
-                  max={5}
-                  value={settings.subplots}
-                  onChange={(e) =>
-                    setSettings({ ...settings, subplots: +e.target.value })
-                  }
-                  className="w-full bg-gray-800 rounded-lg px-4 py-2 text-white"
-                />
-              </div>
-            </div>
-          </div>
-        );
+      // Start reading the response as a stream
+      const reader = response.body?.getReader();
+      if (!reader) {
+        throw new Error("Failed to read response stream");
+      }
 
-      case 3:
-        return (
-          <div className="space-y-6">
-            <h2 className="text-xl font-medium">Narrative Generation</h2>
-            {/* Narrative Settings */}
-            <div className="space-y-6">
-              {/* Point of View Selection */}
-              <div>
-                <label className="text-lg font-medium mb-2 block">
-                  Point of View
-                </label>
-                <div className="flex space-x-4">
-                  {["First Person", "Third Person", "Omniscient"].map((pov) => (
-                    <button
-                      key={pov}
-                      className="px-4 py-2 rounded-lg bg-gray-800 text-gray-300 hover:bg-gray-700"
-                    >
-                      {pov}
-                    </button>
-                  ))}
-                </div>
-              </div>
-              {/* Target Audience */}
-              <div>
-                <label className="text-lg font-medium mb-2 block">
-                  Target Audience
-                </label>
-                <select className="w-full bg-gray-800 rounded-lg px-4 py-2 text-white">
-                  <option value="children">Children</option>
-                  <option value="middle-grade">Middle Grade</option>
-                  <option value="young-adult">Young Adult</option>
-                  <option value="adult">Adult</option>
-                </select>
-              </div>
-            </div>
-          </div>
-        );
+      let story = "";
+      let decoder = new TextDecoder();
+
+      // Mark first step as completed
+      steps[0].status = "completed";
+      steps[0].progress = 100;
+      setCurrentStepIndex(1);
+      setOverallProgress(50);
+
+      // Start second step
+      steps[1].status = "in_progress";
+      steps[1].progress = 0;
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+
+        // Decode the chunk and append to story
+        const chunk = decoder.decode(value);
+        story += chunk;
+
+        // Update progress based on the log messages in the chunk
+        if (chunk.includes("Analyzing prompt")) {
+          steps[1].progress = 20;
+        } else if (chunk.includes("Generating framework")) {
+          steps[1].progress = 40;
+        } else if (chunk.includes("Creating story bible")) {
+          steps[1].progress = 60;
+        } else if (chunk.includes("Writing story")) {
+          steps[1].progress = 80;
+        }
+
+        setOverallProgress(50 + Math.floor((steps[1].progress || 0) / 2));
+      }
+
+      // Parse the complete story response
+      const data = JSON.parse(story);
+
+      // Mark second step as completed
+      steps[1].status = "completed";
+      steps[1].progress = 100;
+      setOverallProgress(100);
+
+      setGeneratedStory(data);
+    } catch (err) {
+      console.error("Error generating story:", err);
+      steps[currentStepIndex].status = "error";
+      if (err.name === "AbortError") {
+        setError("Story generation timed out. Please try again.");
+      } else {
+        setError("Failed to generate story. Please try again.");
+      }
+    } finally {
+      clearTimeout(timeoutId);
+      setIsGenerating(false);
+    }
+    */
+
+    // Use test version instead
+    try {
+      // Simulate API delay
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+
+      // Use our test component's mock data
+      const mockResponse: StoryResponse = {
+        bible: {
+          title: "The Awakening",
+          genre: "Science Fiction",
+          universe: {
+            setting: "Station Omega",
+            era: "Near Future",
+          },
+          characters: [
+            {
+              name: "Dr. James Chen",
+              role: "Protagonist",
+              description:
+                "A dedicated scientist studying mysterious Fragment artifacts",
+              traits: null,
+              background: null,
+              relationships: null,
+              arc: null,
+            },
+          ],
+          locations: [
+            {
+              name: "Station Omega Lab",
+              description:
+                "A high-tech research facility where Fragments are studied",
+              significance: null,
+              features: null,
+              hazards: null,
+              infrastructure: null,
+            },
+          ],
+          themes: ["Discovery", "Scientific Mystery", "Ancient Technology"],
+          notes: [],
+          factions: [],
+          technology: [],
+          timeline: {
+            main_events: [],
+          },
+        },
+        framework: {
+          title: "The Awakening",
+          genre: "Science Fiction",
+          main_conflict:
+            "A scientist discovers an anomaly in ancient artifacts",
+          central_theme: "Scientific discovery and mystery",
+          arcs: [],
+        },
+        story: {
+          title: "The Awakening",
+          author: "SLAG AI",
+          genre: "Science Fiction",
+          content: `The soft hum of quantum processors fills the dimly lit laboratory as Dr. James Chen leans closer to his holographic display, his weathered face illuminated by the pale blue light. The Fragment sample, suspended in the containment field before him, shouldn't be moving the way it is.
+
+"Run sequence delta-seven again," he mumbles to himself, fingers dancing across the haptic interface. The Fragment—a crystalline shard no larger than his thumb—pulses with an internal light that defies his understanding of its composition. According to every known law of physics, it should be inert.
+
+Six months of study, and the Fragments are still a mystery. But tonight feels different. Tonight, he's seen something new...`,
+          word_count: 187,
+        },
+        word_count: 187,
+      };
+
+      // Mark first step as completed
+      steps[0].status = "completed";
+      steps[0].progress = 100;
+      setCurrentStepIndex(1);
+      setOverallProgress(50);
+
+      // Simulate second step progress
+      steps[1].status = "in_progress";
+      for (let progress = 0; progress <= 100; progress += 10) {
+        steps[1].progress = progress;
+        setOverallProgress(50 + Math.floor(progress / 2));
+        await new Promise((resolve) => setTimeout(resolve, 300));
+      }
+
+      // Mark second step as completed
+      steps[1].status = "completed";
+      steps[1].progress = 100;
+      setOverallProgress(100);
+
+      setGeneratedStory(mockResponse);
+    } catch (err) {
+      console.error("Error in test generation:", err);
+      steps[currentStepIndex].status = "error";
+      setError("Failed to generate story. Please try again.");
+    } finally {
+      setIsGenerating(false);
     }
   };
 
-  // Helper functions
-  const toggleGenre = (genre: string) => {
-    setSettings({
-      ...settings,
-      genre: settings.genre.includes(genre)
-        ? settings.genre.filter((g) => g !== genre)
-        : [...settings.genre, genre],
-    });
-  };
-
-  const toggleLocation = (location: string) => {
-    setSettings({
-      ...settings,
-      location: settings.location.includes(location)
-        ? settings.location.filter((l) => l !== location)
-        : [...settings.location, location],
-    });
-  };
-
   return (
-    <div className="min-h-screen bg-black text-white">
-      <div className="max-w-4xl mx-auto p-6">
-        {/* Mode Toggle and Settings */}
-        <div className="flex items-center justify-between mb-8">
-          <div className="flex items-center space-x-4">
-            <Switch
-              checked={isAdvancedMode}
-              onCheckedChange={setIsAdvancedMode}
-              className="data-[state=checked]:bg-green-400"
-            />
-            <div className="flex items-center space-x-2">
-              {isAdvancedMode ? (
-                <Settings2 className="w-5 h-5 text-green-400" />
-              ) : (
-                <Sparkles className="w-5 h-5 text-green-400" />
-              )}
-              <span className="text-lg font-medium">
-                {isAdvancedMode ? "Advanced Mode" : "Basic Mode"}
-              </span>
+    <div className="container mx-auto px-4 py-8">
+      <div className="max-w-2xl mx-auto space-y-8">
+        <div className="text-center space-y-4">
+          <h1 className="text-4xl font-bold">Create Your Story</h1>
+          {/* Commented out for testing
+          {connected && (
+            <div className="bg-black/30 rounded-lg p-4">
+              <p className="text-gray-400">
+                {3 - freePromptsUsed} free{" "}
+                {3 - freePromptsUsed === 1 ? "prompt" : "prompts"} remaining
+              </p>
             </div>
-          </div>
-          <button className="text-gray-400 hover:text-white flex items-center space-x-1">
-            <Brain className="w-5 h-5" />
-            <span>Brainstorm Ideas</span>
-          </button>
+          )} */}
         </div>
 
-        {/* Phase Indicator */}
-        {isAdvancedMode && <PhaseIndicator />}
-
-        {/* Main Input Area */}
-        <div className="space-y-6">
-          {/* Prompt Input */}
+        <div className="space-y-4">
           <div className="relative">
-            <div className="flex items-center space-x-2 mb-2">
-              <span className="text-lg font-medium">Story Prompt</span>
-              <Info className="w-4 h-4 text-gray-400" />
-            </div>
             <textarea
               value={prompt}
               onChange={(e) => setPrompt(e.target.value)}
-              placeholder="Enter your story prompt here..."
-              className="w-full h-32 bg-gray-900/50 rounded-lg p-4 text-white placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-green-400/50 resize-none"
+              className="w-full h-32 px-4 py-3 rounded-lg bg-black/50 border border-gray-700 focus:border-green-500 focus:ring-1 focus:ring-green-500 transition-colors text-green-400 font-['IBM_Plex_Mono'] text-base tracking-tight"
+              disabled={isGenerating || !connected}
             />
-            <div className="absolute bottom-4 right-4 text-sm text-gray-500">
-              {prompt.length} / 3000
+            <div
+              className="absolute pointer-events-none select-none"
+              style={{
+                top: "12px",
+                left: "16px",
+                right: "16px",
+                opacity: prompt ? 0 : 1,
+              }}
+            >
+              <span className="font-['IBM_Plex_Mono'] text-lg tracking-tight text-gray-500">
+                Enter your story idea...
+                <span
+                  className={`text-green-400 ${
+                    showCursor ? "opacity-100" : "opacity-0"
+                  }`}
+                >
+                  ▋
+                </span>
+              </span>
             </div>
           </div>
 
-          {/* Advanced Settings */}
-          {isAdvancedMode && renderPhaseContent()}
+          {error && (
+            <div className="bg-red-500/10 border border-red-500 text-red-400 text-sm p-3 rounded-lg">
+              {error}
+            </div>
+          )}
 
-          {/* Generate Button */}
-          <button className="w-full bg-green-400 text-black py-3 rounded-lg font-medium hover:bg-green-300 transition-colors flex items-center justify-center space-x-2">
-            <BookOpen className="w-5 h-5" />
-            <span>
-              {isAdvancedMode
-                ? `Generate Phase ${currentPhase}`
-                : "Generate Story"}
-            </span>
-          </button>
+          <div className="relative group">
+            <button
+              onClick={startGeneration}
+              disabled={
+                isGenerating || !connected /* || freePromptsUsed >= 3 */
+              }
+              className="w-full py-3 px-4 bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 rounded-lg font-medium flex items-center justify-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-white"
+            >
+              <Wand2 className="w-5 h-5" />
+              <span>{isGenerating ? "Generating..." : "Generate Story"}</span>
+            </button>
+            {!connected && (
+              <div className="absolute -top-12 left-1/2 -translate-x-1/2 w-max opacity-0 group-hover:opacity-100 transition-opacity bg-black/90 text-white text-sm py-2 px-3 rounded pointer-events-none">
+                Connect your wallet to generate stories
+              </div>
+            )}
+          </div>
         </div>
+
+        {isGenerating && (
+          <GenerationProgress
+            steps={steps}
+            currentStepIndex={currentStepIndex}
+            overallProgress={overallProgress}
+          />
+        )}
+
+        {generatedStory && !isGenerating && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="bg-black/50 rounded-lg p-6 space-y-8"
+          >
+            <div className="flex justify-between items-center">
+              <h2 className="text-2xl font-bold">
+                {generatedStory?.bible?.title || "Generated Story"}
+              </h2>
+              <button
+                onClick={() => {
+                  const element = document.createElement("a");
+                  const file = new Blob(
+                    [JSON.stringify(generatedStory, null, 2)],
+                    {
+                      type: "application/json",
+                    }
+                  );
+                  element.href = URL.createObjectURL(file);
+                  element.download = `${(
+                    generatedStory?.bible?.title || "story"
+                  )
+                    .toLowerCase()
+                    .replace(/\s+/g, "_")}.json`;
+                  document.body.appendChild(element);
+                  element.click();
+                  document.body.removeChild(element);
+                }}
+                className="px-4 py-2 bg-green-500 hover:bg-green-600 rounded-lg text-white flex items-center space-x-2 transition-colors"
+              >
+                <span>Download Story</span>
+              </button>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <h3 className="text-lg font-medium mb-2">Genre</h3>
+                <p className="text-gray-400">
+                  {generatedStory?.bible?.genre || "Unknown"}
+                </p>
+              </div>
+              <div>
+                <h3 className="text-lg font-medium mb-2">Setting</h3>
+                <p className="text-gray-400">
+                  {generatedStory?.bible?.universe?.setting || "Unknown"}
+                </p>
+                <p className="text-gray-400 mt-1">
+                  {generatedStory?.bible?.universe?.era || "Unknown"}
+                </p>
+              </div>
+            </div>
+
+            {generatedStory?.bible?.characters?.length > 0 && (
+              <div>
+                <h3 className="text-lg font-medium mb-2">Characters</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  {generatedStory.bible.characters.map((character, index) => (
+                    <div key={index} className="bg-black/30 rounded p-3">
+                      <div className="font-medium text-green-400">
+                        {character.name}
+                      </div>
+                      <div className="text-sm text-gray-400">
+                        {character.role}
+                      </div>
+                      <div className="text-sm mt-1">
+                        {character.description}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {generatedStory?.bible?.locations?.length > 0 && (
+              <div>
+                <h3 className="text-lg font-medium mb-2">Locations</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  {generatedStory.bible.locations.map((location, index) => (
+                    <div key={index} className="bg-black/30 rounded p-3">
+                      <div className="font-medium text-green-400">
+                        {location.name}
+                      </div>
+                      <div className="text-sm mt-1">{location.description}</div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {generatedStory?.bible?.factions?.length > 0 && (
+              <div>
+                <h3 className="text-lg font-medium mb-2">Factions</h3>
+                <div className="grid grid-cols-1 gap-3">
+                  {generatedStory.bible.factions.map((faction, index) => (
+                    <div key={index} className="bg-black/30 rounded p-3">
+                      <div className="font-medium text-green-400">
+                        {faction.name}
+                      </div>
+                      <div className="text-sm mt-1">{faction.description}</div>
+                      {faction.goals?.length > 0 && (
+                        <div className="mt-2">
+                          <div className="text-sm font-medium mb-1">Goals:</div>
+                          <ul className="list-disc list-inside text-sm text-gray-400">
+                            {faction.goals.map((goal, idx) => (
+                              <li key={idx}>{goal}</li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {generatedStory?.bible?.technology?.length > 0 && (
+              <div>
+                <h3 className="text-lg font-medium mb-2">Technology</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  {generatedStory.bible.technology.map((tech, index) => (
+                    <div key={index} className="bg-black/30 rounded p-3">
+                      <div className="font-medium text-green-400">
+                        {tech.name}
+                      </div>
+                      <div className="text-sm mt-1">{tech.description}</div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {generatedStory?.bible?.timeline?.main_events?.length > 0 && (
+              <div>
+                <h3 className="text-lg font-medium mb-2">Timeline</h3>
+                <div className="space-y-3">
+                  {generatedStory.bible.timeline.main_events.map(
+                    (event, index) => (
+                      <div key={index} className="bg-black/30 rounded p-3">
+                        <div className="font-medium text-green-400">
+                          {event.year}
+                        </div>
+                        <div className="text-sm font-medium">{event.event}</div>
+                        <div className="text-sm text-gray-400 mt-1">
+                          {event.details}
+                        </div>
+                      </div>
+                    )
+                  )}
+                </div>
+              </div>
+            )}
+
+            {generatedStory?.bible?.themes?.length > 0 && (
+              <div>
+                <h3 className="text-lg font-medium mb-2">Themes</h3>
+                <div className="flex flex-wrap gap-2">
+                  {generatedStory.bible.themes.map((theme, index) => (
+                    <span
+                      key={index}
+                      className="px-3 py-1 bg-green-500/10 border border-green-500/20 rounded-full text-sm text-green-400"
+                    >
+                      {theme}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {generatedStory?.story?.content && (
+              <div>
+                <h3 className="text-lg font-medium mb-2">Story</h3>
+                <div className="bg-black/30 rounded-lg p-4">
+                  <div className="prose prose-invert max-w-none">
+                    {generatedStory.story.content
+                      .split("\n\n")
+                      .map((paragraph, index) => (
+                        <p key={index} className="mb-4 last:mb-0">
+                          {paragraph}
+                        </p>
+                      ))}
+                  </div>
+                </div>
+                {generatedStory.story.word_count && (
+                  <div className="mt-2 text-sm text-gray-400">
+                    Word count: {generatedStory.story.word_count}
+                  </div>
+                )}
+              </div>
+            )}
+          </motion.div>
+        )}
       </div>
     </div>
   );

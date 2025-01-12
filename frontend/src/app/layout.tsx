@@ -1,15 +1,14 @@
-import { IBM_Plex_Mono } from "next/font/google";
+import type { Metadata } from "next";
+import { Inter } from "next/font/google";
 import "./globals.css";
-import { metadata } from "./metadata";
+import { Web3Provider } from "@/contexts/Web3Context";
 
-const ibmPlexMono = IBM_Plex_Mono({
-  subsets: ["latin"],
-  weight: ["400", "700"],
-  variable: "--font-ibm-plex-mono",
-  display: "swap",
-});
+const inter = Inter({ subsets: ["latin"] });
 
-export { metadata };
+export const metadata: Metadata = {
+  title: "SLAG",
+  description: "AI-powered story generation platform",
+};
 
 export default function RootLayout({
   children,
@@ -17,17 +16,9 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className="text-[16px]">
-      <body
-        className={`
-          ${ibmPlexMono.variable} 
-          bg-black 
-          text-white 
-          text-lg
-          antialiased
-        `}
-      >
-        {children}
+    <html lang="en">
+      <body className={inter.className}>
+        <Web3Provider>{children}</Web3Provider>
       </body>
     </html>
   );
