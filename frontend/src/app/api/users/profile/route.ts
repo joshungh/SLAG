@@ -1,6 +1,5 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
-import prisma from "@/lib/prisma";
 import { verifyJwt } from "@/lib/jwt";
 
 // GET /api/users/profile
@@ -25,29 +24,27 @@ export async function GET(req: NextRequest) {
       );
     }
 
-    // Get user profile from database
-    const user = await prisma.user.findUnique({
-      where: {
-        id: payload.userId,
-      },
-      select: {
-        id: true,
-        username: true,
-        email: true,
-        first_name: true,
-        last_name: true,
-        profile_picture: true,
-        web3_wallet: true,
-        bio: true,
-        created_at: true,
-        login_methods: true,
+    const BACKEND_URL = process.env.BACKEND_URL;
+    if (!BACKEND_URL) {
+      throw new Error("BACKEND_URL environment variable is not set");
+    }
+
+    // Get user profile from Python backend
+    const response = await fetch(`${BACKEND_URL}/api/users/profile`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
       },
     });
 
-    if (!user) {
-      return NextResponse.json({ error: "User not found" }, { status: 404 });
+    if (!response.ok) {
+      const errorData = await response.json();
+      return NextResponse.json(
+        { error: errorData.detail || "Failed to fetch profile" },
+        { status: response.status }
+      );
     }
 
+    const user = await response.json();
     return NextResponse.json(user);
   } catch (error) {
     console.error("Profile fetch error:", error);
@@ -79,40 +76,31 @@ export async function PUT(req: NextRequest) {
       );
     }
 
-    const formData = await req.formData();
-    const updates: any = {
-      username: formData.get("username"),
-      first_name: formData.get("first_name"),
-      last_name: formData.get("last_name"),
-    };
-
-    // Handle profile picture upload if present
-    const profilePicture = formData.get("profile_picture");
-    if (profilePicture instanceof Blob) {
-      // TODO: Implement file upload to your preferred storage service
-      // updates.profile_picture = await uploadFile(profilePicture);
+    const BACKEND_URL = process.env.BACKEND_URL;
+    if (!BACKEND_URL) {
+      throw new Error("BACKEND_URL environment variable is not set");
     }
 
-    // Update user in database
-    const updatedUser = await prisma.user.update({
-      where: {
-        id: payload.userId,
+    const formData = await req.formData();
+
+    // Forward the request to Python backend
+    const response = await fetch(`${BACKEND_URL}/api/users/profile`, {
+      method: "PUT",
+      headers: {
+        Authorization: `Bearer ${token}`,
       },
-      data: updates,
-      select: {
-        id: true,
-        username: true,
-        email: true,
-        first_name: true,
-        last_name: true,
-        profile_picture: true,
-        web3_wallet: true,
-        bio: true,
-        created_at: true,
-        login_methods: true,
-      },
+      body: formData,
     });
 
+    if (!response.ok) {
+      const errorData = await response.json();
+      return NextResponse.json(
+        { error: errorData.detail || "Failed to update profile" },
+        { status: response.status }
+      );
+    }
+
+    const updatedUser = await response.json();
     return NextResponse.json(updatedUser);
   } catch (error) {
     console.error("Profile update error:", error);
