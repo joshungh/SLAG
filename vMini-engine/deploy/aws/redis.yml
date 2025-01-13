@@ -1,78 +1,59 @@
 AWSTemplateFormatVersion: '2010-09-09'
-Description: 'Redis Configuration for vMini-engine'
+Description: 'Redis stack for vMini-engine'
 
 Parameters:
-  Environment:
-    Type: String
-    Default: production
-    AllowedValues: [development, production]
-  
   VpcId:
-    Type: String
-    Description: VPC ID from network stack
-  
-  PrivateSubnet1:
-    Type: String
-    Description: Private Subnet 1 for Redis
-  
-  PrivateSubnet2:
-    Type: String
-    Description: Private Subnet 2 for Redis
+    Type: AWS::EC2::VPC::Id
+    Description: VPC where Redis will be deployed
+
+  SubnetIds:
+    Type: List<AWS::EC2::Subnet::Id>
+    Description: Subnets for Redis cluster
 
 Resources:
-  # Redis Security Group
   RedisSecurityGroup:
     Type: AWS::EC2::SecurityGroup
     Properties:
-      GroupName: !Sub ${AWS::StackName}-sg-${AWS::Region}
-      GroupDescription: Security group for Redis
+      GroupDescription: Security group for Redis cluster
       VpcId: !Ref VpcId
       SecurityGroupIngress:
         - IpProtocol: tcp
           FromPort: 6379
           ToPort: 6379
-          SourceSecurityGroupId: !ImportValue vMini-engine-security-AppSecurityGroupId
+          SourceSecurityGroupId: !Ref 'AWS::NoValue'  # Will be updated by update-redis-sg.sh
+      Tags:
+        - Key: Name
+          Value: vMini-engine-redis-sg
 
-  # Redis Subnet Group
   RedisSubnetGroup:
     Type: AWS::ElastiCache::SubnetGroup
     Properties:
       Description: Subnet group for Redis cluster
-      SubnetIds: 
-        - !Ref PrivateSubnet1
-        - !Ref PrivateSubnet2
+      SubnetIds: !Ref SubnetIds
 
-  # Redis Instance
-  RedisCache:
+  RedisCluster:
     Type: AWS::ElastiCache::CacheCluster
     Properties:
-      ClusterName: !Sub vmini-engine-redis-${Environment}
       Engine: redis
-      EngineVersion: '7.0'
-      CacheNodeType: cache.t4g.micro
+      CacheNodeType: cache.t3.micro
       NumCacheNodes: 1
-      Port: 6379
       VpcSecurityGroupIds: 
         - !Ref RedisSecurityGroup
       CacheSubnetGroupName: !Ref RedisSubnetGroup
-      PreferredMaintenanceWindow: sun:05:00-sun:09:00
-      AutoMinorVersionUpgrade: true
+      Port: 6379
+      Tags:
+        - Key: Name
+          Value: vMini-engine-redis
 
 Outputs:
   RedisEndpoint:
     Description: Redis endpoint address
-    Value: !GetAtt RedisCache.RedisEndpoint.Address
-    Export:
-      Name: !Sub ${AWS::StackName}-RedisEndpoint
-
-  RedisSecurityGroupId:
-    Description: Redis Security Group ID
-    Value: !Ref RedisSecurityGroup
-    Export:
-      Name: !Sub ${AWS::StackName}-RedisSecurityGroupId
+    Value: !GetAtt RedisCluster.RedisEndpoint.Address
 
   RedisPort:
     Description: Redis port
-    Value: !GetAtt RedisCache.RedisEndpoint.Port
-    Export:
-      Name: !Sub ${AWS::StackName}-RedisPort 
+    Value: !GetAtt RedisCluster.RedisEndpoint.Port
+
+  RedisSecurityGroupId:
+    Description: Security group ID for Redis
+    Value: !Ref RedisSecurityGroup 

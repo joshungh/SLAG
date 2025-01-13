@@ -1,10 +1,10 @@
 import time
-from fastapi import FastAPI, HTTPException, Request
+from fastapi import FastAPI, HTTPException, Request, Response
 from pydantic import BaseModel
 import logging
 from src.core.utils.logging_config import setup_logging
 from fastapi.middleware.cors import CORSMiddleware
-from datetime import datetime
+from datetime import datetime, timedelta
 from src.config.config import settings
 from src.core.services import (
     redis_service,
@@ -15,6 +15,7 @@ from src.core.services.redis_service import RedisService
 from starlette.middleware.base import BaseHTTPMiddleware
 import asyncio
 from fastapi.responses import JSONResponse
+import json
 
 logger = setup_logging("api", "api.log")
 
@@ -57,31 +58,62 @@ REDIS_PORT = int(os.getenv("REDIS_PORT", 6379))
 # Initialize Redis service
 redis_client = RedisService(host=REDIS_HOST, port=REDIS_PORT)
 
+# Add rate limiting state
+health_check_timestamps = []
+RATE_LIMIT = 20  # requests
+TIME_WINDOW = 60  # seconds
+
 @app.get("/health")
 async def health_check():
-    logger.info("Health check endpoint called")
+    """Health check endpoint for ELB with rate limiting"""
     try:
-        # Test Redis connection
-        redis_client.redis.ping()
-        redis_status = {
-            "status": "healthy",
-            "host": REDIS_HOST,
-            "port": REDIS_PORT
-        }
-    except Exception as e:
-        logger.error(f"Redis health check failed: {str(e)}")
-        redis_status = {
-            "status": "error",
-            "message": str(e),
-            "host": REDIS_HOST,
-            "port": REDIS_PORT
-        }
+        # Clean old timestamps
+        current_time = time.time()
+        while health_check_timestamps and health_check_timestamps[0] < current_time - TIME_WINDOW:
+            health_check_timestamps.pop(0)
+            
+        # Check rate limit
+        if len(health_check_timestamps) >= RATE_LIMIT:
+            return JSONResponse(
+                status_code=429,  # Too Many Requests
+                content={
+                    "status": "error",
+                    "detail": "Rate limit exceeded"
+                }
+            )
+            
+        health_check_timestamps.append(current_time)
+        
+        # Use cached result for 5 seconds to reduce Redis load
+        cache_key = "health_check_cache"
+        cached = await redis_client.get(cache_key)
+        if cached:
+            return JSONResponse(
+                status_code=200,
+                content=json.loads(cached)
+            )
 
-    return {
-        "status": "healthy",
-        "redis": redis_status,
-        "timestamp": datetime.utcnow().isoformat()
-    }
+        # Only check Redis if cache miss
+        redis_ok = await redis_client.ping()
+        result = {
+            "status": "healthy" if redis_ok else "degraded",
+            "timestamp": datetime.utcnow().isoformat(),
+            "redis": redis_ok
+        }
+        
+        # Cache result
+        await redis_client.setex(cache_key, 5, json.dumps(result))
+        return JSONResponse(status_code=200, content=result)
+        
+    except Exception as e:
+        logger.error(f"Health check failed: {str(e)}")
+        return JSONResponse(
+            status_code=503,
+            content={
+                "status": "unhealthy",
+                "detail": str(e)
+            }
+        )
 
 @app.middleware("http")
 async def log_requests(request: Request, call_next):
@@ -101,3 +133,27 @@ class TimeoutMiddleware(BaseHTTPMiddleware):
             )
 
 app.add_middleware(TimeoutMiddleware) 
+
+@app.on_event("startup")
+async def startup_event():
+    """Initialize connections on startup"""
+    try:
+        # Test Redis connection
+        await redis_client.ping()
+        logger.info("Redis connection successful")
+    except Exception as e:
+        logger.error(f"Failed to initialize Redis: {str(e)}")
+        # Don't raise here - let the app start but mark Redis as unavailable
+
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run(
+        "main:app",
+        host="0.0.0.0",
+        port=8000,
+        workers=4,  # Number of worker processes
+        limit_concurrency=50,  # Max concurrent connections
+        timeout_keep_alive=65,
+        loop="uvloop",  # Faster event loop implementation
+        access_log=True
+    ) 

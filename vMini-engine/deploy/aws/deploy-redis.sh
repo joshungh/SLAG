@@ -1,24 +1,57 @@
 #!/bin/bash
 
-# Set variables
-ENVIRONMENT="production"
-AWS_REGION="us-west-2"
-VPC_ID="vpc-084087a335373ed6c"
-SUBNET_1="subnet-08e2f4a63424670d9"  # Your existing subnet
-SUBNET_2="subnet-07754accd2f3042f7"  # Your second subnet
+# Get VPC and subnet IDs
+VPC_ID=$(aws ec2 describe-vpcs --filters "Name=tag:Name,Values=vMini-engine-vpc" --query "Vpcs[0].VpcId" --output text)
+SUBNET_IDS=$(aws ec2 describe-subnets --filters "Name=vpc-id,Values=$VPC_ID" --query "Subnets[*].SubnetId" --output text | tr '\t' ',')
 
-# Deploy Redis Stack
-echo "Deploying Redis stack..."
-aws cloudformation create-stack \
-    --stack-name "vMini-engine-redis" \
-    --template-body file://redis.yml \
-    --parameters \
-        ParameterKey=Environment,ParameterValue=$ENVIRONMENT \
-        ParameterKey=VpcId,ParameterValue=$VPC_ID \
-        ParameterKey=PrivateSubnet1,ParameterValue=$SUBNET_1 \
-        ParameterKey=PrivateSubnet2,ParameterValue=$SUBNET_2
+STACK_NAME="vmini-engine-redis"
 
-echo "Waiting for Redis stack to complete..."
-aws cloudformation wait stack-create-complete --stack-name "vMini-engine-redis"
+# Check if stack exists
+if aws cloudformation describe-stacks --stack-name $STACK_NAME >/dev/null 2>&1; then
+    echo "Updating existing Redis stack..."
+    
+    # Update existing stack
+    aws cloudformation update-stack \
+        --stack-name $STACK_NAME \
+        --template-body file://deploy/aws/redis.yml \
+        --parameters \
+            ParameterKey=VpcId,ParameterValue=$VPC_ID \
+            ParameterKey=SubnetIds,ParameterValue=\"$SUBNET_IDS\" \
+        --capabilities CAPABILITY_IAM
 
-echo "Redis deployment complete!" 
+    echo "Waiting for Redis stack update to complete..."
+    aws cloudformation wait stack-update-complete --stack-name $STACK_NAME
+else
+    echo "Creating new Redis stack..."
+    
+    # Create new stack
+    aws cloudformation create-stack \
+        --stack-name $STACK_NAME \
+        --template-body file://deploy/aws/redis.yml \
+        --parameters \
+            ParameterKey=VpcId,ParameterValue=$VPC_ID \
+            ParameterKey=SubnetIds,ParameterValue=\"$SUBNET_IDS\" \
+        --capabilities CAPABILITY_IAM
+
+    echo "Waiting for Redis stack creation to complete..."
+    aws cloudformation wait stack-create-complete --stack-name $STACK_NAME
+fi
+
+# Get Redis endpoint
+REDIS_ENDPOINT=$(aws cloudformation describe-stacks \
+    --stack-name $STACK_NAME \
+    --query 'Stacks[0].Outputs[?OutputKey==`RedisEndpoint`].OutputValue' \
+    --output text)
+
+REDIS_PORT=$(aws cloudformation describe-stacks \
+    --stack-name $STACK_NAME \
+    --query 'Stacks[0].Outputs[?OutputKey==`RedisPort`].OutputValue' \
+    --output text)
+
+# Update environment variables
+sed -i '' "s/REDIS_HOST=.*/REDIS_HOST=$REDIS_ENDPOINT/" .env.production
+sed -i '' "s/REDIS_PORT=.*/REDIS_PORT=$REDIS_PORT/" .env.production
+
+echo "Redis deployment complete!"
+echo "Endpoint: $REDIS_ENDPOINT"
+echo "Port: $REDIS_PORT" 

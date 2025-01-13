@@ -1,6 +1,7 @@
 from .llm_service import LLMService
 from .embedding_service import EmbeddingService
 from .redis_service import RedisService
+from .redis_client import redis_client
 from .world_generation_service import WorldGenerationService
 from .story_framework_service import StoryFrameworkService
 from .story_generation_service import StoryGenerationService
@@ -16,11 +17,6 @@ logger = logging.getLogger(__name__)
 # Initialize core services
 llm_service = LLMService()
 embedding_service = EmbeddingService()
-
-# Initialize Redis with environment variables
-redis_host = os.getenv("REDIS_HOST")
-redis_port = int(os.getenv("REDIS_PORT", "6379"))
-redis_service = RedisService(redis_host, redis_port)
 
 # Initialize dependent services
 vector_store_service = VectorStoreService()
@@ -44,7 +40,7 @@ s3_service = S3Service()
 __all__ = [
     'llm_service',
     'embedding_service',
-    'redis_service',
+    'redis_client',
     'vector_store_service',
     'world_generation_service',
     'story_framework_service',

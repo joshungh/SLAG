@@ -91,6 +91,27 @@ Resources:
         MinimumHealthyPercent: 50
       HealthCheckGracePeriodSeconds: 120
 
+  ServiceScalableTarget:
+    Type: AWS::ApplicationAutoScaling::ScalableTarget
+    Properties:
+      MinCapacity: 2        # Minimum 2 tasks for high availability
+      MaxCapacity: 6        # Max 6 tasks (can handle ~120 concurrent users)
+      ResourceId: !Sub service/${ECSCluster}/${Service.Name}
+      ScalableDimension: ecs:service:DesiredCount
+      ServiceNamespace: ecs
+
+  RequestCountScaling:
+    Type: AWS::ApplicationAutoScaling::ScalingPolicy
+    Properties:
+      PolicyName: RequestCountScaling
+      PolicyType: TargetTrackingScaling
+      TargetTrackingScalingPolicyConfiguration:
+        TargetValue: 20     # Scale when average requests per task > 20
+        ScaleInCooldown: 300 # Wait 5 mins before scaling in
+        ScaleOutCooldown: 60 # Scale out quickly (1 min)
+        PredefinedMetricSpecification:
+          PredefinedMetricType: ALBRequestCountPerTarget
+
 Outputs:
   LoadBalancerDNS:
     Description: Load Balancer DNS Name

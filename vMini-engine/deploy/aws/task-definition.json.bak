@@ -9,7 +9,7 @@
   "containerDefinitions": [
     {
       "name": "app",
-      "image": "047719630676.dkr.ecr.us-west-2.amazonaws.com/vmini-engine-production:latest@sha256:b1d663d889772763f1377b8ecf056a79f487b6a07ab0de7728d5b1a6925c755b",
+      "image": "047719630676.dkr.ecr.us-west-2.amazonaws.com/vmini-engine-production:latest@sha256:f90d7cd43b4297dc4f54eb8063f9e045ee823a7c2b42724e8ea092ffa29ed9df",
       "cpu": 512,
       "memory": 1024,
       "portMappings": [
