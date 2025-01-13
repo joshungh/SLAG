@@ -1,7 +1,8 @@
 "use client";
 
 import { createContext, useContext, useState, useEffect } from "react";
-import { setToken, removeToken } from "@/utils/auth";
+import { setToken, removeToken, getToken } from "@/utils/token";
+import { verifyJwt } from "@/utils/auth";
 
 interface User {
   id: string;
