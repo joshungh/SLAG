@@ -108,7 +108,7 @@ export default function DashboardLayout({
   }) => {
     try {
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/api/auth/login`,
+        `${process.env.NEXT_PUBLIC_API_URL}/api/login`,
         {
           method: "POST",
           headers: {
