@@ -2,9 +2,9 @@
 
 import Link from "next/link";
 import { useRouter, usePathname } from "next/navigation";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useWeb3 } from "@/contexts/Web3Context";
-import { Wallet, LogIn, PlusCircle } from "lucide-react";
+import { Wallet, LogIn, PlusCircle, Menu, X } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import SignInModal from "./SignInModal";
 import UserRegistrationModal from "./UserRegistrationModal";
@@ -46,6 +46,12 @@ export default function DashboardLayout({
   const { user, authMethod, signOut, signIn, isLoading } = useAuth();
   const [isSignInModalOpen, setIsSignInModalOpen] = useState(false);
   const [isRegistrationModalOpen, setIsRegistrationModalOpen] = useState(false);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+
+  // Close sidebar when route changes on mobile
+  useEffect(() => {
+    setIsSidebarOpen(false);
+  }, [pathname]);
 
   // Function to truncate wallet address
   const truncateAddress = (address: string) => {
@@ -200,8 +206,32 @@ export default function DashboardLayout({
 
   return (
     <div className="flex min-h-screen">
+      {/* Mobile Overlay */}
+      {isSidebarOpen && (
+        <div
+          className="fixed inset-0 bg-black/50 z-40 md:hidden"
+          onClick={() => setIsSidebarOpen(false)}
+        />
+      )}
+
+      {/* Mobile Menu Button */}
+      <button
+        onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+        className="fixed top-4 left-4 z-50 md:hidden text-white hover:text-green-400 transition-colors"
+      >
+        {isSidebarOpen ? (
+          <X className="w-6 h-6" />
+        ) : (
+          <Menu className="w-6 h-6" />
+        )}
+      </button>
+
       {/* Sidebar */}
-      <div className="fixed top-0 left-0 w-64 h-screen border-r border-white/10 flex flex-col">
+      <div
+        className={`fixed top-0 left-0 w-64 h-screen border-r border-white/10 flex flex-col bg-black transform transition-transform duration-300 ease-in-out z-50 ${
+          isSidebarOpen ? "translate-x-0" : "-translate-x-full"
+        } md:translate-x-0`}
+      >
         {/* Logo */}
         <div className="p-6">
           <Link
@@ -228,10 +258,9 @@ export default function DashboardLayout({
         </nav>
 
         {/* Auth Section */}
-        <div className="mt-auto px-4 space-y-4 relative z-50">
-          {/* User Menu (when logged in) */}
+        <div className="mt-auto px-4 space-y-4">
           {user && (
-            <div className="mb-4 relative">
+            <div className="mb-4">
               <UserMenu
                 user={user}
                 onSignOut={handleSignOut}
@@ -243,7 +272,6 @@ export default function DashboardLayout({
             </div>
           )}
 
-          {/* Sign In Button (when not logged in) */}
           {!user && (
             <button
               onClick={handleOpenSignIn}
@@ -259,7 +287,7 @@ export default function DashboardLayout({
             </button>
           )}
 
-          {/* Wallet Section (always visible) */}
+          {/* Wallet Section */}
           <div className="border-t border-white/10 pt-4">
             {connected ? (
               <ConnectedWalletView
@@ -282,8 +310,8 @@ export default function DashboardLayout({
       </div>
 
       {/* Main Content */}
-      <div className="flex-1 ml-64">
-        <div className="p-8">{children}</div>
+      <div className="flex-1 md:ml-64">
+        <div className="p-4 sm:p-8">{children}</div>
       </div>
 
       {/* Modals */}
