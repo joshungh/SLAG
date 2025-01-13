@@ -2,6 +2,7 @@
 
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { Connection, PublicKey, clusterApiUrl } from "@solana/web3.js";
+import UserRegistrationModal from "@/components/UserRegistrationModal";
 
 // Initialize Solana connection
 const connection = new Connection(clusterApiUrl("devnet"), "confirmed");
@@ -12,6 +13,8 @@ type Web3ContextType = {
   balance: number | null;
   connect: () => Promise<void>;
   disconnect: () => void;
+  isNewUser: boolean;
+  userProfile: any | null;
 };
 
 const Web3Context = createContext<Web3ContextType>({
@@ -20,12 +23,17 @@ const Web3Context = createContext<Web3ContextType>({
   balance: null,
   connect: async () => {},
   disconnect: () => {},
+  isNewUser: false,
+  userProfile: null,
 });
 
 export function Web3Provider({ children }: { children: React.ReactNode }) {
   const [connected, setConnected] = useState(false);
   const [publicKey, setPublicKey] = useState<string | null>(null);
   const [balance, setBalance] = useState<number | null>(null);
+  const [isNewUser, setIsNewUser] = useState(false);
+  const [showRegistration, setShowRegistration] = useState(false);
+  const [userProfile, setUserProfile] = useState<any | null>(null);
 
   const fetchBalance = async (pubKey: string) => {
     try {
@@ -36,26 +44,93 @@ export function Web3Provider({ children }: { children: React.ReactNode }) {
     }
   };
 
+  const checkUserExists = async (walletAddress: string) => {
+    try {
+      const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL;
+      if (!BACKEND_URL) {
+        throw new Error("NEXT_PUBLIC_API_URL environment variable is not set");
+      }
+
+      const response = await fetch(
+        `${BACKEND_URL}/api/users/wallet/${walletAddress}`
+      );
+      if (response.ok) {
+        const userData = await response.json();
+        setUserProfile(userData);
+        return true;
+      }
+      return false;
+    } catch (error) {
+      console.error("Error checking user:", error);
+      return false;
+    }
+  };
+
+  const handleUserRegistration = async (formData: any) => {
+    try {
+      const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL;
+      if (!BACKEND_URL) {
+        throw new Error("NEXT_PUBLIC_API_URL environment variable is not set");
+      }
+
+      const userData = {
+        username: formData.username || `user_${publicKey?.slice(0, 8)}`,
+        email: formData.email || null,
+        first_name: formData.first_name || null,
+        last_name: formData.last_name || null,
+        web3_wallet: publicKey,
+        login_method: "web3",
+        created_at: new Date().toISOString(),
+      };
+
+      const response = await fetch(`${BACKEND_URL}/api/users`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(userData),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || "Failed to create user");
+      }
+
+      const data = await response.json();
+      setUserProfile(data);
+      setShowRegistration(false);
+      localStorage.setItem("wallet_disconnected", "false");
+      return data;
+    } catch (error) {
+      console.error("Error creating user:", error);
+      throw error;
+    }
+  };
+
   const checkAndUpdateConnection = async () => {
     try {
+      const wasDisconnected =
+        localStorage.getItem("wallet_disconnected") === "true";
+      if (wasDisconnected) {
+        setConnected(false);
+        setPublicKey(null);
+        setBalance(null);
+        setUserProfile(null);
+        return;
+      }
+
       const provider = window?.phantom?.solana;
       if (provider?.isPhantom) {
-        // Check if user explicitly disconnected
-        const wasDisconnected =
-          localStorage.getItem("wallet_disconnected") === "true";
-        if (wasDisconnected) {
-          setConnected(false);
-          setPublicKey(null);
-          setBalance(null);
-          return;
-        }
-
-        // If not explicitly disconnected, check if wallet is connected
         if (provider.isConnected && provider.publicKey) {
           const pubKey = provider.publicKey.toString();
           setConnected(true);
           setPublicKey(pubKey);
           await fetchBalance(pubKey);
+
+          // Show registration modal if no user profile
+          if (!userProfile) {
+            setShowRegistration(true);
+          }
         }
       }
     } catch (error) {
@@ -67,14 +142,19 @@ export function Web3Provider({ children }: { children: React.ReactNode }) {
   };
 
   useEffect(() => {
-    // Only run in browser environment
     if (typeof window === "undefined") return;
-
-    // Check connection on mount
     checkAndUpdateConnection();
 
-    // Listen for Phantom connection events
-    const handleConnect = () => {
+    const handleConnect = async () => {
+      const wasDisconnected =
+        localStorage.getItem("wallet_disconnected") === "true";
+      if (wasDisconnected) {
+        const provider = window?.phantom?.solana;
+        if (provider?.isPhantom) {
+          await provider.disconnect();
+        }
+        return;
+      }
       localStorage.removeItem("wallet_disconnected");
       checkAndUpdateConnection();
     };
@@ -83,7 +163,7 @@ export function Web3Provider({ children }: { children: React.ReactNode }) {
       setConnected(false);
       setPublicKey(null);
       setBalance(null);
-      localStorage.setItem("wallet_disconnected", "true");
+      setUserProfile(null);
     };
 
     const provider = window.phantom?.solana;
@@ -110,6 +190,9 @@ export function Web3Provider({ children }: { children: React.ReactNode }) {
         setConnected(true);
         setPublicKey(pubKey);
         await fetchBalance(pubKey);
+
+        // Show registration modal for new connections
+        setShowRegistration(true);
       }
     } catch (error) {
       console.error("Error connecting to Phantom wallet:", error);
@@ -123,22 +206,42 @@ export function Web3Provider({ children }: { children: React.ReactNode }) {
     try {
       const provider = window?.phantom?.solana;
       if (provider?.isPhantom) {
-        await provider.disconnect();
         localStorage.setItem("wallet_disconnected", "true");
+        await provider.disconnect();
         setConnected(false);
         setPublicKey(null);
         setBalance(null);
+        setUserProfile(null);
       }
     } catch (error) {
       console.error("Error disconnecting from Phantom wallet:", error);
+      localStorage.setItem("wallet_disconnected", "true");
+      setConnected(false);
+      setPublicKey(null);
+      setBalance(null);
+      setUserProfile(null);
     }
   };
 
   return (
     <Web3Context.Provider
-      value={{ connected, publicKey, balance, connect, disconnect }}
+      value={{
+        connected,
+        publicKey,
+        balance,
+        connect,
+        disconnect,
+        isNewUser,
+        userProfile,
+      }}
     >
       {children}
+      <UserRegistrationModal
+        isOpen={showRegistration}
+        onClose={() => setShowRegistration(false)}
+        walletAddress={publicKey}
+        onSubmit={handleUserRegistration}
+      />
     </Web3Context.Provider>
   );
 }
