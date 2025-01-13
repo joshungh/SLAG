@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
-import { verifyJwt } from "@/lib/jwt";
+import { verifyJwt, AuthError } from "@/utils/auth";
+import { getToken } from "@/utils/token";
 
 // GET /api/users/profile
 export async function GET(req: NextRequest) {
