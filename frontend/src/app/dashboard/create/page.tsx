@@ -349,39 +349,30 @@ Six months of study, and the Fragments are still a mystery. But tonight feels di
   };
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="max-w-2xl mx-auto space-y-8">
-        <div className="text-center space-y-4">
-          <h1 className="text-4xl font-bold">Create Your Story</h1>
-          {/* Commented out for testing
-          {connected && (
-            <div className="bg-black/30 rounded-lg p-4">
-              <p className="text-gray-400">
-                {3 - freePromptsUsed} free{" "}
-                {3 - freePromptsUsed === 1 ? "prompt" : "prompts"} remaining
-              </p>
-            </div>
-          )} */}
+    <div className="container mx-auto px-4 py-4 sm:py-8 min-h-screen">
+      <div className="max-w-2xl mx-auto space-y-6 sm:space-y-8">
+        <div className="text-center space-y-3 sm:space-y-4">
+          <h1 className="text-3xl sm:text-4xl font-bold">Create Your Story</h1>
         </div>
 
-        <div className="space-y-4">
+        <div className="space-y-3 sm:space-y-4">
           <div className="relative">
             <textarea
               value={prompt}
               onChange={(e) => setPrompt(e.target.value)}
-              className="w-full h-32 px-4 py-3 rounded-lg bg-black/50 border border-gray-700 focus:border-green-500 focus:ring-1 focus:ring-green-500 transition-colors text-green-400 font-['IBM_Plex_Mono'] text-base tracking-tight"
+              className="w-full h-24 sm:h-32 px-3 sm:px-4 py-2 sm:py-3 rounded-lg bg-black/50 border border-gray-700 focus:border-green-500 focus:ring-1 focus:ring-green-500 transition-colors text-green-400 font-['IBM_Plex_Mono'] text-sm sm:text-base tracking-tight"
               disabled={isGenerating || !connected}
             />
             <div
               className="absolute pointer-events-none select-none"
               style={{
-                top: "12px",
-                left: "16px",
-                right: "16px",
+                top: "8px",
+                left: "12px",
+                right: "12px",
                 opacity: prompt ? 0 : 1,
               }}
             >
-              <span className="font-['IBM_Plex_Mono'] text-lg tracking-tight text-gray-500">
+              <span className="font-['IBM_Plex_Mono'] text-base sm:text-lg tracking-tight text-gray-500">
                 Enter your story idea...
                 <span
                   className={`text-green-400 ${
@@ -395,7 +386,7 @@ Six months of study, and the Fragments are still a mystery. But tonight feels di
           </div>
 
           {error && (
-            <div className="bg-red-500/10 border border-red-500 text-red-400 text-sm p-3 rounded-lg">
+            <div className="bg-red-500/10 border border-red-500 text-red-400 text-xs sm:text-sm p-2 sm:p-3 rounded-lg">
               {error}
             </div>
           )}
@@ -403,16 +394,14 @@ Six months of study, and the Fragments are still a mystery. But tonight feels di
           <div className="relative group">
             <button
               onClick={startGeneration}
-              disabled={
-                isGenerating || !connected /* || freePromptsUsed >= 3 */
-              }
-              className="w-full py-3 px-4 bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 rounded-lg font-medium flex items-center justify-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-white"
+              disabled={isGenerating || !connected}
+              className="w-full py-2 sm:py-3 px-3 sm:px-4 bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 rounded-lg font-medium flex items-center justify-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-white text-sm sm:text-base"
             >
-              <Wand2 className="w-5 h-5" />
+              <Wand2 className="w-4 h-4 sm:w-5 sm:h-5" />
               <span>{isGenerating ? "Generating..." : "Generate Story"}</span>
             </button>
             {!connected && (
-              <div className="absolute -top-12 left-1/2 -translate-x-1/2 w-max opacity-0 group-hover:opacity-100 transition-opacity bg-black/90 text-white text-sm py-2 px-3 rounded pointer-events-none">
+              <div className="absolute -top-10 sm:-top-12 left-1/2 -translate-x-1/2 w-max opacity-0 group-hover:opacity-100 transition-opacity bg-black/90 text-white text-xs sm:text-sm py-1.5 sm:py-2 px-2 sm:px-3 rounded pointer-events-none">
                 Connect your wallet to generate stories
               </div>
             )}
@@ -431,10 +420,10 @@ Six months of study, and the Fragments are still a mystery. But tonight feels di
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="bg-black/50 rounded-lg p-6 space-y-8"
+            className="bg-black/50 rounded-lg p-4 sm:p-6 space-y-6 sm:space-y-8"
           >
-            <div className="flex justify-between items-center">
-              <h2 className="text-2xl font-bold">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center space-y-3 sm:space-y-0">
+              <h2 className="text-xl sm:text-2xl font-bold">
                 {generatedStory?.bible?.title || "Generated Story"}
               </h2>
               <button
@@ -456,25 +445,27 @@ Six months of study, and the Fragments are still a mystery. But tonight feels di
                   element.click();
                   document.body.removeChild(element);
                 }}
-                className="px-4 py-2 bg-green-500 hover:bg-green-600 rounded-lg text-white flex items-center space-x-2 transition-colors"
+                className="w-full sm:w-auto px-3 sm:px-4 py-2 bg-green-500 hover:bg-green-600 rounded-lg text-white flex items-center justify-center space-x-2 transition-colors text-sm sm:text-base"
               >
                 <span>Download Story</span>
               </button>
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <h3 className="text-lg font-medium mb-2">Genre</h3>
-                <p className="text-gray-400">
+                <h3 className="text-base sm:text-lg font-medium mb-2">Genre</h3>
+                <p className="text-gray-400 text-sm sm:text-base">
                   {generatedStory?.bible?.genre || "Unknown"}
                 </p>
               </div>
               <div>
-                <h3 className="text-lg font-medium mb-2">Setting</h3>
-                <p className="text-gray-400">
+                <h3 className="text-base sm:text-lg font-medium mb-2">
+                  Setting
+                </h3>
+                <p className="text-gray-400 text-sm sm:text-base">
                   {generatedStory?.bible?.universe?.setting || "Unknown"}
                 </p>
-                <p className="text-gray-400 mt-1">
+                <p className="text-gray-400 text-sm sm:text-base mt-1">
                   {generatedStory?.bible?.universe?.era || "Unknown"}
                 </p>
               </div>
@@ -482,17 +473,19 @@ Six months of study, and the Fragments are still a mystery. But tonight feels di
 
             {generatedStory?.bible?.characters?.length > 0 && (
               <div>
-                <h3 className="text-lg font-medium mb-2">Characters</h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                <h3 className="text-base sm:text-lg font-medium mb-2">
+                  Characters
+                </h3>
+                <div className="grid grid-cols-1 gap-3">
                   {generatedStory.bible.characters.map((character, index) => (
                     <div key={index} className="bg-black/30 rounded p-3">
-                      <div className="font-medium text-green-400">
+                      <div className="font-medium text-green-400 text-sm sm:text-base">
                         {character.name}
                       </div>
-                      <div className="text-sm text-gray-400">
+                      <div className="text-xs sm:text-sm text-gray-400">
                         {character.role}
                       </div>
-                      <div className="text-sm mt-1">
+                      <div className="text-xs sm:text-sm mt-1">
                         {character.description}
                       </div>
                     </div>
@@ -503,14 +496,18 @@ Six months of study, and the Fragments are still a mystery. But tonight feels di
 
             {generatedStory?.bible?.locations?.length > 0 && (
               <div>
-                <h3 className="text-lg font-medium mb-2">Locations</h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                <h3 className="text-base sm:text-lg font-medium mb-2">
+                  Locations
+                </h3>
+                <div className="grid grid-cols-1 gap-3">
                   {generatedStory.bible.locations.map((location, index) => (
                     <div key={index} className="bg-black/30 rounded p-3">
-                      <div className="font-medium text-green-400">
+                      <div className="font-medium text-green-400 text-sm sm:text-base">
                         {location.name}
                       </div>
-                      <div className="text-sm mt-1">{location.description}</div>
+                      <div className="text-xs sm:text-sm text-gray-400">
+                        {location.description}
+                      </div>
                     </div>
                   ))}
                 </div>
@@ -519,18 +516,24 @@ Six months of study, and the Fragments are still a mystery. But tonight feels di
 
             {generatedStory?.bible?.factions?.length > 0 && (
               <div>
-                <h3 className="text-lg font-medium mb-2">Factions</h3>
+                <h3 className="text-base sm:text-lg font-medium mb-2">
+                  Factions
+                </h3>
                 <div className="grid grid-cols-1 gap-3">
                   {generatedStory.bible.factions.map((faction, index) => (
                     <div key={index} className="bg-black/30 rounded p-3">
-                      <div className="font-medium text-green-400">
+                      <div className="font-medium text-green-400 text-sm sm:text-base">
                         {faction.name}
                       </div>
-                      <div className="text-sm mt-1">{faction.description}</div>
+                      <div className="text-xs sm:text-sm text-gray-400">
+                        {faction.description}
+                      </div>
                       {faction.goals?.length > 0 && (
                         <div className="mt-2">
-                          <div className="text-sm font-medium mb-1">Goals:</div>
-                          <ul className="list-disc list-inside text-sm text-gray-400">
+                          <div className="text-xs sm:text-sm font-medium mb-1">
+                            Goals:
+                          </div>
+                          <ul className="list-disc list-inside text-xs sm:text-sm text-gray-400">
                             {faction.goals.map((goal, idx) => (
                               <li key={idx}>{goal}</li>
                             ))}
@@ -545,14 +548,18 @@ Six months of study, and the Fragments are still a mystery. But tonight feels di
 
             {generatedStory?.bible?.technology?.length > 0 && (
               <div>
-                <h3 className="text-lg font-medium mb-2">Technology</h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                <h3 className="text-base sm:text-lg font-medium mb-2">
+                  Technology
+                </h3>
+                <div className="grid grid-cols-1 gap-3">
                   {generatedStory.bible.technology.map((tech, index) => (
                     <div key={index} className="bg-black/30 rounded p-3">
-                      <div className="font-medium text-green-400">
+                      <div className="font-medium text-green-400 text-sm sm:text-base">
                         {tech.name}
                       </div>
-                      <div className="text-sm mt-1">{tech.description}</div>
+                      <div className="text-xs sm:text-sm text-gray-400">
+                        {tech.description}
+                      </div>
                     </div>
                   ))}
                 </div>
@@ -561,16 +568,20 @@ Six months of study, and the Fragments are still a mystery. But tonight feels di
 
             {generatedStory?.bible?.timeline?.main_events?.length > 0 && (
               <div>
-                <h3 className="text-lg font-medium mb-2">Timeline</h3>
+                <h3 className="text-base sm:text-lg font-medium mb-2">
+                  Timeline
+                </h3>
                 <div className="space-y-3">
                   {generatedStory.bible.timeline.main_events.map(
                     (event, index) => (
                       <div key={index} className="bg-black/30 rounded p-3">
-                        <div className="font-medium text-green-400">
+                        <div className="font-medium text-green-400 text-sm sm:text-base">
                           {event.year}
                         </div>
-                        <div className="text-sm font-medium">{event.event}</div>
-                        <div className="text-sm text-gray-400 mt-1">
+                        <div className="text-xs sm:text-sm font-medium">
+                          {event.event}
+                        </div>
+                        <div className="text-xs sm:text-sm text-gray-400 text-sm sm:text-base mt-1">
                           {event.details}
                         </div>
                       </div>
@@ -582,7 +593,9 @@ Six months of study, and the Fragments are still a mystery. But tonight feels di
 
             {generatedStory?.bible?.themes?.length > 0 && (
               <div>
-                <h3 className="text-lg font-medium mb-2">Themes</h3>
+                <h3 className="text-base sm:text-lg font-medium mb-2">
+                  Themes
+                </h3>
                 <div className="flex flex-wrap gap-2">
                   {generatedStory.bible.themes.map((theme, index) => (
                     <span
@@ -598,7 +611,7 @@ Six months of study, and the Fragments are still a mystery. But tonight feels di
 
             {generatedStory?.story?.content && (
               <div>
-                <h3 className="text-lg font-medium mb-2">Story</h3>
+                <h3 className="text-base sm:text-lg font-medium mb-2">Story</h3>
                 <div className="bg-black/30 rounded-lg p-4">
                   <div className="prose prose-invert max-w-none">
                     {generatedStory.story.content

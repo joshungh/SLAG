@@ -124,7 +124,7 @@ export default function Header() {
         </button>
 
         <Link
-          href="/dashboard"
+          href="/dashboard/create"
           className="bg-green-400 text-black px-4 py-2 rounded hover:bg-green-300 transition-colors"
         >
           Launch App

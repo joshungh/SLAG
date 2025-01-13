@@ -38,16 +38,19 @@ export function Web3Provider({ children }: { children: React.ReactNode }) {
 
   const checkAndUpdateConnection = async () => {
     try {
-      // Check if user explicitly disconnected
-      const wasDisconnected =
-        localStorage.getItem("wallet_disconnected") === "true";
-      if (wasDisconnected) {
-        return;
-      }
-
       const provider = window?.phantom?.solana;
       if (provider?.isPhantom) {
-        // Check if already connected
+        // Check if user explicitly disconnected
+        const wasDisconnected =
+          localStorage.getItem("wallet_disconnected") === "true";
+        if (wasDisconnected) {
+          setConnected(false);
+          setPublicKey(null);
+          setBalance(null);
+          return;
+        }
+
+        // If not explicitly disconnected, check if wallet is connected
         if (provider.isConnected && provider.publicKey) {
           const pubKey = provider.publicKey.toString();
           setConnected(true);
@@ -57,6 +60,9 @@ export function Web3Provider({ children }: { children: React.ReactNode }) {
       }
     } catch (error) {
       console.error("Error checking wallet connection:", error);
+      setConnected(false);
+      setPublicKey(null);
+      setBalance(null);
     }
   };
 
@@ -98,26 +104,33 @@ export function Web3Provider({ children }: { children: React.ReactNode }) {
     try {
       const provider = window?.phantom?.solana;
       if (provider?.isPhantom) {
+        localStorage.removeItem("wallet_disconnected");
         const response = await provider.connect();
         const pubKey = response.publicKey.toString();
-        localStorage.removeItem("wallet_disconnected");
         setConnected(true);
         setPublicKey(pubKey);
         await fetchBalance(pubKey);
       }
     } catch (error) {
       console.error("Error connecting to Phantom wallet:", error);
-    }
-  };
-
-  const disconnect = () => {
-    const provider = window?.phantom?.solana;
-    if (provider?.isPhantom) {
-      provider.disconnect();
-      localStorage.setItem("wallet_disconnected", "true");
       setConnected(false);
       setPublicKey(null);
       setBalance(null);
+    }
+  };
+
+  const disconnect = async () => {
+    try {
+      const provider = window?.phantom?.solana;
+      if (provider?.isPhantom) {
+        await provider.disconnect();
+        localStorage.setItem("wallet_disconnected", "true");
+        setConnected(false);
+        setPublicKey(null);
+        setBalance(null);
+      }
+    } catch (error) {
+      console.error("Error disconnecting from Phantom wallet:", error);
     }
   };
 
