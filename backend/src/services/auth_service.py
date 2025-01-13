@@ -1,4 +1,5 @@
 import jwt
+from jose import jwt
 import bcrypt
 from datetime import datetime, timedelta
 import uuid
