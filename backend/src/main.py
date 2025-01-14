@@ -1,9 +1,9 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from dotenv import load_dotenv
-from .routes import user_routes, auth
-from .config.aws_config import initialize_aws
-from .config.config import Settings
+from src.routes import user_routes, auth
+from src.config.aws_config import initialize_aws
+from src.config.config import Settings
 import os
 
 # Load environment variables and initialize AWS
