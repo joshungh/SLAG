@@ -3,6 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from dotenv import load_dotenv
 from .routes import user_routes, auth
 from .config.aws_config import initialize_aws
+from .config.config import Settings
 import os
 
 # Load environment variables and initialize AWS
@@ -10,14 +11,15 @@ load_dotenv()
 initialize_aws()
 
 app = FastAPI()
+settings = Settings()
 
 # Configure CORS
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000", "http://localhost:3001", "http://localhost:3002", "http://localhost:3010"],  # Frontend URLs
+    allow_origins=settings.CORS_ORIGINS,
     allow_credentials=True,
     allow_methods=["*"],
-    allow_headers=["*"],
+    allow_headers=["*"]
 )
 
 # Include routers

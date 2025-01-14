@@ -10,6 +10,9 @@ class Settings(BaseSettings):
     PINECONE_ENVIRONMENT: str = os.getenv("PINECONE_ENVIRONMENT")
     PINECONE_INDEX: str = os.getenv("PINECONE_INDEX", "slag-index")
     
+    # CORS Settings
+    CORS_ORIGINS: list = os.getenv("CORS_ORIGINS", "http://localhost:3000").split(",")
+    
     # Add Bedrock settings
     BEDROCK_MODEL_ID: str = os.getenv("BEDROCK_MODEL_ID", "anthropic.claude-3-5-sonnet-20241022-v2:0")
     BEDROCK_EMBEDDING_MODEL_ID: str = os.getenv("BEDROCK_EMBEDDING_MODEL_ID", "amazon.titan-embed-text-v1")
