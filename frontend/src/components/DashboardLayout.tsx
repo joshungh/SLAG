@@ -169,9 +169,7 @@ export default function DashboardLayout({
       const responseData = await response.json();
 
       if (!response.ok) {
-        const errorMessage =
-          responseData?.detail || responseData?.error || "Registration failed";
-        throw new Error(errorMessage);
+        throw responseData;
       }
 
       if (responseData?.user) {
@@ -186,8 +184,11 @@ export default function DashboardLayout({
       setIsRegistrationModalOpen(false);
 
       return responseData;
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error registering:", error);
+      if (error.detail) {
+        throw new Error(error.detail);
+      }
       throw error;
     }
   };
@@ -320,16 +321,7 @@ export default function DashboardLayout({
         onClose={handleCloseSignIn}
         onSignIn={handleSignIn}
         onRegisterClick={handleOpenRegistration}
-      >
-        <div className="mt-4 text-center">
-          <button
-            onClick={() => router.push("/forgot-password")}
-            className="text-sm text-gray-400 hover:text-white transition-colors"
-          >
-            Forgot your password?
-          </button>
-        </div>
-      </SignInModal>
+      ></SignInModal>
 
       <UserRegistrationModal
         isOpen={isRegistrationModalOpen}
@@ -337,6 +329,7 @@ export default function DashboardLayout({
         onSubmit={handleRegister}
         mode={publicKey ? "web3" : "traditional"}
         walletAddress={publicKey}
+        onSignInClick={handleOpenSignIn}
       />
     </div>
   );

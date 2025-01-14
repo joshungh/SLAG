@@ -61,12 +61,6 @@ export default function Header() {
             <li className="flex items-center">
               <div className="flex space-x-4">
                 <Link
-                  href="/dashboard"
-                  className="hover:text-green-300 transition-colors"
-                >
-                  Dashboard
-                </Link>
-                <Link
                   href="https://docs.lostage.io"
                   className="hover:text-green-300 transition-colors"
                   target="_blank"

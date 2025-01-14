@@ -82,14 +82,6 @@ export default function UserMenu({
               <User className="w-4 h-4 mr-3" />
               View Profile
             </Link>
-            <Link
-              href="/dashboard/settings"
-              className="flex items-center px-4 py-3 text-sm text-gray-300 hover:bg-white/5 transition-colors"
-              onClick={() => setIsOpen(false)}
-            >
-              <Settings className="w-4 h-4 mr-3" />
-              Manage Account
-            </Link>
 
             <button
               onClick={() => {

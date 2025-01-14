@@ -86,6 +86,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     removeToken();
     setUser(null);
     setAuthMethod(null);
+
+    // Disconnect wallet if user was using web3 login
+    const provider = window?.phantom?.solana;
+    if (provider?.isPhantom) {
+      localStorage.setItem("wallet_disconnected", "true");
+      provider.disconnect().catch(console.error);
+    }
   };
 
   return (

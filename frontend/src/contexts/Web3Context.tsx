@@ -3,6 +3,7 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { Connection, PublicKey, clusterApiUrl } from "@solana/web3.js";
 import UserRegistrationModal from "@/components/UserRegistrationModal";
+import { useAuth } from "./AuthContext";
 
 // Initialize Solana connection
 const connection = new Connection(clusterApiUrl("devnet"), "confirmed");
@@ -28,6 +29,7 @@ const Web3Context = createContext<Web3ContextType>({
 });
 
 export function Web3Provider({ children }: { children: React.ReactNode }) {
+  const { signIn, signOut } = useAuth();
   const [connected, setConnected] = useState(false);
   const [publicKey, setPublicKey] = useState<string | null>(null);
   const [balance, setBalance] = useState<number | null>(null);
@@ -91,18 +93,51 @@ export function Web3Provider({ children }: { children: React.ReactNode }) {
         body: JSON.stringify(userData),
       });
 
+      const data = await response.json();
+
       if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || "Failed to create user");
+        throw new Error(data.detail || "Failed to create user");
       }
 
-      const data = await response.json();
-      setUserProfile(data);
+      signIn(data.token, data.user);
+      setUserProfile(data.user);
       setShowRegistration(false);
       localStorage.setItem("wallet_disconnected", "false");
       return data;
     } catch (error) {
       console.error("Error creating user:", error);
+      throw error;
+    }
+  };
+
+  const handleUserLogin = async (walletAddress: string) => {
+    try {
+      const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL;
+      if (!BACKEND_URL) {
+        throw new Error("NEXT_PUBLIC_API_URL environment variable is not set");
+      }
+
+      const response = await fetch(`${BACKEND_URL}/api/auth/login`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          web3_wallet: walletAddress,
+          login_method: "web3",
+        }),
+      });
+
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data.detail || "Failed to login");
+      }
+
+      signIn(data.token, data.user);
+      setUserProfile(data.user);
+      return data;
+    } catch (error) {
+      console.error("Error logging in:", error);
       throw error;
     }
   };
@@ -123,12 +158,21 @@ export function Web3Provider({ children }: { children: React.ReactNode }) {
       if (provider?.isPhantom) {
         if (provider.isConnected && provider.publicKey) {
           const pubKey = provider.publicKey.toString();
-          setConnected(true);
-          setPublicKey(pubKey);
-          await fetchBalance(pubKey);
 
-          // Show registration modal if no user profile
-          if (!userProfile) {
+          // Check if user exists first
+          const userExists = await checkUserExists(pubKey);
+
+          if (userExists) {
+            // If user exists, log them in
+            await handleUserLogin(pubKey);
+            setConnected(true);
+            setPublicKey(pubKey);
+            await fetchBalance(pubKey);
+          } else {
+            // Only show registration for new users
+            setConnected(true);
+            setPublicKey(pubKey);
+            await fetchBalance(pubKey);
             setShowRegistration(true);
           }
         }
@@ -187,18 +231,27 @@ export function Web3Provider({ children }: { children: React.ReactNode }) {
         localStorage.removeItem("wallet_disconnected");
         const response = await provider.connect();
         const pubKey = response.publicKey.toString();
-        setConnected(true);
-        setPublicKey(pubKey);
-        await fetchBalance(pubKey);
 
-        // Show registration modal for new connections
-        setShowRegistration(true);
+        // First check if user exists
+        const userExists = await checkUserExists(pubKey);
+
+        if (userExists) {
+          // If user exists, log them in
+          await handleUserLogin(pubKey);
+          setConnected(true);
+          setPublicKey(pubKey);
+          await fetchBalance(pubKey);
+        } else {
+          // If user doesn't exist, show registration
+          setConnected(true);
+          setPublicKey(pubKey);
+          await fetchBalance(pubKey);
+          setShowRegistration(true);
+        }
       }
     } catch (error) {
       console.error("Error connecting to Phantom wallet:", error);
-      setConnected(false);
-      setPublicKey(null);
-      setBalance(null);
+      await disconnect(); // Disconnect if anything fails
     }
   };
 
@@ -212,6 +265,7 @@ export function Web3Provider({ children }: { children: React.ReactNode }) {
         setPublicKey(null);
         setBalance(null);
         setUserProfile(null);
+        signOut(); // Sign out from AuthContext when disconnecting wallet
       }
     } catch (error) {
       console.error("Error disconnecting from Phantom wallet:", error);
@@ -220,6 +274,7 @@ export function Web3Provider({ children }: { children: React.ReactNode }) {
       setPublicKey(null);
       setBalance(null);
       setUserProfile(null);
+      signOut(); // Sign out from AuthContext even if disconnect fails
     }
   };
 
@@ -238,9 +293,14 @@ export function Web3Provider({ children }: { children: React.ReactNode }) {
       {children}
       <UserRegistrationModal
         isOpen={showRegistration}
-        onClose={() => setShowRegistration(false)}
+        onClose={() => {
+          setShowRegistration(false);
+          disconnect(); // Disconnect if they cancel registration
+        }}
         walletAddress={publicKey}
         onSubmit={handleUserRegistration}
+        mode="web3"
+        onSignInClick={() => {}}
       />
     </Web3Context.Provider>
   );

@@ -6,6 +6,7 @@ import { motion } from "framer-motion";
 import { Edit3, User, Mail, Wallet, X, Camera } from "lucide-react";
 import Image from "next/image";
 import { useAuth } from "@/contexts/AuthContext";
+import { useRouter } from "next/navigation";
 
 interface UserProfile {
   username: string;
@@ -26,6 +27,7 @@ interface EditableFields {
 }
 
 export default function ProfilePage() {
+  const router = useRouter();
   const { connected, publicKey } = useWeb3();
   const { user: authUser } = useAuth();
   const [profile, setProfile] = useState<UserProfile | null>(null);
@@ -37,8 +39,13 @@ export default function ProfilePage() {
   });
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [profilePicture, setProfilePicture] = useState<File | null>(null);
-  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+
+  // Redirect if not authenticated
+  useEffect(() => {
+    if (!authUser && !isLoading) {
+      router.push("/dashboard/create");
+    }
+  }, [authUser, isLoading, router]);
 
   // Use authUser data to set profile
   useEffect(() => {
@@ -54,8 +61,6 @@ export default function ProfilePage() {
         created_at: authUser.created_at,
         login_methods: authUser.login_methods || [],
       });
-    } else {
-      setError("Please sign in to view your profile");
     }
   }, [authUser]);
 
@@ -77,8 +82,6 @@ export default function ProfilePage() {
         first_name: profile?.first_name || "",
         last_name: profile?.last_name || "",
       });
-      setPreviewUrl(null);
-      setProfilePicture(null);
     }
     setIsEditing(!isEditing);
     setError(null);
@@ -91,21 +94,6 @@ export default function ProfilePage() {
     }));
   };
 
-  const handleProfilePictureChange = (
-    e: React.ChangeEvent<HTMLInputElement>
-  ) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      if (file.size > 5 * 1024 * 1024) {
-        // 5MB limit
-        setError("Profile picture must be less than 5MB");
-        return;
-      }
-      setProfilePicture(file);
-      setPreviewUrl(URL.createObjectURL(file));
-    }
-  };
-
   const handleSave = async () => {
     setIsLoading(true);
     setError(null);
@@ -116,25 +104,34 @@ export default function ProfilePage() {
         throw new Error("No authentication token found");
       }
 
-      const formData = new FormData();
-      formData.append("username", editableFields.username);
-      formData.append("first_name", editableFields.first_name);
-      formData.append("last_name", editableFields.last_name);
-      if (profilePicture) {
-        formData.append("profile_picture", profilePicture);
+      const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL;
+      if (!BACKEND_URL) {
+        throw new Error("Backend URL not configured");
       }
 
-      const response = await fetch("/api/users/profile", {
+      // Send the profile data as JSON
+      const profileData = {
+        username: editableFields.username,
+        first_name: editableFields.first_name,
+        last_name: editableFields.last_name,
+      };
+
+      console.log("Profile data being sent:", profileData);
+
+      const response = await fetch(`${BACKEND_URL}/api/users/profile`, {
         method: "PUT",
-        body: formData,
         headers: {
           Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
         },
+        body: JSON.stringify(profileData),
       });
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.error || "Failed to update profile");
+        throw new Error(
+          errorData.detail || errorData.error || "Failed to update profile"
+        );
       }
 
       const updatedProfile = await response.json();
@@ -144,6 +141,7 @@ export default function ProfilePage() {
       }));
       setIsEditing(false);
     } catch (err) {
+      console.error("Profile update error:", err);
       setError(err instanceof Error ? err.message : "An error occurred");
     } finally {
       setIsLoading(false);
@@ -180,38 +178,27 @@ export default function ProfilePage() {
             <div className="flex items-center space-x-6">
               <div className="relative group">
                 {isEditing ? (
-                  <label className="cursor-pointer block relative">
-                    <div className="w-[120px] h-[120px] rounded-full overflow-hidden">
-                      {previewUrl || profile.profile_picture ? (
-                        <Image
-                          src={previewUrl || profile.profile_picture!}
-                          alt="Profile preview"
-                          width={120}
-                          height={120}
-                          className="object-cover"
-                        />
-                      ) : (
-                        <div className="w-full h-full bg-gradient-to-br from-green-400/20 to-green-600/20 flex items-center justify-center">
-                          <User className="w-12 h-12 text-green-400" />
-                        </div>
-                      )}
-                      <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                        <Camera className="w-6 h-6 text-white" />
+                  <div className="w-[120px] h-[120px] rounded-full overflow-hidden">
+                    {profile.profile_picture ? (
+                      <Image
+                        src={profile.profile_picture}
+                        alt="Profile"
+                        width={120}
+                        height={120}
+                        className="object-cover"
+                      />
+                    ) : (
+                      <div className="w-full h-full bg-gradient-to-br from-green-400/20 to-green-600/20 flex items-center justify-center">
+                        <User className="w-12 h-12 text-green-400" />
                       </div>
-                    </div>
-                    <input
-                      type="file"
-                      accept="image/*"
-                      className="hidden"
-                      onChange={handleProfilePictureChange}
-                    />
-                  </label>
+                    )}
+                  </div>
                 ) : (
                   <div className="w-[120px] h-[120px] rounded-full overflow-hidden">
                     {profile.profile_picture ? (
                       <Image
                         src={profile.profile_picture}
-                        alt={profile.username}
+                        alt="Profile"
                         width={120}
                         height={120}
                         className="object-cover"

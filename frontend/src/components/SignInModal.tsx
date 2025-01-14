@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, Mail, Lock, Loader2 } from "lucide-react";
+import Link from "next/link";
 
 interface SignInModalProps {
   isOpen: boolean;
@@ -25,6 +26,7 @@ export default function SignInModal({
   children,
 }: SignInModalProps) {
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [formData, setFormData] = useState<FormData>({
     email: "",
     password: "",
@@ -36,30 +38,49 @@ export default function SignInModal({
       ...prev,
       [name]: value,
     }));
+    // Clear error when user starts typing
+    if (error) setError(null);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
+    setError(null);
 
     try {
       await onSignIn(formData);
       onClose();
-    } catch (error) {
-      console.error("Sign in error:", error);
+    } catch (err) {
+      // Handle API error responses
+      if (err instanceof Error) {
+        // Check if it's an API error response
+        const apiError = err as any;
+        if (apiError.detail) {
+          setError(apiError.detail);
+        } else if (typeof apiError === "object" && apiError.message) {
+          setError(apiError.message);
+        } else {
+          setError(err.message || "Failed to sign in");
+        }
+      } else if (typeof err === "string") {
+        setError(err);
+      } else {
+        setError("An unexpected error occurred");
+      }
     } finally {
       setIsLoading(false);
     }
   };
 
   return (
-    <AnimatePresence>
+    <AnimatePresence mode="wait">
       {isOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center px-4">
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
+            transition={{ duration: 0.15 }}
             className="fixed inset-0 bg-black/60 backdrop-blur-sm"
             onClick={onClose}
           />
@@ -68,6 +89,7 @@ export default function SignInModal({
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.95 }}
+            transition={{ duration: 0.15 }}
             className="relative bg-[#1a1a1a] rounded-lg shadow-xl w-full max-w-md p-8 z-10"
             onClick={(e) => e.stopPropagation()}
           >
@@ -86,6 +108,12 @@ export default function SignInModal({
                 Welcome back! Please sign in to continue.
               </p>
             </div>
+
+            {error && (
+              <div className="mb-4 p-2 bg-red-500/10 border border-red-500/20 rounded">
+                <p className="text-sm text-red-400">{error}</p>
+              </div>
+            )}
 
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
@@ -145,13 +173,21 @@ export default function SignInModal({
 
             <p className="mt-4 text-xs text-center text-gray-500">
               By continuing, you accept our{" "}
-              <a href="#" className="text-gray-400 hover:text-white">
+              <Link
+                href="/privacy"
+                className="text-gray-400 hover:text-white"
+                onClick={onClose}
+              >
                 Privacy Policy
-              </a>{" "}
+              </Link>{" "}
               and{" "}
-              <a href="#" className="text-gray-400 hover:text-white">
+              <Link
+                href="/terms"
+                className="text-gray-400 hover:text-white"
+                onClick={onClose}
+              >
                 Terms of Use
-              </a>
+              </Link>
             </p>
 
             {children}
