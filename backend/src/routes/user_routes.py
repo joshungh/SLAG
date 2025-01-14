@@ -6,7 +6,7 @@ import bcrypt
 import secrets
 from ..services.dynamodb_service import DynamoDBService
 from ..services.auth_service import AuthService
-from ..models.user import UserCreate, LoginMethod, UserLogin
+from ..models.user import UserCreate, LoginMethod, UserLogin, UserUpdate
 from ..services.email_service import EmailService
 
 router = APIRouter()
@@ -176,18 +176,24 @@ async def get_user(user_id: str):
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error retrieving user: {str(e)}")
 
-@router.put("/users/{user_id}")
-async def update_user(user_id: str, user_update: UserCreate):
+@router.put("/users/profile")
+async def update_user(user_update: UserUpdate, token: str = Depends(auth_service.get_current_user)):
     """Update user information."""
     try:
+        # Get user ID from token
+        user_id = token.get("user_id")
+        if not user_id:
+            raise HTTPException(status_code=401, detail="Invalid token")
+
         # Create update item for DynamoDB
         update_item = {
             'username': user_update.username,
             'email': user_update.email,
             'first_name': user_update.first_name,
             'last_name': user_update.last_name,
-            'web3_wallet': user_update.web3_wallet,
-            'login_methods': user_update.login_methods,
+            'phone': user_update.phone,
+            'profile_picture': user_update.profile_picture,
+            'author_metadata': user_update.author_metadata,
             'updated_at': datetime.utcnow().isoformat()
         }
         
@@ -199,7 +205,7 @@ async def update_user(user_id: str, user_update: UserCreate):
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Error updating user: {str(e)}") 
+        raise HTTPException(status_code=500, detail=f"Error updating user: {str(e)}")
 
 @router.post("/auth/forgot-password")
 async def request_password_reset(email: str):
