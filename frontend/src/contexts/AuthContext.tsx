@@ -38,7 +38,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const token = localStorage.getItem("auth_token");
     if (token) {
       console.log("Found auth token, verifying...");
-      fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/auth/verify`, {
+      const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL?.replace(
+        /\/api$/,
+        ""
+      );
+      fetch(`${BACKEND_URL}/api/auth/verify`, {
         headers: {
           Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",

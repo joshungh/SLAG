@@ -131,15 +131,6 @@ export default function Header() {
           <ul className="flex flex-col space-y-4 font-['IBM_Plex_Mono'] text-sm">
             <li>
               <Link
-                href="/dashboard"
-                className="hover:text-green-300 transition-colors"
-                onClick={() => setIsMenuOpen(false)}
-              >
-                Dashboard
-              </Link>
-            </li>
-            <li>
-              <Link
                 href="https://docs.lostage.io"
                 className="hover:text-green-300 transition-colors"
                 target="_blank"
