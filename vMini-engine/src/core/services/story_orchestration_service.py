@@ -5,7 +5,7 @@ from src.core.models.story_bible import StoryBible
 from src.core.models.story_framework import StoryFramework
 from src.core.models.story import Story
 from src.core.services.world_generation_service import WorldGenerationService
-from src.core.services.story_framework_service import StoryFrameworkService
+from src.core.services.framework_generation_service import FrameworkGenerationService
 from src.core.services.story_generation_service import StoryGenerationService
 from src.core.services.validation_service import ValidationService
 import asyncio
@@ -17,7 +17,7 @@ class StoryOrchestrationService:
     def __init__(
         self,
         world_service: WorldGenerationService,
-        framework_service: StoryFrameworkService,
+        framework_service: FrameworkGenerationService,
         story_service: StoryGenerationService,
         validation_service: ValidationService
     ):

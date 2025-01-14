@@ -6,12 +6,15 @@ from src.core.utils.logging_config import setup_logging
 from src.config.config import settings
 from datetime import datetime
 import os
+from src.core.models.story_bible import StoryBible
+from src.core.services.s3_service import S3Service
 
 logger = setup_logging("framework_generation", "framework_generation.log")
 
 class FrameworkGenerationService:
     def __init__(self, llm_service: LLMService):
         self.llm = llm_service
+        self.s3 = S3Service()
         
     async def _get_genre_masters(self, genre: str) -> str:
         """Ask Claude to identify master storytellers for a given genre"""
@@ -31,38 +34,16 @@ class FrameworkGenerationService:
             logger.warning(f"Could not get genre masters: {str(e)}")
             return ""
         
-    async def _save_framework(self, framework: StoryFramework) -> str:
-        """Save framework to JSON file"""
-        try:
-            # Create frameworks directory if it doesn't exist
-            os.makedirs("output/frameworks", exist_ok=True)
-            
-            # Generate filename with timestamp
-            timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-            filename = f"output/frameworks/framework_{timestamp}.json"
-            
-            # Save framework
-            with open(filename, "w") as f:
-                json.dump(framework.model_dump(), f, indent=2)
-                
-            logger.info(f"Saved framework to: {filename}")
-            return filename
-            
-        except Exception as e:
-            logger.error(f"Error saving framework: {str(e)}")
-            raise
-
-    async def generate_framework(self, story_bible: Dict[str, Any]) -> StoryFramework:
+    async def create_framework(self, bible: StoryBible) -> StoryFramework:
         """Generate a story framework from a story bible"""
         try:
-            logger.info(f"Generating framework for story: {story_bible.get('title')}")
+            logger.info(f"Generating framework for story: {bible.title}")
             
-            # Get genre masters if possible
-            genre = story_bible.get('genre', '')
-            masters = await self._get_genre_masters(genre)
+            # Get genre masters
+            masters = await self._get_genre_masters(bible.genre)
             
-            # Extract available locations for prompt
-            locations = [loc["name"] for loc in story_bible.get("locations", [])]
+            # Extract locations
+            locations = [loc.name for loc in bible.locations]
             locations_str = "\n".join(f"- {loc}" for loc in locations)
             
             # Define JSON structure separately
@@ -113,7 +94,7 @@ class FrameworkGenerationService:
 
             # Get framework from LLM
             response = await self.llm.generate(
-                prompt=f"{system_prompt}\n\nStory Bible:\n{json.dumps(story_bible, indent=2)}",
+                prompt=f"{system_prompt}\n\nStory Bible:\n{json.dumps(bible.model_dump(), indent=2)}",
                 temperature=settings.FRAMEWORK_TEMPERATURE,
                 max_tokens=settings.FRAMEWORK_MAX_TOKENS
             )
@@ -123,10 +104,14 @@ class FrameworkGenerationService:
                 framework_data = json.loads(response)
                 framework = StoryFramework(**framework_data)
                 
-                # Save framework to file
-                await self._save_framework(framework)
+                # Update to use S3 instead of local save
+                framework_url = await self.s3.save_story(
+                    framework.model_dump_json(indent=2),
+                    bible.title.lower().replace(' ', '_'),
+                    'framework'
+                )
+                logger.info(f"Saved framework to: {framework_url}")
                 
-                logger.info("Successfully generated story framework")
                 return framework
                 
             except json.JSONDecodeError:

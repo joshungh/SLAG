@@ -2,7 +2,7 @@ from .llm_service import LLMService
 from .embedding_service import EmbeddingService
 from .redis_service import RedisService
 from .world_generation_service import WorldGenerationService
-from .story_framework_service import StoryFrameworkService
+from .framework_generation_service import FrameworkGenerationService
 from .story_generation_service import StoryGenerationService
 from .validation_service import ValidationService
 from .vector_store_service import VectorStoreService
@@ -25,14 +25,14 @@ redis_service = RedisService(redis_host, redis_port)
 # Initialize dependent services
 vector_store_service = VectorStoreService()
 world_generation_service = WorldGenerationService(llm_service)
-story_framework_service = StoryFrameworkService(llm_service)
+framework_service = FrameworkGenerationService(llm_service)
 story_generation_service = StoryGenerationService(llm_service)
 validation_service = ValidationService(llm_service)
 
 # Initialize orchestration service
 story_orchestration_service = StoryOrchestrationService(
     world_generation_service,
-    story_framework_service,
+    framework_service,
     story_generation_service,
     validation_service
 )
@@ -47,7 +47,7 @@ __all__ = [
     'redis_service',
     'vector_store_service',
     'world_generation_service',
-    'story_framework_service',
+    'framework_service',
     'story_generation_service',
     'validation_service',
     'story_orchestration_service',
