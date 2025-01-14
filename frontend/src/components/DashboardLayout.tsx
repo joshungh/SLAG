@@ -148,8 +148,8 @@ export default function DashboardLayout({
       const registrationData = {
         username: data.username,
         email: data.email,
-        first_name: data.firstName,
-        last_name: data.lastName,
+        first_name: data.first_name,
+        last_name: data.last_name,
         web3_wallet: publicKey || null,
         login_method: publicKey ? "web3" : "email",
         password: data.password,
