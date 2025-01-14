@@ -108,7 +108,7 @@ async def log_requests(request: Request, call_next):
     logger.info(f"Incoming request: {request.method} {request.url}")
     logger.info(f"Client host: {request.client.host if request.client else 'Unknown'}")
     response = await call_next(request)
-    return response
+    return response 
 
 class TimeoutMiddleware(BaseHTTPMiddleware):
     async def dispatch(self, request: Request, call_next):
@@ -120,4 +120,4 @@ class TimeoutMiddleware(BaseHTTPMiddleware):
                 content={"detail": "Request timeout"}
             )
 
-app.add_middleware(TimeoutMiddleware)
+app.add_middleware(TimeoutMiddleware) 

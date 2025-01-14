@@ -60,6 +60,14 @@ Resources:
             Timeout: 5
             Retries: 3
 
+  TargetGroup:
+    Type: AWS::ElasticLoadBalancingV2::TargetGroup
+    Properties:
+      HealthCheckIntervalSeconds: 60
+      HealthCheckTimeoutSeconds: 10
+      HealthyThresholdCount: 2
+      UnhealthyThresholdCount: 3
+
 Outputs:
   ClusterArn:
     Description: ECS Cluster ARN
