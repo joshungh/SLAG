@@ -6,6 +6,7 @@ from pydantic import ValidationError
 from src.core.models.story_bible import StoryBible, TimelineEvent
 from src.core.services.llm_service import LLMService
 from src.core.services.embedding_service import EmbeddingService
+from src.core.services.s3_service import S3Service
 import logging
 from pathlib import Path
 from src.core.utils.logging_config import setup_logging
@@ -23,28 +24,8 @@ class WorldGenerationService:
         self.output_dir = Path("output")
         self.output_dir.mkdir(parents=True, exist_ok=True)
         self.vector_store = VectorStoreService()
+        self.s3 = S3Service()
         logger.info("WorldGenerationService initialized")
-
-    def _save_bible(self, bible: StoryBible, stage: str, is_final: bool = False):
-        """Save the bible to a JSON file with timestamp"""
-        try:
-            timestamp = bible.created.strftime("%Y%m%d_%H%M%S")
-            
-            # For intermediate saves
-            if not is_final:
-                filename = f"{self.output_dir}/bible_{stage}_{timestamp}.json"
-            else:
-                # For the final comprehensive bible
-                filename = f"{self.output_dir}/final_story_bible_{timestamp}.json"
-            
-            with open(filename, 'w') as f:
-                json.dump(bible.model_dump(), f, indent=2)
-            
-            logger.info(f"Successfully saved bible to: {filename}")
-            
-        except Exception as e:
-            logger.error(f"Error saving bible: {str(e)}")
-            raise
 
     async def initialize_bible(self, prompt: str) -> StoryBible:
         """Create initial story bible framework from user prompt"""
@@ -89,7 +70,7 @@ class WorldGenerationService:
             self.current_bible = StoryBible(**bible_dict)
             
             logger.info("Successfully created initial bible")
-            self._save_bible(self.current_bible, "initial")
+            await self.save_bible(self.current_bible, "initial")
             return self.current_bible
             
         except json.JSONDecodeError as e:
@@ -332,7 +313,7 @@ class WorldGenerationService:
             
             # Use the add_expansion method to merge enrichments
             bible.add_expansion(enrichment_dict)
-            self._save_bible(bible, "story_elements_enriched")
+            await self.save_bible(bible, "story_elements_enriched")
             return bible
             
         except Exception as e:
@@ -364,8 +345,9 @@ class WorldGenerationService:
             except Exception as e:
                 logger.error(f"Error in final enrichment: {str(e)}")
             
-            # 5. Save final comprehensive bible
-            self._save_bible(self.current_bible, "complete", is_final=True)
+            # 5. Save final comprehensive bible to S3
+            bible_url = await self.save_bible(self.current_bible)
+            logger.info(f"Saved final bible to: {bible_url}")
             
             return self.current_bible
             
@@ -388,9 +370,12 @@ class WorldGenerationService:
         else:
             return 'general world-building' 
 
-    async def save_bible(self, bible: StoryBible, suffix: str = "") -> Path:
+    async def save_bible(self, bible: StoryBible, suffix: str = "") -> str:
         """Save bible to file with timestamp"""
-        timestamp = bible.created.strftime("%Y%m%d_%H%M%S")
-        filename = f"bible_{suffix}_{timestamp}.json"
-        output_path = Path("output") / filename
-        return output_path 
+        try:
+            content = bible.model_dump_json(indent=2)
+            bible_id = bible.title.lower().replace(' ', '_')
+            return await self.s3.save_story(content, bible_id, 'bible')
+        except Exception as e:
+            logger.error(f"Error saving bible: {str(e)}")
+            raise 

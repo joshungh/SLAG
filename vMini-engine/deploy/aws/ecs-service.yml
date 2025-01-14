@@ -1,0 +1,120 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: 'ECS Service for vMini-engine'
+
+Parameters:
+  Environment:
+    Type: String
+    Default: production
+    AllowedValues: [development, production]
+  
+  VpcId:
+    Type: String
+    Description: VPC ID
+  
+  PublicSubnet1:
+    Type: String
+    Description: Public Subnet 1
+  
+  PublicSubnet2:
+    Type: String
+    Description: Public Subnet 2
+
+Resources:
+  # Application Load Balancer
+  LoadBalancer:
+    Type: AWS::ElasticLoadBalancingV2::LoadBalancer
+    Properties:
+      Name: !Sub vmini-engine-alb-${Environment}
+      Scheme: internet-facing
+      Subnets: 
+        - !Ref PublicSubnet1
+        - !Ref PublicSubnet2
+      SecurityGroups:
+        - !ImportValue vMini-engine-security-LoadBalancerSecurityGroupId
+      Tags:
+        - Key: Environment
+          Value: !Ref Environment
+
+  # Target Group
+  TargetGroup:
+    Type: AWS::ElasticLoadBalancingV2::TargetGroup
+    Properties:
+      Name: !Sub vmini-engine-tg-${Environment}
+      Port: 8000
+      Protocol: HTTP
+      VpcId: !Ref VpcId
+      TargetType: ip
+      HealthCheckPath: /health
+      HealthCheckIntervalSeconds: 60
+      HealthCheckTimeoutSeconds: 10
+      HealthyThresholdCount: 2
+      UnhealthyThresholdCount: 3
+      HealthCheckPort: "8000"
+      Matcher:
+        HttpCode: "200"
+
+  # Listener
+  Listener:
+    Type: AWS::ElasticLoadBalancingV2::Listener
+    Properties:
+      LoadBalancerArn: !Ref LoadBalancer
+      Port: 80
+      Protocol: HTTP
+      DefaultActions:
+        - Type: forward
+          TargetGroupArn: !Ref TargetGroup
+
+  # ECS Service
+  Service:
+    Type: AWS::ECS::Service
+    DependsOn: Listener
+    Properties:
+      ServiceName: !Sub vmini-engine-service-${Environment}
+      Cluster: !ImportValue vMini-engine-ecs-ClusterArn
+      TaskDefinition: !Sub arn:aws:ecs:${AWS::Region}:${AWS::AccountId}:task-definition/vmini-engine-production:9
+      DesiredCount: 1
+      LaunchType: FARGATE
+      NetworkConfiguration:
+        AwsvpcConfiguration:
+          AssignPublicIp: ENABLED
+          Subnets:
+            - !Ref PublicSubnet1
+            - !Ref PublicSubnet2
+          SecurityGroups:
+            - !ImportValue vMini-engine-security-AppSecurityGroupId
+      LoadBalancers:
+        - ContainerName: app
+          ContainerPort: 8000
+          TargetGroupArn: !Ref TargetGroup
+      DeploymentConfiguration:
+        MaximumPercent: 200
+        MinimumHealthyPercent: 50
+      HealthCheckGracePeriodSeconds: 120
+
+  ServiceScalableTarget:
+    Type: AWS::ApplicationAutoScaling::ScalableTarget
+    Properties:
+      MinCapacity: 2        # Minimum 2 tasks for high availability
+      MaxCapacity: 6        # Max 6 tasks (can handle ~120 concurrent users)
+      ResourceId: !Sub service/${ECSCluster}/${Service.Name}
+      ScalableDimension: ecs:service:DesiredCount
+      ServiceNamespace: ecs
+
+  RequestCountScaling:
+    Type: AWS::ApplicationAutoScaling::ScalingPolicy
+    Properties:
+      PolicyName: RequestCountScaling
+      PolicyType: TargetTrackingScaling
+      TargetTrackingScalingPolicyConfiguration:
+        TargetValue: 20     # Scale when average requests per task > 20
+        ScaleInCooldown: 300 # Wait 5 mins before scaling in
+        ScaleOutCooldown: 60 # Scale out quickly (1 min)
+        PredefinedMetricSpecification:
+          PredefinedMetricType: ALBRequestCountPerTarget
+
+Outputs:
+  LoadBalancerDNS:
+    Description: Load Balancer DNS Name
+    Value: !GetAtt LoadBalancer.DNSName
+    Export:
+      Name: !Sub ${AWS::StackName}-LoadBalancerDNS 

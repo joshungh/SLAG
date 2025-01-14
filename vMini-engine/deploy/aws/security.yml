@@ -1,0 +1,123 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: 'Security Configuration for vMini-engine'
+
+Parameters:
+  Environment:
+    Type: String
+    Default: production
+    AllowedValues: [development, production]
+  
+  VpcId:
+    Type: String
+    Description: VPC ID from network stack
+
+Resources:
+  # ECS Task Role
+  ECSTaskRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub vMini-engine-ecs-task-role-${Environment}
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: ecs-tasks.amazonaws.com
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy
+      Policies:
+        - PolicyName: vMini-engine-task-policy
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - ssm:GetParameters
+                  - ssm:GetParametersByPath
+                  - ssm:GetParameter
+                  - kms:Decrypt
+                  - logs:CreateLogStream
+                  - logs:PutLogEvents
+                  - s3:PutObject
+                  - s3:GetObject
+                  - s3:ListBucket
+                  - s3:CreateBucket
+                  - s3:PutBucketPolicy
+                  - s3:PutBucketEncryption
+                  - s3:PutBucketVersioning
+                  - s3:PutBucketPublicAccessBlock
+                Resource:
+                  - "arn:aws:ssm:us-west-2:047719630676:parameter/vMini-engine/prod/*"
+                  - "arn:aws:kms:us-west-2:047719630676:key/*"
+                  - "arn:aws:logs:us-west-2:047719630676:log-group:/ecs/vMini-engine-production:*"
+                  - "arn:aws:s3:::vmini-engine-stories/*"
+                  - "arn:aws:s3:::vmini-engine-stories"
+                  - "arn:aws:s3:::vmini-engine-stories-production/*"
+                  - "arn:aws:s3:::vmini-engine-stories-production"
+
+  # Application Security Group
+  AppSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupName: !Sub vMini-engine-app-sg-${Environment}
+      GroupDescription: Security group for vMini-engine application
+      VpcId: !Ref VpcId
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 8000
+          ToPort: 8000
+          SourceSecurityGroupId: !Ref LoadBalancerSecurityGroup
+      Tags:
+        - Key: Name
+          Value: !Sub vMini-engine-app-sg-${Environment}
+
+  # Redis Security Group
+  RedisSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupName: !Sub vMini-engine-redis-sg-${Environment}
+      GroupDescription: Security group for Redis
+      VpcId: !Ref VpcId
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 6379
+          ToPort: 6379
+          SourceSecurityGroupId: !Ref AppSecurityGroup
+      Tags:
+        - Key: Name
+          Value: !Sub vMini-engine-redis-sg-${Environment}
+
+  LoadBalancerSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupName: !Sub vMini-engine-alb-sg-${Environment}
+      GroupDescription: Security group for Application Load Balancer
+      VpcId: !Ref VpcId
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 80
+          ToPort: 80
+          CidrIp: 0.0.0.0/0
+      Tags:
+        - Key: Name
+          Value: !Sub vMini-engine-alb-sg-${Environment}
+
+Outputs:
+  ECSTaskRoleArn:
+    Description: ECS Task Role ARN
+    Value: !GetAtt ECSTaskRole.Arn
+    Export:
+      Name: !Sub ${AWS::StackName}-ECSTaskRoleArn
+
+  AppSecurityGroupId:
+    Description: Application Security Group ID
+    Value: !Ref AppSecurityGroup
+    Export:
+      Name: !Sub ${AWS::StackName}-AppSecurityGroupId
+
+  RedisSecurityGroupId:
+    Description: Redis Security Group ID
+    Value: !Ref RedisSecurityGroup
+    Export:
+      Name: !Sub ${AWS::StackName}-RedisSecurityGroupId 

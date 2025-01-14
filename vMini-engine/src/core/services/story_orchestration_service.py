@@ -1,22 +1,25 @@
 from typing import Optional, Dict, Any
-from src.core.services.world_generation_service import WorldGenerationService
-from src.core.services.framework_generation_service import FrameworkGenerationService
-from src.core.services.story_generation_service import StoryGenerationService
+import logging
+from src.core.utils.logging_config import setup_logging
 from src.core.models.story_bible import StoryBible
 from src.core.models.story_framework import StoryFramework
 from src.core.models.story import Story
-from src.core.utils.logging_config import setup_logging
-from pathlib import Path
-import os
+from src.core.services.world_generation_service import WorldGenerationService
+from src.core.services.story_framework_service import StoryFrameworkService
+from src.core.services.story_generation_service import StoryGenerationService
+from src.core.services.validation_service import ValidationService
+from src.core.services import redis_client
+import time
 
 logger = setup_logging("orchestration", "orchestration.log")
 
 class StoryOrchestrationService:
     def __init__(
         self,
-        world_service: WorldGenerationService,
-        framework_service: FrameworkGenerationService,
-        story_service: StoryGenerationService
+        world_service,
+        framework_service,
+        story_service,
+        validation_service
     ):
         if not all([world_service, framework_service, story_service]):
             raise ValueError("All services must be provided")
@@ -24,73 +27,61 @@ class StoryOrchestrationService:
         self.world_service = world_service
         self.framework_service = framework_service
         self.story_service = story_service
-        self.current_state: Dict[str, Any] = {}
+        self.validation = validation_service
         
-        # Define base paths
-        self.base_dir = Path("/app")
-        self.output_dir = self.base_dir / "output"
-        self.stories_dir = self.output_dir / "stories"
-        self.frameworks_dir = self.output_dir / "frameworks"
+    async def generate_complete_story(self, prompt: str) -> Dict[str, Any]:
+        request_id = f"story:{prompt[:32]}:{int(time.time())}"
         
-        # Ensure directories exist with proper permissions
-        for directory in [self.output_dir, self.stories_dir, self.frameworks_dir]:
-            directory.mkdir(parents=True, exist_ok=True)
-            directory.chmod(0o777)
-            
-        logger.debug(f"Initialized directories:")
-        logger.debug(f"Base dir: {self.base_dir}")
-        logger.debug(f"Output dir: {self.output_dir}")
-        logger.debug(f"Stories dir: {self.stories_dir}")
-        logger.debug(f"Frameworks dir: {self.frameworks_dir}")
-
-    async def generate_complete_story(self, prompt: str) -> Story:
-        """Orchestrate the complete story generation pipeline"""
         try:
-            logger.info(f"Starting story generation for prompt: {prompt}")
+            logger.info(f"Starting story generation for request {request_id}")
             
             # Step 1: Generate Story Bible
-            logger.info("Generating story bible...")
             bible = await self.world_service.generate_complete_bible(prompt)
-            self.current_state["bible"] = bible
-            logger.info("Story bible generated successfully")
-
+            try:
+                await redis_client.hset(request_id, "bible", bible.model_dump_json())
+            except Exception as e:
+                logger.error(f"Redis operation failed: {str(e)}")
+                # Continue without Redis - at least return the generated content
+                return {
+                    "request_id": request_id,
+                    "bible": bible.model_dump()
+                }
+            
+            # Step 1.5: Validate bible
+            issues = await self.validation.check_cohesiveness(bible)
+            if any(issues.values()):
+                bible = await self.validation.fix_inconsistencies(bible, issues)
+                await redis_client.hset(request_id, "bible", bible.model_dump_json())
+            
             # Step 2: Create Story Framework
-            logger.info("Generating story framework...")
-            framework = await self.framework_service.generate_framework(bible.model_dump())
-            self.current_state["framework"] = framework
-            logger.info("Story framework generated successfully")
-
+            framework = await self.framework_service.create_framework(bible)
+            await redis_client.hset(request_id, "framework", framework.model_dump_json())
+            
             # Step 3: Generate Story
-            logger.info("Generating final story...")
             story = await self.story_service.generate_story(
                 story_bible=bible.model_dump(),
                 framework=framework
             )
-            self.current_state["story"] = story
-            logger.info("Story generation complete")
-
-            return story
-
+            await redis_client.hset(request_id, "story", story.model_dump_json())
+            
+            # Set expiration for cleanup
+            await redis_client.expire(request_id, 3600)  # 1 hour TTL
+            
+            return {
+                "request_id": request_id,
+                "bible": bible.model_dump(),
+                "framework": framework.model_dump(),
+                "story": story.model_dump(),
+                "word_count": story.word_count
+            }
+            
         except Exception as e:
             logger.error(f"Error in story generation pipeline: {str(e)}")
-            # Could add recovery/retry logic here
             raise
 
     def get_generation_status(self) -> Dict[str, Any]:
         """Get current status of story generation process"""
         return {
-            "has_bible": "bible" in self.current_state,
-            "has_framework": "framework" in self.current_state,
-            "has_story": "story" in self.current_state,
-            "current_stage": self._determine_current_stage()
-        }
-
-    def _determine_current_stage(self) -> str:
-        """Determine current stage of story generation"""
-        if "story" in self.current_state:
-            return "complete"
-        if "framework" in self.current_state:
-            return "generating_story"
-        if "bible" in self.current_state:
-            return "generating_framework"
-        return "generating_bible" 
+            "status": "active",
+            "current_stage": "processing"
+        } 

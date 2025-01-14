@@ -1,0 +1,104 @@
+{
+  "family": "vmini-engine-production",
+  "networkMode": "awsvpc",
+  "requiresCompatibilities": ["FARGATE"],
+  "cpu": "512",
+  "memory": "1024",
+  "taskRoleArn": "arn:aws:iam::047719630676:role/vmini-engine-role",
+  "executionRoleArn": "arn:aws:iam::047719630676:role/vmini-engine-role",
+  "containerDefinitions": [
+    {
+      "name": "app",
+      "image": "047719630676.dkr.ecr.us-west-2.amazonaws.com/vmini-engine-production:latest@sha256:f90d7cd43b4297dc4f54eb8063f9e045ee823a7c2b42724e8ea092ffa29ed9df",
+      "cpu": 512,
+      "memory": 1024,
+      "portMappings": [
+        {
+          "containerPort": 8000,
+          "hostPort": 8000,
+          "protocol": "tcp"
+        }
+      ],
+      "essential": true,
+      "environment": [
+        {
+          "name": "PYTHONPATH",
+          "value": "/app"
+        },
+        {
+          "name": "AWS_REGION",
+          "value": "us-west-2"
+        },
+        {
+          "name": "AWS_PARAMETER_PATH",
+          "value": "/vMini-engine/prod"
+        },
+        {
+          "name": "PYTHONUNBUFFERED",
+          "value": "1"
+        },
+        {
+          "name": "ENVIRONMENT",
+          "value": "production"
+        },
+        {
+          "name": "BEDROCK_MODEL_ID",
+          "value": "anthropic.claude-3-5-sonnet-20241022-v2:0"
+        },
+        {
+          "name": "BEDROCK_EMBEDDING_MODEL_ID",
+          "value": "amazon.titan-embed-text-v1"
+        },
+        {
+          "name": "REDIS_HOST",
+          "value": "vmini-engine-redis-production.drxrzz.0001.usw2.cache.amazonaws.com"
+        },
+        {
+          "name": "REDIS_PORT",
+          "value": "6379"
+        },
+        {
+          "name": "REDIS_TIMEOUT",
+          "value": "10"
+        },
+        {
+          "name": "REDIS_SSL",
+          "value": "false"
+        },
+        {
+          "name": "AWS_VPC_DNS",
+          "value": "true"
+        },
+        {
+          "name": "STORY_BUCKET",
+          "value": "vmini-engine-stories-production"
+        },
+        {
+          "name": "STORY_OUTPUT_PATH",
+          "value": "/app/output"
+        }
+      ],
+      "logConfiguration": {
+        "logDriver": "awslogs",
+        "options": {
+          "awslogs-group": "/ecs/vMini-engine-production",
+          "awslogs-region": "us-west-2",
+          "awslogs-stream-prefix": "app"
+        }
+      },
+      "healthCheck": {
+        "command": [
+          "CMD-SHELL",
+          "curl -f http://localhost:8000/health || exit 1"
+        ],
+        "interval": 60,
+        "timeout": 10,
+        "retries": 3,
+        "startPeriod": 60
+      },
+      "linuxParameters": {
+        "initProcessEnabled": true
+      }
+    }
+  ]
+} 

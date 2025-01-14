@@ -2,20 +2,26 @@ version: '3.8'
 
 services:
   app:
-    build: .
+    build: 
+      context: .
+      dockerfile: Dockerfile
     ports:
       - "8000:8000"
     volumes:
-      - ./src:/app/src:ro
       - ./output:/app/output:rw
       - ./logs:/app/logs:rw
     env_file:
-      - .env
+      - .env.${ENVIRONMENT:-development}
     environment:
       - PYTHONPATH=/app
       - PYTHONUNBUFFERED=1
     depends_on:
       - redis
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 3s
+      retries: 3
 
   redis:
     image: redis:alpine
@@ -23,6 +29,11 @@ services:
       - "6379:6379"
     volumes:
       - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 30s
+      timeout: 3s
+      retries: 3
 
 volumes:
   redis_data: 
