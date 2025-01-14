@@ -2,16 +2,16 @@
   "family": "vmini-engine-production",
   "networkMode": "awsvpc",
   "requiresCompatibilities": ["FARGATE"],
-  "cpu": "512",
-  "memory": "1024",
+  "cpu": "2048",
+  "memory": "4096",
   "taskRoleArn": "arn:aws:iam::047719630676:role/vmini-engine-role",
   "executionRoleArn": "arn:aws:iam::047719630676:role/vmini-engine-role",
   "containerDefinitions": [
     {
       "name": "app",
-      "image": "047719630676.dkr.ecr.us-west-2.amazonaws.com/vmini-engine-production:latest@sha256:b1d663d889772763f1377b8ecf056a79f487b6a07ab0de7728d5b1a6925c755b",
-      "cpu": 512,
-      "memory": 1024,
+      "image": "047719630676.dkr.ecr.us-west-2.amazonaws.com/vmini-engine-production:latest@sha256:48c942f11f227ba53bc1983da37081eb5ac27e33e663c7e6a7758d09608399a0",
+      "cpu": 2048,
+      "memory": 4096,
       "portMappings": [
         {
           "containerPort": 8000,

@@ -5,16 +5,21 @@ export ENVIRONMENT=${ENVIRONMENT:-production}
 export AWS_ACCOUNT_ID=047719630676
 export AWS_REGION=us-west-2
 
-# Set up buildx for multi-platform builds
-docker buildx create --use --name vMini-builder || true
+# Clean up any existing builder
+docker buildx rm vMini-builder 2>/dev/null || true
 
-# Build and push directly to ECR
+# Create a new builder instance with proper platform support
+docker buildx create --name vMini-builder --driver docker-container --platform linux/amd64 --use
+
+# Build and push directly to ECR with proper platform specification
 aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com
 
-# Build and push the image directly
+# Build and push the image directly with explicit platform
 IMAGE_URI="$AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/vmini-engine-production:latest"
 docker buildx build \
+    --builder vMini-builder \
     --platform linux/amd64 \
+    --build-arg BUILDKIT_INLINE_CACHE=1 \
     --tag $IMAGE_URI \
     --push \
     .

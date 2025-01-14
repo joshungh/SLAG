@@ -8,6 +8,8 @@ from src.core.services.world_generation_service import WorldGenerationService
 from src.core.services.story_framework_service import StoryFrameworkService
 from src.core.services.story_generation_service import StoryGenerationService
 from src.core.services.validation_service import ValidationService
+import asyncio
+from fastapi import HTTPException
 
 logger = setup_logging("orchestration", "orchestration.log")
 
@@ -32,26 +34,44 @@ class StoryOrchestrationService:
         try:
             logger.info(f"Starting story generation for prompt: {prompt}")
             
-            # Step 1: Generate Story Bible
-            bible = await self.world_service.generate_complete_bible(prompt)
-            self.current_state["bible"] = bible
+            # Step 1: Generate Story Bible with retries
+            for attempt in range(3):
+                try:
+                    bible = await self.world_service.generate_complete_bible(prompt)
+                    self.current_state["bible"] = bible
+                    break
+                except Exception as e:
+                    if attempt == 2:
+                        raise
+                    logger.warning(f"Bible generation attempt {attempt + 1} failed: {str(e)}")
+                    await asyncio.sleep(2 ** attempt)  # Exponential backoff
             
-            # Step 1.5: Validate bible
-            issues = await self.validation.check_cohesiveness(bible)
-            if any(issues.values()):
-                bible = await self.validation.fix_inconsistencies(bible, issues)
-                logger.info("Fixed bible inconsistencies")
+            # Step 2: Create Story Framework with retries
+            for attempt in range(3):
+                try:
+                    framework = await self.framework_service.create_framework(bible)
+                    self.current_state["framework"] = framework
+                    break
+                except Exception as e:
+                    if attempt == 2:
+                        raise
+                    logger.warning(f"Framework generation attempt {attempt + 1} failed: {str(e)}")
+                    await asyncio.sleep(2 ** attempt)
             
-            # Step 2: Create Story Framework
-            framework = await self.framework_service.create_framework(bible)
-            self.current_state["framework"] = framework
-            
-            # Step 3: Generate Story
-            story = await self.story_service.generate_story(
-                story_bible=bible.model_dump(),
-                framework=framework
-            )
-            self.current_state["story"] = story
+            # Step 3: Generate Story with retries
+            for attempt in range(3):
+                try:
+                    story = await self.story_service.generate_story(
+                        story_bible=bible.model_dump(),
+                        framework=framework
+                    )
+                    self.current_state["story"] = story
+                    break
+                except Exception as e:
+                    if attempt == 2:
+                        raise
+                    logger.warning(f"Story generation attempt {attempt + 1} failed: {str(e)}")
+                    await asyncio.sleep(2 ** attempt)
             
             return {
                 "bible": bible.model_dump(),
@@ -62,7 +82,7 @@ class StoryOrchestrationService:
             
         except Exception as e:
             logger.error(f"Error in story generation pipeline: {str(e)}")
-            raise
+            raise HTTPException(status_code=500, detail=str(e))
 
     def get_generation_status(self) -> Dict[str, Any]:
         """Get current status of story generation process"""

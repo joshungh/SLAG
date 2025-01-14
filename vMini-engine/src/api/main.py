@@ -4,7 +4,7 @@ from pydantic import BaseModel
 import logging
 from src.core.utils.logging_config import setup_logging
 from fastapi.middleware.cors import CORSMiddleware
-from datetime import datetime
+from datetime import datetime, timedelta
 from src.config.config import settings
 from src.core.services import (
     redis_service,
@@ -57,38 +57,58 @@ REDIS_PORT = int(os.getenv("REDIS_PORT", 6379))
 # Initialize Redis service
 redis_client = RedisService(host=REDIS_HOST, port=REDIS_PORT)
 
+# Simple in-memory cache for health check
+_last_health_check = None
+_health_check_cache_ttl = 5  # seconds
+
 @app.get("/health")
 async def health_check():
-    logger.info("Health check endpoint called")
+    global _last_health_check
+    current_time = time.time()
+    
+    # Return cached result if available and not expired
+    if _last_health_check and current_time - _last_health_check['timestamp'] < _health_check_cache_ttl:
+        return _last_health_check['result']
+    
     try:
         # Test Redis connection
         redis_client.redis.ping()
-        redis_status = {
+        result = {
             "status": "healthy",
-            "host": REDIS_HOST,
-            "port": REDIS_PORT
+            "redis": {
+                "status": "healthy",
+                "host": REDIS_HOST,
+                "port": REDIS_PORT
+            },
+            "timestamp": datetime.utcnow().isoformat()
         }
     except Exception as e:
         logger.error(f"Redis health check failed: {str(e)}")
-        redis_status = {
-            "status": "error",
-            "message": str(e),
-            "host": REDIS_HOST,
-            "port": REDIS_PORT
+        result = {
+            "status": "degraded",
+            "redis": {
+                "status": "error",
+                "message": str(e),
+                "host": REDIS_HOST,
+                "port": REDIS_PORT
+            },
+            "timestamp": datetime.utcnow().isoformat()
         }
-
-    return {
-        "status": "healthy",
-        "redis": redis_status,
-        "timestamp": datetime.utcnow().isoformat()
+    
+    # Update cache
+    _last_health_check = {
+        'timestamp': current_time,
+        'result': result
     }
+    
+    return result
 
 @app.middleware("http")
 async def log_requests(request: Request, call_next):
     logger.info(f"Incoming request: {request.method} {request.url}")
     logger.info(f"Client host: {request.client.host if request.client else 'Unknown'}")
     response = await call_next(request)
-    return response 
+    return response
 
 class TimeoutMiddleware(BaseHTTPMiddleware):
     async def dispatch(self, request: Request, call_next):
@@ -100,4 +120,4 @@ class TimeoutMiddleware(BaseHTTPMiddleware):
                 content={"detail": "Request timeout"}
             )
 
-app.add_middleware(TimeoutMiddleware) 
+app.add_middleware(TimeoutMiddleware)
