@@ -61,12 +61,6 @@ export default function Header() {
             <li className="flex items-center">
               <div className="flex space-x-4">
                 <Link
-                  href="/dashboard"
-                  className="hover:text-green-300 transition-colors"
-                >
-                  Dashboard
-                </Link>
-                <Link
                   href="https://docs.lostage.io"
                   className="hover:text-green-300 transition-colors"
                   target="_blank"
@@ -124,7 +118,7 @@ export default function Header() {
         </button>
 
         <Link
-          href="/dashboard"
+          href="/dashboard/create"
           className="bg-green-400 text-black px-4 py-2 rounded hover:bg-green-300 transition-colors"
         >
           Launch App
@@ -135,15 +129,6 @@ export default function Header() {
       {isMenuOpen && (
         <nav className="md:hidden mt-4">
           <ul className="flex flex-col space-y-4 font-['IBM_Plex_Mono'] text-sm">
-            <li>
-              <Link
-                href="/dashboard"
-                className="hover:text-green-300 transition-colors"
-                onClick={() => setIsMenuOpen(false)}
-              >
-                Dashboard
-              </Link>
-            </li>
             <li>
               <Link
                 href="https://docs.lostage.io"
