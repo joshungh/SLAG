@@ -1,330 +1,143 @@
 "use client";
 
-import { motion, AnimatePresence } from "framer-motion";
-import {
-  CheckCircle2,
-  Loader2,
-  AlertCircle,
-  Clock,
-  ChevronDown,
-  ChevronUp,
-  Sparkles,
-  Brain,
-} from "lucide-react";
+import { Clock, Sparkles } from "lucide-react";
+import { motion } from "framer-motion";
 import { useState, useEffect } from "react";
 
-export interface LogMessage {
-  timestamp: string;
-  message: string;
-  type: "info" | "warning" | "error";
-}
-
-export interface GenerationStep {
+interface Step {
   id: string;
   title: string;
-  description: string;
-  status: "pending" | "in_progress" | "completed" | "error";
-  progress?: number;
-  estimatedTime?: string;
-  logs?: LogMessage[];
+  status: "pending" | "in-progress" | "completed";
 }
 
 interface GenerationProgressProps {
-  steps: GenerationStep[];
+  steps: Step[];
   currentStepIndex: number;
   overallProgress: number;
 }
-
-const LoadingParticles = () => {
-  return (
-    <div className="absolute inset-0 overflow-hidden pointer-events-none">
-      <div className="absolute inset-0 flex items-center justify-center">
-        {[...Array(20)].map((_, i) => (
-          <motion.div
-            key={i}
-            className="absolute w-1 h-1 bg-blue-400/30 rounded-full"
-            animate={{
-              scale: [1, 1.5, 1],
-              opacity: [0.3, 0.8, 0.3],
-              x: [
-                Math.cos((i * (Math.PI * 2)) / 20) * 100,
-                Math.cos(((i + 1) * (Math.PI * 2)) / 20) * 100,
-              ],
-              y: [
-                Math.sin((i * (Math.PI * 2)) / 20) * 100,
-                Math.sin(((i + 1) * (Math.PI * 2)) / 20) * 100,
-              ],
-            }}
-            transition={{
-              duration: 3,
-              repeat: Infinity,
-              delay: i * 0.1,
-              ease: "linear",
-            }}
-          />
-        ))}
-      </div>
-    </div>
-  );
-};
-
-const TypingIndicator = () => {
-  return (
-    <div className="flex space-x-1">
-      {[...Array(3)].map((_, i) => (
-        <motion.div
-          key={i}
-          className="w-1 h-1 bg-blue-400 rounded-full"
-          animate={{ scale: [1, 1.5, 1], opacity: [0.3, 1, 0.3] }}
-          transition={{
-            duration: 0.6,
-            repeat: Infinity,
-            delay: i * 0.2,
-          }}
-        />
-      ))}
-    </div>
-  );
-};
 
 export default function GenerationProgress({
   steps,
   currentStepIndex,
   overallProgress,
 }: GenerationProgressProps) {
-  const [expandedSteps, setExpandedSteps] = useState<string[]>([]);
   const [showParticles, setShowParticles] = useState(false);
 
   useEffect(() => {
-    // Show particles animation when there's an in-progress step
-    const hasInProgressStep = steps.some(
-      (step) => step.status === "in_progress"
-    );
-    setShowParticles(hasInProgressStep);
-  }, [steps]);
-
-  const toggleStep = (stepId: string) => {
-    setExpandedSteps((prev) =>
-      prev.includes(stepId)
-        ? prev.filter((id) => id !== stepId)
-        : [...prev, stepId]
-    );
-  };
+    if (overallProgress === 100) {
+      setShowParticles(true);
+      const timeout = setTimeout(() => setShowParticles(false), 2000);
+      return () => clearTimeout(timeout);
+    }
+  }, [overallProgress]);
 
   return (
-    <div className="relative w-full max-w-2xl mx-auto bg-black/50 backdrop-blur-sm rounded-lg p-6 border border-white/10">
-      {showParticles && <LoadingParticles />}
-
-      {/* AI Processing Indicator */}
-      {showParticles && (
-        <div className="absolute -top-12 left-1/2 transform -translate-x-1/2 bg-blue-500/10 backdrop-blur-sm px-4 py-2 rounded-full border border-blue-400/20 flex items-center gap-2">
-          <Brain className="w-4 h-4 text-blue-400" />
-          <span className="text-sm text-blue-400">AI Processing</span>
-          <TypingIndicator />
-        </div>
-      )}
-
+    <div className="bg-black/30 backdrop-blur-sm rounded-xl p-4 space-y-6">
       {/* Overall Progress */}
-      <div className="mb-8 relative">
-        <div className="flex justify-between items-center mb-2">
-          <h3 className="text-lg font-medium flex items-center gap-2">
-            Story Generation Progress
-            {showParticles && <Sparkles className="w-4 h-4 text-blue-400" />}
-          </h3>
-          <div className="flex items-center space-x-2">
+      <div className="space-y-6">
+        <div className="flex justify-between items-center">
+          <div className="flex items-center gap-2">
+            <span className="text-base font-medium text-gray-300">
+              Progress
+            </span>
+            {showParticles && (
+              <motion.div
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                transition={{ type: "spring", stiffness: 400, damping: 10 }}
+              >
+                <Sparkles className="w-4 h-4 text-blue-400" />
+              </motion.div>
+            )}
+          </div>
+          <div className="flex items-center gap-2">
             <Clock className="w-4 h-4 text-gray-400" />
-            <span className="text-sm text-gray-400">{overallProgress}%</span>
+            <span className="text-sm font-medium text-gray-400">
+              {overallProgress}%
+            </span>
           </div>
         </div>
-        <div className="h-2 bg-gray-800 rounded-full overflow-hidden">
-          <motion.div
-            className="h-full bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500"
-            initial={{ width: 0 }}
-            animate={{ width: `${overallProgress}%` }}
-            transition={{ duration: 0.5 }}
-          />
-        </div>
-      </div>
 
-      {/* Steps */}
-      <div className="space-y-4">
-        <AnimatePresence>
-          {steps.map((step, index) => {
-            const isExpanded = expandedSteps.includes(step.id);
-            const hasLogs = step.logs && step.logs.length > 0;
-            const isActive = index === currentStepIndex;
-
-            return (
+        {/* Progress Bar and Steps */}
+        <div className="relative pt-8 pb-6">
+          {/* Progress Bar */}
+          <div className="relative">
+            {/* Background Bar */}
+            <div className="h-2 bg-gray-800/50 rounded-full overflow-hidden">
               <motion.div
-                key={step.id}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -20 }}
-                transition={{ duration: 0.3, delay: index * 0.1 }}
-                className={`relative ${
-                  isActive
-                    ? "bg-gradient-to-r from-blue-500/5 to-transparent"
-                    : ""
-                } rounded-lg p-4 transition-colors border border-white/5 hover:border-white/10`}
-              >
-                {/* Active step indicator */}
-                {isActive && step.status === "in_progress" && (
-                  <motion.div
-                    className="absolute inset-0 rounded-lg"
-                    animate={{
-                      boxShadow: [
-                        "0 0 0 0 rgba(59, 130, 246, 0)",
-                        "0 0 0 4px rgba(59, 130, 246, 0.1)",
-                        "0 0 0 0 rgba(59, 130, 246, 0)",
-                      ],
-                    }}
-                    transition={{
-                      duration: 2,
-                      repeat: Infinity,
-                      ease: "easeInOut",
-                    }}
-                  />
-                )}
+                className="h-full bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500"
+                initial={{ width: 0 }}
+                animate={{ width: `${overallProgress}%` }}
+                transition={{ duration: 0.5 }}
+              />
+            </div>
 
-                <div className="flex items-start gap-4">
-                  {/* Status Icon */}
-                  <div className="mt-1">
-                    <AnimatePresence mode="wait">
-                      {step.status === "completed" ? (
-                        <motion.div
-                          key="completed"
-                          initial={{ scale: 0 }}
-                          animate={{ scale: 1 }}
-                          exit={{ scale: 0 }}
-                        >
-                          <CheckCircle2 className="w-5 h-5 text-green-400" />
-                        </motion.div>
-                      ) : step.status === "in_progress" ? (
-                        <motion.div
-                          key="in_progress"
-                          initial={{ rotate: 0 }}
-                          animate={{ rotate: 360 }}
-                          transition={{
-                            duration: 2,
-                            repeat: Infinity,
-                            ease: "linear",
+            {/* Step Dots and Labels */}
+            <div className="absolute -top-1.5 left-0 right-0">
+              <div className="relative h-12">
+                {steps.map((step, index) => {
+                  const isCompleted = index < currentStepIndex;
+                  const isActive = index === currentStepIndex;
+                  const position = (index / (steps.length - 1)) * 100;
+
+                  return (
+                    <div
+                      key={step.id}
+                      className="absolute transform -translate-x-1/2"
+                      style={{ left: `${position}%` }}
+                    >
+                      {/* Dot */}
+                      <motion.div
+                        initial={{ scale: 0 }}
+                        animate={{ scale: 1 }}
+                        transition={{ delay: index * 0.1 }}
+                        className="flex justify-center"
+                      >
+                        <div
+                          className={`w-4 h-4 rounded-full border-2 ${
+                            isCompleted
+                              ? "bg-blue-500 border-blue-500"
+                              : isActive
+                              ? "bg-purple-500 border-purple-500 animate-pulse"
+                              : "bg-gray-800 border-gray-700"
+                          } transition-colors`}
+                        />
+                      </motion.div>
+
+                      {/* Label - Desktop Only */}
+                      <div className="hidden sm:block absolute top-6 left-1/2 transform -translate-x-1/2 whitespace-nowrap">
+                        <span
+                          className="text-xs"
+                          style={{
+                            color: isCompleted
+                              ? "#60A5FA"
+                              : isActive
+                              ? "#A855F7"
+                              : "#6B7280",
                           }}
                         >
-                          <Loader2 className="w-5 h-5 text-blue-400" />
-                        </motion.div>
-                      ) : step.status === "error" ? (
-                        <motion.div
-                          key="error"
-                          initial={{ scale: 0 }}
-                          animate={{ scale: 1 }}
-                          exit={{ scale: 0 }}
-                        >
-                          <AlertCircle className="w-5 h-5 text-red-400" />
-                        </motion.div>
-                      ) : (
-                        <motion.div
-                          key="pending"
-                          initial={{ scale: 0 }}
-                          animate={{ scale: 1 }}
-                          exit={{ scale: 0 }}
-                        >
-                          <div className="w-5 h-5 rounded-full border-2 border-gray-600" />
-                        </motion.div>
-                      )}
-                    </AnimatePresence>
-                  </div>
-
-                  {/* Step Content */}
-                  <div className="flex-1">
-                    <div className="flex justify-between items-start">
-                      <div>
-                        <h4 className="font-medium flex items-center gap-2">
                           {step.title}
-                          {hasLogs && (
-                            <button
-                              onClick={() => toggleStep(step.id)}
-                              className="text-gray-400 hover:text-white transition-colors"
-                            >
-                              {isExpanded ? (
-                                <ChevronUp className="w-4 h-4" />
-                              ) : (
-                                <ChevronDown className="w-4 h-4" />
-                              )}
-                            </button>
-                          )}
-                        </h4>
-                        <p className="text-sm text-gray-400 mt-1">
-                          {step.description}
-                        </p>
+                        </span>
                       </div>
-                      {step.estimatedTime && step.status === "in_progress" && (
-                        <motion.span
-                          initial={{ opacity: 0, x: 20 }}
-                          animate={{ opacity: 1, x: 0 }}
-                          exit={{ opacity: 0, x: -20 }}
-                          className="text-xs text-gray-500 flex items-center space-x-1"
-                        >
-                          <Clock className="w-3 h-3" />
-                          <span>~{step.estimatedTime} remaining</span>
-                        </motion.span>
-                      )}
                     </div>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
 
-                    {/* Step Progress (if available) */}
-                    {step.progress !== undefined &&
-                      step.status === "in_progress" && (
-                        <motion.div
-                          initial={{ opacity: 0, height: 0 }}
-                          animate={{ opacity: 1, height: "auto" }}
-                          exit={{ opacity: 0, height: 0 }}
-                          className="mt-3"
-                        >
-                          <div className="h-1 bg-gray-800 rounded-full overflow-hidden">
-                            <motion.div
-                              className="h-full bg-gradient-to-r from-blue-400 to-blue-300"
-                              initial={{ width: 0 }}
-                              animate={{ width: `${step.progress}%` }}
-                              transition={{ duration: 0.3 }}
-                            />
-                          </div>
-                        </motion.div>
-                      )}
-
-                    {/* Logs Section */}
-                    {hasLogs && isExpanded && step.logs && (
-                      <motion.div
-                        initial={{ opacity: 0, height: 0 }}
-                        animate={{ opacity: 1, height: "auto" }}
-                        exit={{ opacity: 0, height: 0 }}
-                        className="mt-4 space-y-2"
-                      >
-                        <div className="bg-black/30 rounded-lg p-3 max-h-48 overflow-y-auto font-mono text-sm">
-                          {step.logs.map((log, i) => (
-                            <div
-                              key={i}
-                              className={`py-1 ${
-                                log.type === "error"
-                                  ? "text-red-400"
-                                  : log.type === "warning"
-                                  ? "text-yellow-400"
-                                  : "text-gray-300"
-                              }`}
-                            >
-                              <span className="text-gray-500">
-                                {log.timestamp}
-                              </span>{" "}
-                              {log.message}
-                            </div>
-                          ))}
-                        </div>
-                      </motion.div>
-                    )}
-                  </div>
-                </div>
-              </motion.div>
-            );
-          })}
-        </AnimatePresence>
+          {/* Current Step - Mobile Only */}
+          <div className="sm:hidden text-center mt-6">
+            <span
+              className="text-sm"
+              style={{
+                color: "#A855F7",
+              }}
+            >
+              {steps[currentStepIndex]?.title}
+            </span>
+          </div>
+        </div>
       </div>
     </div>
   );

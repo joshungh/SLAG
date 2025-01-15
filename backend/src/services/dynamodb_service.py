@@ -168,8 +168,54 @@ class DynamoDBService:
         for key, value in item.items():
             # Get the first key in the value dict (e.g., 'S', 'N', etc.)
             type_key = next(iter(value))
-            result[key] = value[type_key]
+            # Handle special cases for certain fields
+            if key == 'password':
+                # Ensure password is always returned as a UTF-8 string
+                if not value[type_key]:
+                    result[key] = None
+                else:
+                    try:
+                        result[key] = str(value[type_key])
+                    except Exception as e:
+                        logger.error(f"Error deserializing password: {str(e)}")
+                        result[key] = None
+            elif type_key == 'N':
+                # Convert numbers to float or int
+                num_val = value[type_key]
+                result[key] = int(num_val) if num_val.isdigit() else float(num_val)
+            elif type_key == 'BOOL':
+                # Convert to boolean
+                result[key] = value[type_key]
+            elif type_key == 'NULL':
+                # Handle null values
+                result[key] = None
+            elif type_key == 'L':
+                # Handle lists
+                result[key] = [self._deserialize_value(v) for v in value[type_key]]
+            elif type_key == 'M':
+                # Handle maps
+                result[key] = {k: self._deserialize_value(v) for k, v in value[type_key].items()}
+            else:
+                # Default case for strings and other types
+                result[key] = value[type_key]
         return result
+
+    def _deserialize_value(self, value: Dict[str, Any]) -> Any:
+        """Helper method to deserialize a single DynamoDB value."""
+        type_key = next(iter(value))
+        if type_key == 'N':
+            num_val = value[type_key]
+            return int(num_val) if num_val.isdigit() else float(num_val)
+        elif type_key == 'BOOL':
+            return value[type_key]
+        elif type_key == 'NULL':
+            return None
+        elif type_key == 'L':
+            return [self._deserialize_value(v) for v in value[type_key]]
+        elif type_key == 'M':
+            return {k: self._deserialize_value(v) for k, v in value[type_key].items()}
+        else:
+            return value[type_key]
 
     async def update_user(self, user_id: str, update_data: Dict[str, Any]) -> Optional[Dict[str, Any]]:
         """Update a user's information."""
@@ -341,4 +387,53 @@ class DynamoDBService:
             return True
         except ClientError as e:
             logger.error(f"Error invalidating reset token: {e.response['Error']['Message']}")
+            raise
+
+    async def create_story(self, story_item: Dict[str, Any]) -> Dict[str, Any]:
+        """Create a new story in DynamoDB."""
+        try:
+            # Convert the story_item to DynamoDB format
+            dynamodb_item = {}
+            for key, value in story_item.items():
+                if isinstance(value, str):
+                    dynamodb_item[key] = {'S': value}
+                elif isinstance(value, bool):
+                    dynamodb_item[key] = {'BOOL': value}
+                elif isinstance(value, (int, float)):
+                    dynamodb_item[key] = {'N': str(value)}
+                elif isinstance(value, list):
+                    dynamodb_item[key] = {'SS': value} if all(isinstance(x, str) for x in value) else {'L': [{'S': str(x)} for x in value]}
+                elif value is None:
+                    continue
+                else:
+                    dynamodb_item[key] = {'S': str(value)}
+
+            # Create the story
+            await self._run_async(
+                self.dynamodb.put_item,
+                TableName=self.stories_table,
+                Item=dynamodb_item
+            )
+            return story_item
+        except ClientError as e:
+            logger.error(f"Error creating story: {e.response['Error']['Message']}")
+            raise
+
+    async def get_user_by_username(self, username: str) -> Optional[Dict[str, Any]]:
+        """Get a user by their username."""
+        try:
+            response = await self._run_async(
+                self.dynamodb.scan,
+                TableName=self.users_table,
+                FilterExpression='username = :username',
+                ExpressionAttributeValues={
+                    ':username': {'S': username}
+                }
+            )
+            items = response.get('Items', [])
+            if items:
+                return self._deserialize_item(items[0])
+            return None
+        except ClientError as e:
+            logger.error(f"Error getting user by username: {e.response['Error']['Message']}")
             raise

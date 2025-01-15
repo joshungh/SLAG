@@ -8,13 +8,16 @@ import Link from "next/link";
 interface SignInModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSignIn: (credentials: { email: string; password: string }) => Promise<any>;
+  onSignIn: (credentials: {
+    identifier: string;
+    password: string;
+  }) => Promise<any>;
   onRegisterClick: () => void;
   children?: React.ReactNode;
 }
 
 interface FormData {
-  email: string;
+  identifier: string;
   password: string;
 }
 
@@ -25,48 +28,20 @@ export default function SignInModal({
   onRegisterClick,
   children,
 }: SignInModalProps) {
-  const [isLoading, setIsLoading] = useState(false);
+  const [identifier, setIdentifier] = useState("");
+  const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
-  const [formData, setFormData] = useState<FormData>({
-    email: "",
-    password: "",
-  });
-
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
-    // Clear error when user starts typing
-    if (error) setError(null);
-  };
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsLoading(true);
     setError(null);
+    setIsLoading(true);
 
     try {
-      await onSignIn(formData);
-      onClose();
-    } catch (err) {
-      // Handle API error responses
-      if (err instanceof Error) {
-        // Check if it's an API error response
-        const apiError = err as any;
-        if (apiError.detail) {
-          setError(apiError.detail);
-        } else if (typeof apiError === "object" && apiError.message) {
-          setError(apiError.message);
-        } else {
-          setError(err.message || "Failed to sign in");
-        }
-      } else if (typeof err === "string") {
-        setError(err);
-      } else {
-        setError("An unexpected error occurred");
-      }
+      await onSignIn({ identifier, password });
+    } catch (error: any) {
+      setError(error.message);
     } finally {
       setIsLoading(false);
     }
@@ -117,59 +92,72 @@ export default function SignInModal({
 
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
-                <div className="relative">
-                  <input
-                    type="email"
-                    name="email"
-                    required
-                    value={formData.email}
-                    onChange={handleInputChange}
-                    placeholder="Email address"
-                    className="w-full p-2 pl-9 bg-[#2a2a2a] border border-gray-700 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent text-white placeholder-gray-500"
-                  />
-                  <Mail className="absolute left-3 top-2.5 h-4 w-4 text-gray-500" />
-                </div>
+                <label
+                  htmlFor="identifier"
+                  className="block text-sm font-medium text-gray-300 mb-1"
+                >
+                  Email or Username
+                </label>
+                <input
+                  type="text"
+                  id="identifier"
+                  value={identifier}
+                  onChange={(e) => setIdentifier(e.target.value)}
+                  className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent text-white"
+                  placeholder="Enter your email or username"
+                  required
+                />
               </div>
 
               <div>
-                <div className="relative">
-                  <input
-                    type="password"
-                    name="password"
-                    required
-                    value={formData.password}
-                    onChange={handleInputChange}
-                    placeholder="Password"
-                    className="w-full p-2 pl-9 bg-[#2a2a2a] border border-gray-700 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent text-white placeholder-gray-500"
-                  />
-                  <Lock className="absolute left-3 top-2.5 h-4 w-4 text-gray-500" />
-                </div>
+                <label
+                  htmlFor="password"
+                  className="block text-sm font-medium text-gray-300 mb-1"
+                >
+                  Password
+                </label>
+                <input
+                  type="password"
+                  id="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent text-white"
+                  placeholder="Enter your password"
+                  required
+                />
               </div>
 
               <button
                 type="submit"
                 disabled={isLoading}
-                className="w-full bg-green-500 text-white font-medium p-2 rounded-lg hover:bg-green-600 transition-colors flex items-center justify-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                className={`w-full py-2 px-4 rounded-lg font-medium flex items-center justify-center space-x-2 ${
+                  isLoading
+                    ? "bg-gray-600 cursor-not-allowed"
+                    : "bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700"
+                } text-white transition-all`}
               >
                 {isLoading ? (
                   <>
-                    <Loader2 className="w-4 h-4 animate-spin" />
+                    <div className="w-5 h-5 border-t-2 border-b-2 border-white rounded-full animate-spin" />
                     <span>Signing in...</span>
                   </>
                 ) : (
                   "Sign in"
                 )}
               </button>
-            </form>
 
-            <div className="mt-6 text-center">
-              <button
-                onClick={onRegisterClick}
-                className="text-sm text-gray-400 hover:text-white"
-              >
-                Don't have an account? Sign up
-              </button>
-            </div>
+              <div className="text-center mt-4">
+                <p className="text-gray-400">
+                  Don't have an account?{" "}
+                  <button
+                    onClick={onRegisterClick}
+                    className="text-green-500 hover:text-green-400 font-medium"
+                  >
+                    Sign up
+                  </button>
+                </p>
+              </div>
+            </form>
 
             <p className="mt-4 text-xs text-center text-gray-500">
               By continuing, you accept our{" "}

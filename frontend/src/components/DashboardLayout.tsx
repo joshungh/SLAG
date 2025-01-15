@@ -9,7 +9,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import SignInModal from "./SignInModal";
 import UserRegistrationModal from "./UserRegistrationModal";
 import { setToken, getToken, removeToken } from "@/utils/auth";
-import UserMenu from "./UserMenu.tsx";
+import UserMenu from "./UserMenu";
 
 interface User {
   username?: string;
@@ -103,19 +103,21 @@ export default function DashboardLayout({
   };
 
   const handleSignIn = async (credentials: {
-    email: string;
+    identifier: string;
     password: string;
   }) => {
     try {
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/api/login`,
+        `${process.env.NEXT_PUBLIC_API_URL}/api/auth/login`,
         {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
-            email: credentials.email,
+            ...(credentials.identifier.includes("@")
+              ? { email: credentials.identifier }
+              : { username: credentials.identifier }),
             password: credentials.password,
             login_method: "email",
           }),

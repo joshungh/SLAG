@@ -6,7 +6,10 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "dev:local": "NODE_ENV=development next dev",
+    "build:prod": "NODE_ENV=production next build",
+    "start:prod": "NODE_ENV=production next start"
   },
   "dependencies": {
     "@aws-sdk/client-cloudwatch-logs": "^3.714.0",

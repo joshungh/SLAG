@@ -7,11 +7,13 @@ from typing import Optional, Dict, Any
 from google.oauth2 import id_token
 from google.auth.transport import requests
 import os
+import logging
 from .dynamodb_service import DynamoDBService
 from ..models.user import UserCreate, UserLogin, LoginMethod
 from fastapi import Depends, HTTPException
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 
+logger = logging.getLogger(__name__)
 security = HTTPBearer()
 
 class AuthService:
@@ -33,11 +35,20 @@ class AuthService:
     def _hash_password(self, password: str) -> str:
         """Hash password using bcrypt."""
         salt = bcrypt.gensalt()
-        return bcrypt.hashpw(password.encode(), salt).decode()
+        hashed = bcrypt.hashpw(password.encode(), salt)
+        return hashed.decode('utf-8')  # Ensure we store as UTF-8 string
 
     def _verify_password(self, password: str, hashed_password: str) -> bool:
         """Verify password against hashed password."""
-        return bcrypt.checkpw(password.encode(), hashed_password.encode())
+        try:
+            if isinstance(password, str):
+                password = password.encode('utf-8')
+            if isinstance(hashed_password, str):
+                hashed_password = hashed_password.encode('utf-8')
+            return bcrypt.checkpw(password, hashed_password)
+        except Exception as e:
+            logger.error(f"Password verification error: {str(e)}")
+            return False
 
     async def register_email_user(self, user_data: UserCreate) -> Dict[str, Any]:
         """Register a new user with email or web3."""
@@ -82,13 +93,29 @@ class AuthService:
         }
 
     async def login_email_user(self, login_data: UserLogin) -> Dict[str, Any]:
-        """Login user with email and password."""
-        if not login_data.email or not login_data.password:
-            raise ValueError("Email and password are required")
+        """Login user with email/username and password."""
+        if not (login_data.email or login_data.username) or not login_data.password:
+            raise ValueError("Email/username and password are required")
 
-        user = await self.db.get_user_by_email(login_data.email)
-        if not user or not self._verify_password(login_data.password, user.get('password', '')):
-            raise ValueError("Invalid email or password")
+        # Get user by email or username
+        user = None
+        if login_data.email:
+            user = await self.db.get_user_by_email(login_data.email)
+        elif login_data.username:
+            user = await self.db.get_user_by_username(login_data.username)
+            
+        if not user:
+            raise ValueError("Invalid credentials")
+
+        # Verify password exists and matches
+        stored_password = user.get('password')
+        if not stored_password:
+            logger.error(f"No password found for user")
+            raise ValueError("Invalid credentials")
+
+        if not self._verify_password(login_data.password, stored_password):
+            logger.error(f"Password verification failed for user")
+            raise ValueError("Invalid credentials")
 
         user_id = user['PK'].split('#')[1]  # Extract user_id from PK
         # Update last login

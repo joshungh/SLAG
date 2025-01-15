@@ -30,6 +30,7 @@ class UserCreate(BaseModel):
     login_method: LoginMethod
 
 class UserLogin(BaseModel):
+    username: Optional[str] = None
     email: Optional[EmailStr] = None
     password: Optional[str] = None
     web3_wallet: Optional[str] = None
