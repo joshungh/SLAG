@@ -8,6 +8,19 @@ import Image from "next/image";
 import { useAuth } from "@/contexts/AuthContext";
 import { useRouter } from "next/navigation";
 
+interface DynamoDBString {
+  S: string;
+}
+
+function isDynamoDBString(value: any): value is DynamoDBString {
+  return (
+    value &&
+    typeof value === "object" &&
+    "S" in value &&
+    typeof value.S === "string"
+  );
+}
+
 interface UserProfile {
   username: string;
   email: string | null;
@@ -50,16 +63,32 @@ export default function ProfilePage() {
   // Use authUser data to set profile
   useEffect(() => {
     if (authUser) {
+      const processedLoginMethods = (authUser.login_methods || []).map(
+        (method) => {
+          if (isDynamoDBString(method)) {
+            return method.S;
+          }
+          return typeof method === "string" ? method : String(method);
+        }
+      );
+
+      const processedWallet = isDynamoDBString(authUser.web3_wallet)
+        ? authUser.web3_wallet.S
+        : typeof authUser.web3_wallet === "string"
+        ? authUser.web3_wallet
+        : null;
+
       setProfile({
         username: authUser.username,
         email: authUser.email,
         first_name: authUser.first_name || null,
         last_name: authUser.last_name || null,
         profile_picture: authUser.profile_picture || null,
-        web3_wallet: authUser.web3_wallet || null,
+        web3_wallet:
+          typeof authUser.web3_wallet === "boolean" ? null : processedWallet,
         bio: authUser.bio || "",
         created_at: authUser.created_at,
-        login_methods: authUser.login_methods || [],
+        login_methods: processedLoginMethods,
       });
     }
   }, [authUser]);
@@ -109,14 +138,11 @@ export default function ProfilePage() {
         throw new Error("Backend URL not configured");
       }
 
-      // Send the profile data as JSON
       const profileData = {
         username: editableFields.username,
         first_name: editableFields.first_name,
         last_name: editableFields.last_name,
       };
-
-      console.log("Profile data being sent:", profileData);
 
       const response = await fetch(`${BACKEND_URL}/api/users/profile`, {
         method: "PUT",
@@ -134,10 +160,34 @@ export default function ProfilePage() {
         );
       }
 
-      const updatedProfile = await response.json();
+      const updatedData = await response.json();
+
+      // Process the updated data the same way we process initial data
+      const processedLoginMethods = (updatedData.login_methods || []).map(
+        (method: unknown) => {
+          if (isDynamoDBString(method)) {
+            return method.S;
+          }
+          return typeof method === "string" ? method : String(method);
+        }
+      );
+
+      const processedWallet = isDynamoDBString(updatedData.web3_wallet)
+        ? updatedData.web3_wallet.S
+        : typeof updatedData.web3_wallet === "string"
+        ? updatedData.web3_wallet
+        : null;
+
+      const processedProfile = {
+        ...updatedData,
+        web3_wallet:
+          typeof updatedData.web3_wallet === "boolean" ? null : processedWallet,
+        login_methods: processedLoginMethods,
+      };
+
       setProfile((prev) => ({
         ...prev!,
-        ...updatedProfile,
+        ...processedProfile,
       }));
       setIsEditing(false);
     } catch (err) {
@@ -146,6 +196,11 @@ export default function ProfilePage() {
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const truncateAddress = (address: string | null) => {
+    if (!address || typeof address !== "string") return "";
+    return `${address.slice(0, 4)}...${address.slice(-4)}`;
   };
 
   if (!profile) {
@@ -268,10 +323,7 @@ export default function ProfilePage() {
                   {profile.web3_wallet && (
                     <div className="flex items-center space-x-2">
                       <Wallet className="w-4 h-4" />
-                      <span>{`${profile.web3_wallet.slice(
-                        0,
-                        4
-                      )}...${profile.web3_wallet.slice(-4)}`}</span>
+                      <span>{truncateAddress(profile.web3_wallet)}</span>
                     </div>
                   )}
                 </div>

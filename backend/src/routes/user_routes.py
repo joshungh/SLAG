@@ -27,52 +27,12 @@ def verify_password(plain_password: str, hashed_password: str) -> bool:
 async def login(user_login: UserLogin):
     """Login user and return JWT token."""
     try:
-        # Handle email login
         if user_login.login_method == LoginMethod.EMAIL:
-            if not user_login.email or not user_login.password:
-                raise ValueError("Email and password are required for email login")
-
-            # Get user by email
-            user = await db.get_user_by_email(user_login.email)
-            if not user:
-                raise ValueError("Invalid email or password")
-
-            # Verify password
-            if not verify_password(user_login.password, user['password']):
-                raise ValueError("Invalid email or password")
-
-            # Generate JWT token
-            token = auth_service._generate_token(user['PK'].split('#')[1], user_login.login_method.value)
-
-            # Remove password from response
-            if 'password' in user:
-                del user['password']
-
-            return {
-                "user": user,
-                "token": token
-            }
-
-        # Handle web3 login
+            return await auth_service.login_email_user(user_login)
         elif user_login.login_method == LoginMethod.WEB3:
-            if not user_login.web3_wallet:
-                raise ValueError("Wallet address is required for web3 login")
-
-            user = await db.get_user_by_wallet(user_login.web3_wallet)
-            if not user:
-                raise ValueError("User not found")
-
-            # Generate JWT token
-            token = auth_service._generate_token(user['PK'].split('#')[1], user_login.login_method.value)
-
-            return {
-                "user": user,
-                "token": token
-            }
-
+            return await auth_service.login_web3_user(user_login)
         else:
             raise ValueError("Unsupported login method")
-
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
     except Exception as e:

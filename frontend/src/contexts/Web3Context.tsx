@@ -56,10 +56,13 @@ export function Web3Provider({ children }: { children: React.ReactNode }) {
       const response = await fetch(
         `${BACKEND_URL}/api/users/wallet/${walletAddress}`
       );
+
       if (response.ok) {
         const userData = await response.json();
-        setUserProfile(userData);
-        return true;
+        if (userData && !userData.error) {
+          setUserProfile(userData);
+          return true;
+        }
       }
       return false;
     } catch (error) {
@@ -155,39 +158,66 @@ export function Web3Provider({ children }: { children: React.ReactNode }) {
       }
 
       const provider = window?.phantom?.solana;
-      if (provider?.isPhantom) {
-        if (provider.isConnected && provider.publicKey) {
-          const pubKey = provider.publicKey.toString();
+      if (
+        !provider?.isPhantom ||
+        !provider.isConnected ||
+        !provider.publicKey
+      ) {
+        setConnected(false);
+        setPublicKey(null);
+        setBalance(null);
+        setUserProfile(null);
+        return;
+      }
 
-          // Check if user exists first
-          const userExists = await checkUserExists(pubKey);
+      const pubKey = provider.publicKey.toString();
 
-          if (userExists) {
-            // If user exists, log them in
-            await handleUserLogin(pubKey);
-            setConnected(true);
-            setPublicKey(pubKey);
-            await fetchBalance(pubKey);
-          } else {
-            // Only show registration for new users
-            setConnected(true);
-            setPublicKey(pubKey);
-            await fetchBalance(pubKey);
-            setShowRegistration(true);
-          }
+      // If we already have this public key and are logged in, no need to recheck
+      if (connected && publicKey === pubKey && userProfile) {
+        return;
+      }
+
+      setConnected(true);
+      setPublicKey(pubKey);
+      await fetchBalance(pubKey);
+
+      // Check if user exists first
+      const userExists = await checkUserExists(pubKey);
+
+      if (userExists) {
+        // If user exists, log them in
+        try {
+          await handleUserLogin(pubKey);
+          setShowRegistration(false);
+        } catch (error) {
+          console.error("Error logging in existing user:", error);
+          // If login fails, we should show registration
+          setShowRegistration(true);
         }
+      } else {
+        // Only show registration for new users
+        setShowRegistration(true);
       }
     } catch (error) {
       console.error("Error checking wallet connection:", error);
       setConnected(false);
       setPublicKey(null);
       setBalance(null);
+      setUserProfile(null);
     }
   };
 
   useEffect(() => {
     if (typeof window === "undefined") return;
-    checkAndUpdateConnection();
+
+    let timeoutId: NodeJS.Timeout;
+    const debouncedCheck = () => {
+      clearTimeout(timeoutId);
+      timeoutId = setTimeout(checkAndUpdateConnection, 1000);
+    };
+
+    // Initial check
+    debouncedCheck();
 
     const handleConnect = async () => {
       const wasDisconnected =
@@ -200,7 +230,7 @@ export function Web3Provider({ children }: { children: React.ReactNode }) {
         return;
       }
       localStorage.removeItem("wallet_disconnected");
-      checkAndUpdateConnection();
+      debouncedCheck();
     };
 
     const handleDisconnect = () => {
@@ -212,16 +242,20 @@ export function Web3Provider({ children }: { children: React.ReactNode }) {
 
     const provider = window.phantom?.solana;
     if (provider) {
+      // Only add event listeners if they're not already added
       provider.on("connect", handleConnect);
       provider.on("disconnect", handleDisconnect);
       provider.on("accountChanged", handleConnect);
 
       return () => {
+        clearTimeout(timeoutId);
         provider.removeListener("connect", handleConnect);
         provider.removeListener("disconnect", handleDisconnect);
         provider.removeListener("accountChanged", handleConnect);
       };
     }
+
+    return () => clearTimeout(timeoutId);
   }, []);
 
   const connect = async () => {
@@ -229,25 +263,8 @@ export function Web3Provider({ children }: { children: React.ReactNode }) {
       const provider = window?.phantom?.solana;
       if (provider?.isPhantom) {
         localStorage.removeItem("wallet_disconnected");
-        const response = await provider.connect();
-        const pubKey = response.publicKey.toString();
-
-        // First check if user exists
-        const userExists = await checkUserExists(pubKey);
-
-        if (userExists) {
-          // If user exists, log them in
-          await handleUserLogin(pubKey);
-          setConnected(true);
-          setPublicKey(pubKey);
-          await fetchBalance(pubKey);
-        } else {
-          // If user doesn't exist, show registration
-          setConnected(true);
-          setPublicKey(pubKey);
-          await fetchBalance(pubKey);
-          setShowRegistration(true);
-        }
+        await provider.connect();
+        await checkAndUpdateConnection();
       }
     } catch (error) {
       console.error("Error connecting to Phantom wallet:", error);

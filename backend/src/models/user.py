@@ -1,6 +1,5 @@
 from typing import Optional, List, Dict
 from pydantic import BaseModel, EmailStr, Field
-from datetime import datetime
 from enum import Enum
 
 class LoginMethod(str, Enum):
@@ -46,15 +45,5 @@ class UserUpdate(BaseModel):
     profile_picture: Optional[str] = None
     author_metadata: Optional[Dict] = None
 
-class UserResponse(BaseModel):
-    username: str
-    first_name: Optional[str] = None
-    last_name: Optional[str] = None
-    email: Optional[EmailStr] = None
-    phone: Optional[str] = None
-    profile_picture: Optional[str] = None
-    login_methods: List[LoginMethod]
-    web3_wallet: Optional[str] = None
-    created_at: Optional[str] = None
-    last_login: Optional[str] = None
-    author_metadata: Optional[Dict] = None 
+class UserResponse(UserBase):
+    pass 

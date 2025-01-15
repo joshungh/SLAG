@@ -17,9 +17,13 @@ export default function CreatePage() {
   const { user } = useAuth();
 
   const isAuthenticated = connected || !!user;
-  console.log("Auth state:", { connected, user, isAuthenticated });
 
-  // Cursor blink effect
+  // Only log auth state changes when they actually change
+  useEffect(() => {
+    console.log("Auth state:", { connected, user, isAuthenticated });
+  }, [connected, user, isAuthenticated]);
+
+  // Cursor blink effect with cleanup
   useEffect(() => {
     const interval = setInterval(() => {
       setShowCursor((prev) => !prev);
