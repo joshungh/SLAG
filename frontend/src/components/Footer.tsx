@@ -1,15 +1,17 @@
-import { Github, Instagram, Send } from 'lucide-react'
-import XLogo from '@/components/icons/XLogo'
+import { Github, Instagram, Send } from "lucide-react";
+import XLogo from "@/components/icons/XLogo";
+import Link from "next/link";
 
 export default function Footer() {
   return (
     <footer className="mt-16 text-center text-green-400 border-t border-green-500 pt-4">
       <p>&gt; &copy; 2024 Starfall: Lost Age of Giants. All rights reserved.</p>
       <p className="mt-2">
-        &gt; The $SLAG token has no inherent value and is meant for entertainment purposes only. NFA DYOR.
+        &gt; The $SLAG token has no inherent value and is meant for
+        entertainment purposes only. NFA DYOR.
       </p>
       <div className="flex justify-center space-x-4 mt-4">
-        <a 
+        <a
           href="https://github.com/mango31/SLAG"
           target="_blank"
           rel="noopener noreferrer"
@@ -17,7 +19,7 @@ export default function Footer() {
         >
           <Github className="w-4 h-4" />
         </a>
-        <a 
+        <a
           href="https://x.com/slag_ai"
           target="_blank"
           rel="noopener noreferrer"
@@ -25,7 +27,7 @@ export default function Footer() {
         >
           <XLogo className="w-4 h-4" />
         </a>
-        <a 
+        <a
           href="https://t.me/slag_official"
           target="_blank"
           rel="noopener noreferrer"
@@ -33,7 +35,7 @@ export default function Footer() {
         >
           <Send className="w-4 h-4" />
         </a>
-        <a 
+        <a
           href="https://www.instagram.com/slag_ai"
           target="_blank"
           rel="noopener noreferrer"
@@ -42,6 +44,21 @@ export default function Footer() {
           <Instagram className="w-4 h-4" />
         </a>
       </div>
+      <div className="mt-4 text-sm">
+        <Link
+          href="/terms"
+          className="hover:text-green-300 transition-colors mx-2"
+        >
+          Terms of Use
+        </Link>
+        <span className="text-green-500">|</span>
+        <Link
+          href="/privacy"
+          className="hover:text-green-300 transition-colors mx-2"
+        >
+          Privacy Policy
+        </Link>
+      </div>
     </footer>
-  )
-} 
+  );
+}
