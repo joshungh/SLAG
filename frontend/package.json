@@ -6,18 +6,31 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "dev:local": "NODE_ENV=development next dev",
+    "build:prod": "NODE_ENV=production next build",
+    "start:prod": "NODE_ENV=production next start"
   },
   "dependencies": {
     "@aws-sdk/client-cloudwatch-logs": "^3.714.0",
     "@react-spring/web": "^9.7.5",
     "lucide-react": "^0.468.0",
     "next": "15.1.1",
-    "react": "^19.0.0",
-    "react-dom": "^19.0.0"
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "sonner": "^1.7.1",
+    "@emotion/react": "^11.14.0",
+    "@emotion/styled": "^11.14.0",
+    "@mui/material": "^6.3.1",
+    "@radix-ui/react-switch": "^1.1.2",
+    "@solana/web3.js": "^1.98.0",
+    "framer-motion": "^11.16.1",
+    "jose": "^5.9.6",
+    "jsonwebtoken": "^9.0.2"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
+    "@types/jsonwebtoken": "^9.0.7",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
