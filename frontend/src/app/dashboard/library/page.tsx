@@ -8,7 +8,12 @@ import {
   Heart,
   Users,
   History,
+  LogIn,
 } from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
+import { useWeb3 } from "@/contexts/Web3Context";
+import { motion } from "framer-motion";
+import Link from "next/link";
 
 interface Story {
   id: string;
@@ -112,8 +117,14 @@ export default function LibraryPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedStory, setSelectedStory] = useState<Story | null>(null);
+  const { user } = useAuth();
+  const { connected } = useWeb3();
+
+  const isAuthenticated = connected || !!user;
 
   useEffect(() => {
+    if (!isAuthenticated) return;
+
     const fetchStories = async () => {
       try {
         const response = await fetch(
@@ -139,7 +150,32 @@ export default function LibraryPage() {
     };
 
     fetchStories();
-  }, []);
+  }, [isAuthenticated]);
+
+  if (!isAuthenticated) {
+    return (
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="container mx-auto px-4 py-16 max-w-2xl text-center"
+      >
+        <BookOpen className="w-16 h-16 mx-auto mb-6 text-green-500 opacity-50" />
+        <h1 className="text-3xl font-bold mb-4 bg-gradient-to-r from-green-400 to-emerald-500 bg-clip-text text-transparent">
+          Welcome to Your Story Library
+        </h1>
+        <p className="text-gray-400 mb-8">
+          Sign in to view your collection of AI-generated stories
+        </p>
+        <Link
+          href="/dashboard"
+          className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 rounded-lg font-medium space-x-2 text-white shadow-lg shadow-green-500/20 transition-all"
+        >
+          <LogIn className="w-5 h-5" />
+          <span>Sign In to Continue</span>
+        </Link>
+      </motion.div>
+    );
+  }
 
   if (loading) {
     return (
