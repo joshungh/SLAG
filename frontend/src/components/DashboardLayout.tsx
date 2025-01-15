@@ -258,6 +258,16 @@ export default function DashboardLayout({
           >
             Create
           </Link>
+          <Link
+            href="/dashboard/library"
+            className={`flex items-center px-6 py-3 text-base font-medium ${
+              pathname === "/dashboard/library"
+                ? "bg-white/10 text-white"
+                : "text-gray-400 hover:text-white hover:bg-white/5 transition-colors"
+            }`}
+          >
+            Library
+          </Link>
         </nav>
 
         {/* Auth Section */}

@@ -8,49 +8,18 @@ import { useAuth } from "@/contexts/AuthContext";
 import GenerationProgress from "@/components/GenerationProgress";
 import { useRouter } from "next/navigation";
 import { useStoryQueue } from "@/contexts/StoryQueueContext";
+import { GENERATION_STEPS } from "@/constants/steps";
+import StoryPrompt from "@/components/StoryPrompt";
+import StoryQueueItem from "@/components/StoryQueueItem";
+import ErrorMessage from "@/components/ErrorMessage";
 
 export default function CreatePage() {
   const [prompt, setPrompt] = useState("");
   const [error, setError] = useState<string | null>(null);
-  const [showCursor, setShowCursor] = useState(true);
   const { connected } = useWeb3();
   const { user } = useAuth();
-  const { queue, addToQueue } = useStoryQueue();
+  const { queue, addToQueue, clearQueue } = useStoryQueue();
   const router = useRouter();
-
-  interface Step {
-    id: string;
-    title: string;
-    status: "pending" | "in-progress" | "completed";
-  }
-
-  const initialSteps: Step[] = [
-    {
-      id: "world-genesis",
-      title: "World Building",
-      status: "pending",
-    },
-    {
-      id: "story-bible",
-      title: "Story Bible",
-      status: "pending",
-    },
-    {
-      id: "outline",
-      title: "Story Outline",
-      status: "pending",
-    },
-    {
-      id: "scene-drafts",
-      title: "Scene Writing",
-      status: "pending",
-    },
-    {
-      id: "final-assembly",
-      title: "Final Polish",
-      status: "pending",
-    },
-  ];
 
   const isAuthenticated = connected || !!user;
 
@@ -58,14 +27,6 @@ export default function CreatePage() {
   useEffect(() => {
     console.log("Auth state:", { connected, user, isAuthenticated });
   }, [connected, user, isAuthenticated]);
-
-  // Cursor blink effect with cleanup
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setShowCursor((prev) => !prev);
-    }, 500);
-    return () => clearInterval(interval);
-  }, []);
 
   // Request notification permission
   useEffect(() => {
@@ -120,44 +81,9 @@ export default function CreatePage() {
           transition={{ delay: 0.3 }}
           className="space-y-4"
         >
-          <div className="relative group">
-            <textarea
-              value={prompt}
-              onChange={(e) => setPrompt(e.target.value)}
-              className="w-full h-32 sm:h-40 px-4 py-3 rounded-xl bg-black/50 border border-gray-800 group-hover:border-green-500/50 focus:border-green-500 focus:ring-1 focus:ring-green-500 transition-all text-green-400 font-['IBM_Plex_Mono'] text-sm sm:text-base tracking-tight resize-none"
-              disabled={false}
-            />
-            <div
-              className="absolute pointer-events-none select-none"
-              style={{
-                top: "12px",
-                left: "16px",
-                right: "16px",
-                opacity: prompt ? 0 : 1,
-              }}
-            >
-              <span className="font-['IBM_Plex_Mono'] text-base sm:text-lg tracking-tight text-gray-500">
-                Enter your story idea...
-                <span
-                  className={`text-green-400 ${
-                    showCursor ? "opacity-100" : "opacity-0"
-                  } transition-opacity`}
-                >
-                  ▋
-                </span>
-              </span>
-            </div>
-          </div>
+          <StoryPrompt value={prompt} onChange={setPrompt} />
 
-          {error && (
-            <motion.div
-              initial={{ opacity: 0, y: -10 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="bg-red-500/10 border border-red-500 text-red-400 text-sm p-3 rounded-lg"
-            >
-              {error}
-            </motion.div>
-          )}
+          <ErrorMessage message={error} />
 
           <motion.button
             onClick={handleGenerate}
@@ -178,7 +104,7 @@ export default function CreatePage() {
             animate={{ opacity: 1, y: 0 }}
           >
             <GenerationProgress
-              steps={initialSteps}
+              steps={GENERATION_STEPS}
               currentStepIndex={generatingStory.currentStep}
               overallProgress={generatingStory.progress}
             />
@@ -193,36 +119,26 @@ export default function CreatePage() {
             transition={{ delay: 0.4 }}
             className="bg-black/30 backdrop-blur-sm rounded-xl p-4 space-y-3"
           >
-            <h2 className="text-sm font-medium text-gray-300 flex items-center gap-2">
-              <Bell className="w-4 h-4" />
-              Story Queue
-            </h2>
+            <div className="flex items-center justify-between">
+              <h2 className="text-sm font-medium text-gray-300 flex items-center gap-2">
+                <Bell className="w-4 h-4" />
+                Story Queue
+              </h2>
+              <button
+                onClick={clearQueue}
+                className="text-xs text-red-400 hover:text-red-300 transition-colors"
+              >
+                Clear Queue
+              </button>
+            </div>
             <div className="space-y-2">
               {queue.map((task) => (
-                <div
+                <StoryQueueItem
                   key={task.id}
-                  className="flex items-center justify-between py-2 px-3 rounded-lg bg-black/20 border border-gray-800"
-                >
-                  <div className="flex items-center space-x-2">
-                    <div
-                      className={`w-2 h-2 rounded-full ${
-                        task.status === "generating"
-                          ? "bg-blue-500 animate-pulse"
-                          : task.status === "completed"
-                          ? "bg-green-500"
-                          : task.status === "error"
-                          ? "bg-red-500"
-                          : "bg-gray-500"
-                      }`}
-                    />
-                    <span className="text-sm text-gray-400 truncate max-w-[300px] sm:max-w-[400px]">
-                      {task.prompt}
-                    </span>
-                  </div>
-                  <span className="text-xs text-gray-500 capitalize">
-                    {task.status}
-                  </span>
-                </div>
+                  id={task.id}
+                  prompt={task.prompt}
+                  status={task.status}
+                />
               ))}
             </div>
           </motion.div>

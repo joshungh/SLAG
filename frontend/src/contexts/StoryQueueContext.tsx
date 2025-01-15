@@ -104,43 +104,21 @@ export function StoryQueueProvider({
     );
 
     try {
-      const STORY_ENGINE_URL = process.env.NEXT_PUBLIC_STORY_ENGINE_URL;
-      if (!STORY_ENGINE_URL) throw new Error("Story engine URL not configured");
+      const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL;
+      if (!BACKEND_URL) throw new Error("API URL not configured");
 
-      // Call the story engine API
-      const response = await fetch(`${STORY_ENGINE_URL}/generate`, {
+      // Call the test endpoint instead of the story engine
+      const response = await fetch(`${BACKEND_URL}/api/stories/test`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          Authorization: `Bearer ${localStorage.getItem("auth_token")}`,
         },
-        body: JSON.stringify({ prompt: nextStory.prompt }),
       });
 
       if (!response.ok) throw new Error("Failed to generate story");
 
-      const data = await response.json();
-
-      // Save the story to the backend
-      const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL;
-      if (!BACKEND_URL) throw new Error("API URL not configured");
-
-      const saveResponse = await fetch(`${BACKEND_URL}/api/stories`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
-        body: JSON.stringify({
-          content: data.story,
-          prompt: nextStory.prompt,
-          author_id: user?.id,
-          status: "completed",
-        }),
-      });
-
-      if (!saveResponse.ok) throw new Error("Failed to save story");
-
-      const savedStory = await saveResponse.json();
+      const savedStory = await response.json();
 
       // Update queue with completed story
       setQueue((prev) =>
@@ -184,7 +162,7 @@ export function StoryQueueProvider({
         )
       );
     }
-  }, [queue, user?.id, router]);
+  }, [queue, router]);
 
   // Process queue when it changes
   useEffect(() => {

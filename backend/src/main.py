@@ -2,7 +2,7 @@ from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from dotenv import load_dotenv
-from src.routes import user_routes, auth
+from src.routes import user_routes, auth, story_routes
 from src.config.aws_config import initialize_aws
 from src.config.config import Settings
 import os
@@ -53,6 +53,7 @@ app.add_middleware(
 # Include routers
 app.include_router(user_routes.router, prefix="/api", tags=["users"])
 app.include_router(auth.router, prefix="/api", tags=["auth"])
+app.include_router(story_routes.router, prefix="/api", tags=["stories"])
 
 @app.get("/", tags=["Health Check"])
 async def root():

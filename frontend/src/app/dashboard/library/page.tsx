@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Search,
   BookOpen,
@@ -12,242 +12,202 @@ import {
 
 interface Story {
   id: string;
+  user_id: string;
   title: string;
-  author: string;
   genre: string;
-  wordCount: number;
-  version: string;
-  isPublic: boolean;
-  coverImage: string;
-  rating: number;
-  likes: number;
-  reads: number;
+  content: string;
+  word_count: number;
+  created_at: string;
+  bible: {
+    characters: any[];
+    locations: any[];
+    factions: any[];
+    technology: any[];
+    timeline: any[];
+  };
+  framework: {
+    arcs: any[];
+    beats: any[];
+    themes: any[];
+  };
+}
+
+interface StoryModalProps {
+  story: Story;
+  onClose: () => void;
+}
+
+function StoryModal({ story, onClose }: StoryModalProps) {
+  const downloadStory = () => {
+    const content = `# ${story.title}\n\n${story.content}`;
+    const blob = new Blob([content], { type: "text/plain" });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `${story.title.toLowerCase().replace(/\s+/g, "-")}.txt`;
+    document.body.appendChild(a);
+    a.click();
+    window.URL.revokeObjectURL(url);
+    document.body.removeChild(a);
+  };
+
+  return (
+    <div className="fixed inset-0 bg-black/80 flex items-center justify-center p-4 z-50">
+      <div className="bg-gray-900 rounded-lg w-full max-w-4xl max-h-[90vh] overflow-y-auto">
+        <div className="p-6 space-y-6">
+          {/* Header */}
+          <div className="flex justify-between items-center">
+            <h2 className="text-2xl font-bold text-white">{story.title}</h2>
+            <div className="space-x-2">
+              <button
+                onClick={downloadStory}
+                className="px-4 py-2 bg-green-400 text-black rounded hover:bg-green-300"
+              >
+                Download
+              </button>
+              <button
+                onClick={onClose}
+                className="px-4 py-2 bg-gray-700 text-white rounded hover:bg-gray-600"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+
+          {/* Story Content */}
+          <div className="space-y-4">
+            <h3 className="text-xl text-green-400">Story</h3>
+            <div className="bg-gray-800/50 p-4 rounded whitespace-pre-wrap text-gray-300">
+              {story.content || ""}
+            </div>
+          </div>
+
+          {/* Story Bible */}
+          <div className="space-y-4">
+            <h3 className="text-xl text-green-400">Story Bible</h3>
+            <div className="bg-gray-800/50 p-4 rounded">
+              <pre className="text-gray-300 overflow-x-auto">
+                {JSON.stringify(story.bible, null, 2)}
+              </pre>
+            </div>
+          </div>
+
+          {/* Story Framework */}
+          <div className="space-y-4">
+            <h3 className="text-xl text-green-400">Story Framework</h3>
+            <div className="bg-gray-800/50 p-4 rounded">
+              <pre className="text-gray-300 overflow-x-auto">
+                {JSON.stringify(story.framework, null, 2)}
+              </pre>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
 }
 
 export default function LibraryPage() {
-  const [activeTab, setActiveTab] = useState<
-    "stories" | "collections" | "following" | "followers" | "history"
-  >("stories");
-  const [filterType, setFilterType] = useState<"scenes" | "liked" | "public">(
-    "scenes"
-  );
+  const [stories, setStories] = useState<Story[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [selectedStory, setSelectedStory] = useState<Story | null>(null);
 
-  // Mock data
-  const stories: Story[] = [
-    {
-      id: "1",
-      title: "Lights in the Night (Remastered)",
-      author: "ImOliver",
-      genre: "Sci-fi, Cyberpunk",
-      wordCount: 15000,
-      version: "v4",
-      isPublic: true,
-      coverImage: "https://picsum.photos/seed/story1/300/400",
-      rating: 4.5,
-      likes: 2300,
-      reads: 85000,
-    },
-    {
-      id: "2",
-      title: "The Quantum Archaeologist",
-      author: "DrQuantum",
-      genre: "Hard Sci-fi, Mystery",
-      wordCount: 12000,
-      version: "v4",
-      isPublic: true,
-      coverImage: "https://picsum.photos/seed/story2/300/400",
-      rating: 4.7,
-      likes: 1800,
-      reads: 65000,
-    },
-    {
-      id: "3",
-      title: "Chronicles of the Starborn",
-      author: "CosmicWriter",
-      genre: "Space Opera, Adventure",
-      wordCount: 18000,
-      version: "v4",
-      isPublic: false,
-      coverImage: "https://picsum.photos/seed/story3/300/400",
-      rating: 4.3,
-      likes: 3100,
-      reads: 92000,
-    },
-    {
-      id: "4",
-      title: "Whispers in the Machine",
-      author: "TechnoTeller",
-      genre: "Cyberpunk, Horror",
-      wordCount: 9000,
-      version: "v4",
-      isPublic: true,
-      coverImage: "https://picsum.photos/seed/story4/300/400",
-      rating: 4.8,
-      likes: 4200,
-      reads: 120000,
-    },
-    {
-      id: "5",
-      title: "Echoes of Tomorrow",
-      author: "ElenaScribe",
-      genre: "Post-apocalyptic, Romance",
-      wordCount: 14500,
-      version: "v4",
-      isPublic: true,
-      coverImage: "https://picsum.photos/seed/story5/300/400",
-      rating: 4.6,
-      likes: 2800,
-      reads: 78000,
-    },
-  ];
+  useEffect(() => {
+    const fetchStories = async () => {
+      try {
+        const response = await fetch(
+          `${process.env.NEXT_PUBLIC_API_URL}/api/stories`,
+          {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem("auth_token")}`,
+            },
+          }
+        );
+
+        if (!response.ok) {
+          throw new Error("Failed to fetch stories");
+        }
+
+        const data = await response.json();
+        setStories(data.stories || []);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "An error occurred");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchStories();
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-black flex items-center justify-center">
+        <div className="text-green-400">Loading stories...</div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-black flex items-center justify-center">
+        <div className="text-red-400">Error: {error}</div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-black">
       <div className="max-w-7xl mx-auto px-6 py-8">
         <div className="flex flex-col space-y-6">
-          {/* Navigation Tabs */}
-          <div className="flex border-b border-gray-800">
-            <button
-              onClick={() => setActiveTab("stories")}
-              className={`px-6 py-4 text-base font-medium ${
-                activeTab === "stories"
-                  ? "text-green-400 border-b-2 border-green-400"
-                  : "text-gray-400 hover:text-white"
-              }`}
-            >
-              Stories
-            </button>
-            <button
-              onClick={() => setActiveTab("collections")}
-              className={`px-6 py-4 text-base font-medium ${
-                activeTab === "collections"
-                  ? "text-green-400 border-b-2 border-green-400"
-                  : "text-gray-400 hover:text-white"
-              }`}
-            >
-              Collections
-            </button>
-            <button
-              onClick={() => setActiveTab("following")}
-              className={`px-6 py-4 text-base font-medium ${
-                activeTab === "following"
-                  ? "text-green-400 border-b-2 border-green-400"
-                  : "text-gray-400 hover:text-white"
-              }`}
-            >
-              Following
-            </button>
-            <button
-              onClick={() => setActiveTab("followers")}
-              className={`px-6 py-4 text-base font-medium ${
-                activeTab === "followers"
-                  ? "text-green-400 border-b-2 border-green-400"
-                  : "text-gray-400 hover:text-white"
-              }`}
-            >
-              Followers
-            </button>
-            <button
-              onClick={() => setActiveTab("history")}
-              className={`px-6 py-4 text-base font-medium ${
-                activeTab === "history"
-                  ? "text-green-400 border-b-2 border-green-400"
-                  : "text-gray-400 hover:text-white"
-              }`}
-            >
-              History
-            </button>
-          </div>
-
-          {/* Search and Filter Bar */}
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-4">
-              <button
-                onClick={() => setFilterType("scenes")}
-                className={`flex items-center space-x-2 px-4 py-2 rounded-lg text-base ${
-                  filterType === "scenes"
-                    ? "bg-green-400/10 text-green-400"
-                    : "text-gray-400 hover:text-white"
-                }`}
-              >
-                <BookOpen className="w-5 h-5" />
-                <span>Scenes</span>
-              </button>
-              <button
-                onClick={() => setFilterType("liked")}
-                className={`flex items-center space-x-2 px-4 py-2 rounded-lg text-base ${
-                  filterType === "liked"
-                    ? "bg-green-400/10 text-green-400"
-                    : "text-gray-400 hover:text-white"
-                }`}
-              >
-                <Heart className="w-5 h-5" />
-                <span>Liked</span>
-              </button>
-              <button
-                onClick={() => setFilterType("public")}
-                className={`flex items-center space-x-2 px-4 py-2 rounded-lg text-base ${
-                  filterType === "public"
-                    ? "bg-green-400/10 text-green-400"
-                    : "text-gray-400 hover:text-white"
-                }`}
-              >
-                <Users className="w-5 h-5" />
-                <span>Public</span>
-              </button>
-            </div>
-            <div className="relative">
-              <input
-                type="text"
-                placeholder="Search by story name, genre or synopsis"
-                className="w-96 bg-gray-900/50 rounded-lg px-4 py-2 pl-10 text-base text-white placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-green-400/50"
-              />
-              <Search className="w-5 h-5 text-gray-500 absolute left-3 top-1/2 -translate-y-1/2" />
-            </div>
-          </div>
+          <h1 className="text-3xl font-bold text-white">My Stories</h1>
 
           {/* Stories List */}
-          <div className="space-y-2">
-            {stories.map((story) => (
-              <div
-                key={story.id}
-                className="flex items-center justify-between p-4 bg-gray-900/50 rounded-lg hover:bg-gray-900/70"
-              >
-                <div className="flex items-center space-x-4">
-                  <img
-                    src={story.coverImage}
-                    alt={story.title}
-                    className="w-12 h-16 object-cover rounded"
-                  />
+          <div className="space-y-4">
+            {stories.length === 0 ? (
+              <div className="text-gray-400 text-center py-8">
+                No stories found. Create your first story to get started!
+              </div>
+            ) : (
+              stories.map((story) => (
+                <div
+                  key={story.id}
+                  className="flex items-center justify-between p-6 bg-gray-900/50 rounded-lg hover:bg-gray-900/70"
+                >
                   <div>
-                    <div className="flex items-center space-x-2">
-                      <h3 className="text-white text-lg font-medium">
-                        {story.title}
-                      </h3>
-                      <span className="px-2 py-0.5 text-sm bg-green-400/20 text-green-400 rounded">
-                        {story.version}
+                    <h3 className="text-white text-xl font-medium mb-2">
+                      {story.title}
+                    </h3>
+                    <div className="text-gray-400 space-x-4">
+                      <span>{story.genre}</span>
+                      <span>•</span>
+                      <span>{story.word_count} words</span>
+                      <span>•</span>
+                      <span>
+                        {new Date(story.created_at).toLocaleDateString()}
                       </span>
                     </div>
-                    <p className="text-base text-gray-400">{story.genre}</p>
                   </div>
-                </div>
-                <div className="flex items-center space-x-8">
-                  <button className="px-4 py-1.5 bg-green-400 text-black rounded hover:bg-green-300 transition-colors text-base">
-                    Extend
-                  </button>
-                  <div className="flex items-center space-x-2">
-                    <Heart className="w-5 h-5" />
-                    <span className="text-base">{story.likes}</span>
-                  </div>
-                  <button className="text-gray-400 hover:text-white">
-                    <ListFilter className="w-5 h-5" />
+                  <button
+                    onClick={() => setSelectedStory(story)}
+                    className="px-4 py-2 bg-green-400 text-black rounded hover:bg-green-300"
+                  >
+                    Read Story
                   </button>
                 </div>
-              </div>
-            ))}
+              ))
+            )}
           </div>
         </div>
       </div>
+
+      {selectedStory && (
+        <StoryModal
+          story={selectedStory}
+          onClose={() => setSelectedStory(null)}
+        />
+      )}
     </div>
   );
 }
