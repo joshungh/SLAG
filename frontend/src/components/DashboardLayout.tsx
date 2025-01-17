@@ -137,8 +137,8 @@ export default function DashboardLayout({
       signIn(data.token, data.user);
       setIsSignInModalOpen(false);
 
-      // Reload the page to ensure all components pick up the new auth state
-      window.location.reload();
+      // Navigate to dashboard without full page reload
+      router.push("/dashboard/create");
 
       return data;
     } catch (error) {

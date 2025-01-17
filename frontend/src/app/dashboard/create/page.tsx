@@ -115,7 +115,7 @@ export default function CreatePage() {
         </motion.div>
 
         {/* Story Queue */}
-        {queue.length > 0 && (
+        {queue.length > 0 && user && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}

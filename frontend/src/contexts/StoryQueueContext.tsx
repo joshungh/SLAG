@@ -125,6 +125,11 @@ function isStepProgressKey(key: string): key is keyof StepProgress {
   return key in stepProgress;
 }
 
+interface User {
+  user_id: string;
+  // Add other user properties as needed
+}
+
 export function StoryQueueProvider({
   children,
 }: {
@@ -133,7 +138,7 @@ export function StoryQueueProvider({
   const [queue, setQueue] = useState<StoryTask[]>([]);
   const [activePolls, setActivePolls] = useState<Record<string, boolean>>({});
   const router = useRouter();
-  const { user } = useAuth();
+  const { user } = useAuth() as { user: User | null };
 
   // Add request tracking
   const requestInProgress = useRef<boolean>(false);
@@ -312,8 +317,10 @@ export function StoryQueueProvider({
 
   // Load queue from localStorage and restore streaming for generating stories
   useEffect(() => {
-    const savedQueue = localStorage.getItem(QUEUE_STORAGE_KEY);
-    if (savedQueue) {
+    const savedQueue = localStorage.getItem(
+      user ? `${QUEUE_STORAGE_KEY}_${user.user_id}` : QUEUE_STORAGE_KEY
+    );
+    if (savedQueue && user) {
       try {
         const parsedQueue = JSON.parse(savedQueue);
         // Only restore non-completed items that are less than 5 minutes old
@@ -341,12 +348,15 @@ export function StoryQueueProvider({
       } catch (error) {
         handleError("queue", error);
       }
+    } else {
+      // Clear queue if no user is logged in
+      setQueue([]);
     }
-  }, [startStreaming]);
+  }, [startStreaming, user]);
 
   // Save queue to localStorage whenever it changes
   useEffect(() => {
-    if (queue.length > 0) {
+    if (queue.length > 0 && user) {
       // Add timestamp to completed items
       const queueWithTimestamps = queue.map((task) => {
         if (task.status === "completed" && !task.timestamp) {
@@ -355,13 +365,13 @@ export function StoryQueueProvider({
         return task;
       });
       localStorage.setItem(
-        QUEUE_STORAGE_KEY,
+        `${QUEUE_STORAGE_KEY}_${user.user_id}`,
         JSON.stringify(queueWithTimestamps)
       );
-    } else {
-      localStorage.removeItem(QUEUE_STORAGE_KEY);
+    } else if (user) {
+      localStorage.removeItem(`${QUEUE_STORAGE_KEY}_${user.user_id}`);
     }
-  }, [queue]);
+  }, [queue, user]);
 
   // Helper function to handle story completion
   const handleCompletion = async (taskId: string, data: any) => {
@@ -384,7 +394,7 @@ export function StoryQueueProvider({
         file_paths: storyData.file_paths,
       };
 
-      // Save to backend
+      // Save to backend DynamoDB
       const saveResponse = await fetch(`${BACKEND_URL}/api/stories`, {
         method: "POST",
         headers: {
@@ -576,45 +586,10 @@ export function StoryQueueProvider({
       // Add the task to the list first
       setQueue((prev) => [...prev, newTask]);
 
-      try {
-        // Initial POST to get request_id
-        const response = await fetch(`${STORY_ENGINE_URL}/generate`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${localStorage.getItem("auth_token")}`,
-          },
-          body: JSON.stringify({ prompt }),
-        });
-
-        if (!response.ok) {
-          throw new Error("Failed to start story generation");
-        }
-
-        const data = (await response.json()) as GenerateResponse;
-        if (!data.request_id) {
-          throw new Error("No request ID received from story engine");
-        }
-
-        // Update task with request ID
-        setQueue((prev) =>
-          prev.map((task) =>
-            task.id === newTask.id
-              ? {
-                  ...task,
-                  requestId: data.request_id,
-                }
-              : task
-          )
-        );
-
-        // Start streaming
-        startStreaming(newTask.id, data.request_id);
-      } catch (error) {
-        handleError(newTask.id, error);
-      }
+      // Process the story using processNextStory instead of duplicating the logic
+      await processNextStory(prompt, newTask.id);
     },
-    [queue, startStreaming]
+    [queue, processNextStory]
   );
 
   const removeFromQueue = useCallback((id: string) => {
