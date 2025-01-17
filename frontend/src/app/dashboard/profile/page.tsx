@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useWeb3 } from "@/contexts/Web3Context";
 import { motion } from "framer-motion";
 import {
@@ -19,6 +19,8 @@ import Image from "next/image";
 import { useAuth } from "@/contexts/AuthContext";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import DeleteStoryButton from "@/components/DeleteStoryButton";
+import { StoryProvider } from "@/contexts/StoryContext";
 
 interface DynamoDBString {
   S: string;
@@ -354,6 +356,10 @@ export default function ProfilePage() {
     }
   };
 
+  const handleDelete = useCallback((storyId: string) => {
+    setStories((prev) => prev.filter((story) => story.id !== storyId));
+  }, []);
+
   if (!profile) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center">
@@ -372,187 +378,198 @@ export default function ProfilePage() {
   }
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="max-w-6xl mx-auto"
-      >
-        {/* Profile Header - Suno-like layout */}
-        <div className="flex items-center space-x-8 mb-12">
-          {/* Profile Picture */}
-          <div className="relative">
-            <div className="w-[180px] h-[180px] rounded-full overflow-hidden">
-              {profile?.profile_picture ? (
-                <Image
-                  src={profile.profile_picture}
-                  alt="Profile"
-                  width={180}
-                  height={180}
-                  className="object-cover"
-                />
-              ) : (
-                <div className="w-full h-full bg-gradient-to-br from-green-400/20 to-green-600/20 flex items-center justify-center">
-                  <User className="w-16 h-16 text-green-400" />
-                </div>
-              )}
-            </div>
-          </div>
-
-          {/* Profile Info */}
-          <div className="flex-1">
-            <div className="flex items-start justify-between mb-4">
-              <div>
-                {isEditing ? (
-                  <div className="space-y-4">
-                    <input
-                      type="text"
-                      value={editableFields.username}
-                      onChange={(e) =>
-                        handleFieldChange("username", e.target.value)
-                      }
-                      className="block w-full px-3 py-2 bg-black/50 border border-gray-700 rounded-lg focus:border-green-500 focus:ring-1 focus:ring-green-500 text-white text-lg"
-                      placeholder="Username"
-                    />
-                    <div className="flex gap-3">
-                      <input
-                        type="text"
-                        value={editableFields.first_name}
-                        onChange={(e) =>
-                          handleFieldChange("first_name", e.target.value)
-                        }
-                        className="block w-full px-3 py-2 bg-black/50 border border-gray-700 rounded-lg focus:border-green-500 focus:ring-1 focus:ring-green-500 text-white"
-                        placeholder="First Name"
-                      />
-                      <input
-                        type="text"
-                        value={editableFields.last_name}
-                        onChange={(e) =>
-                          handleFieldChange("last_name", e.target.value)
-                        }
-                        className="block w-full px-3 py-2 bg-black/50 border border-gray-700 rounded-lg focus:border-green-500 focus:ring-1 focus:ring-green-500 text-white"
-                        placeholder="Last Name"
-                      />
-                    </div>
-                  </div>
+    <StoryProvider>
+      <div className="min-h-screen bg-black">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="max-w-6xl mx-auto"
+        >
+          {/* Profile Header - Suno-like layout */}
+          <div className="flex items-center space-x-8 mb-12">
+            {/* Profile Picture */}
+            <div className="relative">
+              <div className="w-[180px] h-[180px] rounded-full overflow-hidden">
+                {profile?.profile_picture ? (
+                  <Image
+                    src={profile.profile_picture}
+                    alt="Profile"
+                    width={180}
+                    height={180}
+                    className="object-cover"
+                  />
                 ) : (
-                  <>
-                    <h1 className="text-4xl font-bold mb-2">
-                      {profile?.username}
-                    </h1>
-                    {(profile?.first_name || profile?.last_name) && (
-                      <p className="text-gray-400 text-lg">
-                        {[profile.first_name, profile.last_name]
-                          .filter(Boolean)
-                          .join(" ")}
-                      </p>
-                    )}
-                  </>
-                )}
-                {profile?.email && (
-                  <div className="flex items-center space-x-2 text-gray-400 mt-2">
-                    <Mail className="w-4 h-4" />
-                    <span>{profile.email}</span>
+                  <div className="w-full h-full bg-gradient-to-br from-green-400/20 to-green-600/20 flex items-center justify-center">
+                    <User className="w-16 h-16 text-green-400" />
                   </div>
                 )}
               </div>
-              <div className="flex space-x-2">
-                {isEditing ? (
-                  <>
-                    <button
-                      onClick={handleSave}
-                      disabled={isLoading}
-                      className="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors disabled:opacity-50"
-                    >
-                      {isLoading ? "Saving..." : "Save"}
-                    </button>
+            </div>
+
+            {/* Profile Info */}
+            <div className="flex-1">
+              <div className="flex items-start justify-between mb-4">
+                <div>
+                  {isEditing ? (
+                    <div className="space-y-4">
+                      <input
+                        type="text"
+                        value={editableFields.username}
+                        onChange={(e) =>
+                          handleFieldChange("username", e.target.value)
+                        }
+                        className="block w-full px-3 py-2 bg-black/50 border border-gray-700 rounded-lg focus:border-green-500 focus:ring-1 focus:ring-green-500 text-white text-lg"
+                        placeholder="Username"
+                      />
+                      <div className="flex gap-3">
+                        <input
+                          type="text"
+                          value={editableFields.first_name}
+                          onChange={(e) =>
+                            handleFieldChange("first_name", e.target.value)
+                          }
+                          className="block w-full px-3 py-2 bg-black/50 border border-gray-700 rounded-lg focus:border-green-500 focus:ring-1 focus:ring-green-500 text-white"
+                          placeholder="First Name"
+                        />
+                        <input
+                          type="text"
+                          value={editableFields.last_name}
+                          onChange={(e) =>
+                            handleFieldChange("last_name", e.target.value)
+                          }
+                          className="block w-full px-3 py-2 bg-black/50 border border-gray-700 rounded-lg focus:border-green-500 focus:ring-1 focus:ring-green-500 text-white"
+                          placeholder="Last Name"
+                        />
+                      </div>
+                    </div>
+                  ) : (
+                    <>
+                      <h1 className="text-4xl font-bold mb-2">
+                        {profile?.username}
+                      </h1>
+                      {(profile?.first_name || profile?.last_name) && (
+                        <p className="text-gray-400 text-lg">
+                          {[profile.first_name, profile.last_name]
+                            .filter(Boolean)
+                            .join(" ")}
+                        </p>
+                      )}
+                    </>
+                  )}
+                  {profile?.email && (
+                    <div className="flex items-center space-x-2 text-gray-400 mt-2">
+                      <Mail className="w-4 h-4" />
+                      <span>{profile.email}</span>
+                    </div>
+                  )}
+                </div>
+                <div className="flex space-x-2">
+                  {isEditing ? (
+                    <>
+                      <button
+                        onClick={handleSave}
+                        disabled={isLoading}
+                        className="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors disabled:opacity-50"
+                      >
+                        {isLoading ? "Saving..." : "Save"}
+                      </button>
+                      <button
+                        onClick={handleEditToggle}
+                        className="p-2 hover:bg-white/10 rounded-lg transition-colors"
+                      >
+                        <X className="w-5 h-5" />
+                      </button>
+                    </>
+                  ) : (
                     <button
                       onClick={handleEditToggle}
                       className="p-2 hover:bg-white/10 rounded-lg transition-colors"
                     >
-                      <X className="w-5 h-5" />
+                      <Edit3 className="w-5 h-5" />
                     </button>
-                  </>
-                ) : (
-                  <button
-                    onClick={handleEditToggle}
-                    className="p-2 hover:bg-white/10 rounded-lg transition-colors"
-                  >
-                    <Edit3 className="w-5 h-5" />
+                  )}
+                </div>
+              </div>
+
+              {error && (
+                <div className="mt-4 p-3 bg-red-500/10 border border-red-500 rounded-lg text-red-500 text-sm">
+                  {error}
+                </div>
+              )}
+
+              {/* Stats */}
+              <div className="flex items-center space-x-8 text-gray-400">
+                <div className="flex items-center space-x-2">
+                  <BookOpen className="w-4 h-4" />
+                  <span>{stories.length} Stories</span>
+                </div>
+                <button
+                  onClick={handleShareProfile}
+                  className="flex items-center space-x-2 hover:text-white transition-colors"
+                >
+                  <Share2 className="w-4 h-4" />
+                  <span>Share Profile</span>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          {/* Navigation Tabs */}
+          <div className="border-b border-gray-800 mb-8">
+            <div className="flex space-x-8">
+              <div className="px-4 py-2 text-green-400 border-b-2 border-green-400">
+                Stories
+              </div>
+            </div>
+          </div>
+
+          {/* Stories Grid */}
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 mb-8">
+            {stories.map((story) => (
+              <div key={story.id} className="cursor-pointer relative group">
+                <div className="bg-black/30 backdrop-blur-lg rounded-lg overflow-hidden hover:bg-black/40 transition-colors">
+                  <div className="aspect-[4/3] bg-gradient-to-br from-green-400/10 to-green-600/10 flex items-center justify-center">
+                    <BookOpen className="w-8 h-8 text-green-400/50" />
+                  </div>
+                  <div className="p-3">
+                    <div className="flex items-center justify-between mb-1">
+                      <h3 className="font-medium text-white line-clamp-1 text-sm">
+                        {story.title}
+                      </h3>
+                      <DeleteStoryButton
+                        storyId={story.id}
+                        onDelete={() => handleDelete(story.id)}
+                      />
+                    </div>
+                    <div className="flex items-center justify-between text-xs text-gray-400">
+                      <span>{story.genre}</span>
+                      <span>{story.word_count} words</span>
+                    </div>
+                    <div className="mt-1 text-xs text-gray-500">
+                      {new Date(story.created_at).toLocaleDateString()}
+                    </div>
+                  </div>
+                </div>
+                <div
+                  className="absolute inset-0 flex items-center justify-center bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity"
+                  onClick={() => setSelectedStory(story)}
+                >
+                  <button className="px-4 py-2 bg-green-400 text-black rounded hover:bg-green-300">
+                    Read Story
                   </button>
-                )}
-              </div>
-            </div>
-
-            {error && (
-              <div className="mt-4 p-3 bg-red-500/10 border border-red-500 rounded-lg text-red-500 text-sm">
-                {error}
-              </div>
-            )}
-
-            {/* Stats */}
-            <div className="flex items-center space-x-8 text-gray-400">
-              <div className="flex items-center space-x-2">
-                <BookOpen className="w-4 h-4" />
-                <span>{stories.length} Stories</span>
-              </div>
-              <button
-                onClick={handleShareProfile}
-                className="flex items-center space-x-2 hover:text-white transition-colors"
-              >
-                <Share2 className="w-4 h-4" />
-                <span>Share Profile</span>
-              </button>
-            </div>
-          </div>
-        </div>
-
-        {/* Navigation Tabs */}
-        <div className="border-b border-gray-800 mb-8">
-          <div className="flex space-x-8">
-            <div className="px-4 py-2 text-green-400 border-b-2 border-green-400">
-              Stories
-            </div>
-          </div>
-        </div>
-
-        {/* Stories Grid */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 mb-8">
-          {stories.map((story) => (
-            <div
-              key={story.id}
-              onClick={() => setSelectedStory(story)}
-              className="cursor-pointer"
-            >
-              <div className="bg-black/30 backdrop-blur-lg rounded-lg overflow-hidden hover:bg-black/40 transition-colors">
-                <div className="aspect-[4/3] bg-gradient-to-br from-green-400/10 to-green-600/10 flex items-center justify-center">
-                  <BookOpen className="w-8 h-8 text-green-400/50" />
-                </div>
-                <div className="p-3">
-                  <h3 className="font-medium text-white mb-1 line-clamp-1 text-sm">
-                    {story.title}
-                  </h3>
-                  <div className="flex items-center justify-between text-xs text-gray-400">
-                    <span>{story.genre}</span>
-                    <span>{story.word_count} words</span>
-                  </div>
-                  <div className="mt-1 text-xs text-gray-500">
-                    {new Date(story.created_at).toLocaleDateString()}
-                  </div>
                 </div>
               </div>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
 
-        {/* Story Modal */}
-        {selectedStory && (
-          <StoryModal
-            story={selectedStory}
-            onClose={() => setSelectedStory(null)}
-          />
-        )}
-      </motion.div>
-    </div>
+          {selectedStory && (
+            <StoryModal
+              story={selectedStory}
+              onClose={() => setSelectedStory(null)}
+            />
+          )}
+        </motion.div>
+      </div>
+    </StoryProvider>
   );
 }

@@ -130,8 +130,15 @@ export default function DashboardLayout({
         throw new Error(data.detail || "Failed to sign in");
       }
 
+      // Store the token in localStorage
+      localStorage.setItem("auth_token", data.token);
+
+      // Update auth context
       signIn(data.token, data.user);
       setIsSignInModalOpen(false);
+
+      // Reload the page to ensure all components pick up the new auth state
+      window.location.reload();
 
       return data;
     } catch (error) {

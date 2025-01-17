@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import {
   Search,
   BookOpen,
@@ -11,11 +11,15 @@ import {
   LogIn,
   Download,
   X,
+  Globe,
+  Clock,
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useWeb3 } from "@/contexts/Web3Context";
 import { motion } from "framer-motion";
 import Link from "next/link";
+import { DeleteStoryButton } from "@/components/DeleteStoryButton";
+import { StoryProvider } from "@/contexts/StoryContext";
 
 interface Story {
   id: string;
@@ -111,15 +115,23 @@ export default function LibraryPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedStory, setSelectedStory] = useState<Story | null>(null);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [sortByRecent, setSortByRecent] = useState(false);
   const { user } = useAuth();
   const { connected } = useWeb3();
-
-  const isAuthenticated = connected || !!user;
+  const [hasFetched, setHasFetched] = useState(false);
 
   useEffect(() => {
-    if (!isAuthenticated) return;
+    let mounted = true;
+
+    if (!user && !connected) {
+      setLoading(false);
+      return;
+    }
 
     const fetchStories = async () => {
+      if (hasFetched) return;
+
       try {
         const response = await fetch(
           `${process.env.NEXT_PUBLIC_API_URL}/api/stories`,
@@ -135,18 +147,75 @@ export default function LibraryPage() {
         }
 
         const data = await response.json();
-        setStories(data.stories || []);
+        if (mounted) {
+          setStories(data.stories || []);
+          setHasFetched(true);
+        }
       } catch (err) {
-        setError(err instanceof Error ? err.message : "An error occurred");
+        if (mounted) {
+          setError(err instanceof Error ? err.message : "An error occurred");
+        }
       } finally {
-        setLoading(false);
+        if (mounted) {
+          setLoading(false);
+        }
       }
     };
 
-    fetchStories();
-  }, [isAuthenticated]);
+    void fetchStories();
 
-  if (!isAuthenticated) {
+    return () => {
+      mounted = false;
+    };
+  }, [user, connected]);
+
+  const handleDelete = useCallback(async (storyId: string) => {
+    try {
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/api/stories/${storyId}`,
+        {
+          method: "DELETE",
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("auth_token")}`,
+          },
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error("Failed to delete story");
+      }
+
+      setStories((prev) => prev.filter((story) => story.id !== storyId));
+    } catch (error) {
+      throw new Error("Failed to delete story. Please try again.");
+    }
+  }, []);
+
+  // Filter and sort stories
+  const filteredAndSortedStories = useMemo(() => {
+    let result = [...stories];
+
+    // Apply search filter
+    if (searchQuery) {
+      result = result.filter(
+        (story) =>
+          story.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          story.genre.toLowerCase().includes(searchQuery.toLowerCase())
+      );
+    }
+
+    // Apply recent sort
+    if (sortByRecent) {
+      result.sort(
+        (a, b) =>
+          new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+      );
+    }
+
+    return result;
+  }, [stories, searchQuery, sortByRecent]);
+
+  if (!user && !connected) {
     return (
       <motion.div
         initial={{ opacity: 0, y: 20 }}
@@ -188,56 +257,98 @@ export default function LibraryPage() {
   }
 
   return (
-    <div className="min-h-screen bg-black">
-      <div className="max-w-7xl mx-auto px-6 py-8">
-        <div className="flex flex-col space-y-6">
-          <h1 className="text-3xl font-bold text-white">My Stories</h1>
+    <StoryProvider>
+      <div className="min-h-screen bg-black">
+        <div className="max-w-7xl mx-auto px-6 py-8">
+          <div className="flex flex-col space-y-6">
+            {/* Header */}
+            <div className="flex items-center justify-between">
+              <h1 className="text-3xl font-bold text-white">Library</h1>
+            </div>
 
-          {/* Stories List */}
-          <div className="space-y-4">
-            {stories.length === 0 ? (
-              <div className="text-gray-400 text-center py-8">
-                No stories found. Create your first story to get started!
+            {/* Action Bar */}
+            <div className="flex items-center space-x-4">
+              <div className="flex-1 max-w-md">
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
+                  <input
+                    type="text"
+                    placeholder="Search by story name or genre"
+                    value={searchQuery}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                      setSearchQuery(e.target.value)
+                    }
+                    className="pl-10 bg-gray-900/50 border border-gray-800 text-white placeholder-gray-400 w-full rounded-md py-2"
+                  />
+                </div>
               </div>
-            ) : (
-              stories.map((story) => (
-                <div
-                  key={story.id}
-                  className="flex items-center justify-between p-6 bg-gray-900/50 rounded-lg hover:bg-gray-900/70"
-                >
-                  <div>
-                    <h3 className="text-white text-xl font-medium mb-2">
-                      {story.title}
-                    </h3>
-                    <div className="text-gray-400 space-x-4">
-                      <span>{story.genre}</span>
-                      <span>•</span>
-                      <span>{story.word_count} words</span>
-                      <span>•</span>
-                      <span>
-                        {new Date(story.created_at).toLocaleDateString()}
-                      </span>
+              <button
+                onClick={() => setSortByRecent(!sortByRecent)}
+                className={`px-4 py-2 border border-gray-800 rounded-md flex items-center space-x-2 transition-colors ${
+                  sortByRecent
+                    ? "text-green-400 border-green-400 bg-green-400/10"
+                    : "text-gray-400 hover:text-white hover:bg-gray-800"
+                }`}
+              >
+                <Clock className="w-4 h-4" />
+                <span>Recent</span>
+              </button>
+            </div>
+
+            {/* Stories List */}
+            <div className="space-y-4">
+              {filteredAndSortedStories.length === 0 ? (
+                <div className="text-gray-400 text-center py-8">
+                  {searchQuery
+                    ? "No stories found matching your search."
+                    : "No stories found. Create your first story to get started!"}
+                </div>
+              ) : (
+                filteredAndSortedStories.map((story) => (
+                  <div
+                    key={story.id}
+                    className="flex items-center justify-between p-6 bg-gray-900/50 rounded-lg hover:bg-gray-900/70 transition-colors"
+                  >
+                    <div>
+                      <h3 className="text-white text-xl font-medium mb-2">
+                        {story.title}
+                      </h3>
+                      <div className="text-gray-400 space-x-4">
+                        <span>{story.genre}</span>
+                        <span>•</span>
+                        <span>{story.word_count} words</span>
+                        <span>•</span>
+                        <span>
+                          {new Date(story.created_at).toLocaleDateString()}
+                        </span>
+                      </div>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <button
+                        onClick={() => setSelectedStory(story)}
+                        className="px-4 py-2 bg-green-400 text-black rounded hover:bg-green-300 transition-colors"
+                      >
+                        Read Story
+                      </button>
+                      <DeleteStoryButton
+                        storyId={story.id}
+                        onDelete={() => handleDelete(story.id)}
+                      />
                     </div>
                   </div>
-                  <button
-                    onClick={() => setSelectedStory(story)}
-                    className="px-4 py-2 bg-green-400 text-black rounded hover:bg-green-300"
-                  >
-                    Read Story
-                  </button>
-                </div>
-              ))
-            )}
+                ))
+              )}
+            </div>
           </div>
         </div>
-      </div>
 
-      {selectedStory && (
-        <StoryModal
-          story={selectedStory}
-          onClose={() => setSelectedStory(null)}
-        />
-      )}
-    </div>
+        {selectedStory && (
+          <StoryModal
+            story={selectedStory}
+            onClose={() => setSelectedStory(null)}
+          />
+        )}
+      </div>
+    </StoryProvider>
   );
 }

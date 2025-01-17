@@ -5,23 +5,28 @@ import { motion } from "framer-motion";
 import { Wand2, Bell } from "lucide-react";
 import { useWeb3 } from "@/contexts/Web3Context";
 import { useAuth } from "@/contexts/AuthContext";
-import GenerationProgress from "@/components/GenerationProgress";
 import { useRouter } from "next/navigation";
 import { useStoryQueue } from "@/contexts/StoryQueueContext";
 import { GENERATION_STEPS } from "@/constants/steps";
 import StoryPrompt from "@/components/StoryPrompt";
-import StoryQueueItem from "@/components/StoryQueueItem";
+import { StoryQueueItem } from "@/components/StoryQueueItem";
 import ErrorMessage from "@/components/ErrorMessage";
+import clsx from "clsx";
 
 export default function CreatePage() {
   const [prompt, setPrompt] = useState("");
   const [error, setError] = useState<string | null>(null);
   const { connected } = useWeb3();
   const { user } = useAuth();
-  const { queue, addToQueue, clearQueue } = useStoryQueue();
+  const { queue, addToQueue, clearQueue, retryTask, stopTask } =
+    useStoryQueue();
   const router = useRouter();
 
   const isAuthenticated = connected || !!user;
+  const generatingCount = queue.filter(
+    (task) => task.status === "generating"
+  ).length;
+  const isGenerationLimitReached = generatingCount >= 2;
 
   // Add logging to debug auth state
   useEffect(() => {
@@ -43,6 +48,13 @@ export default function CreatePage() {
 
     if (!prompt.trim()) {
       setError("Please enter a story idea");
+      return;
+    }
+
+    if (isGenerationLimitReached) {
+      setError(
+        "You can only generate 2 stories at a time. Please wait for current generations to complete."
+      );
       return;
     }
 
@@ -72,6 +84,11 @@ export default function CreatePage() {
           </h1>
           <p className="text-gray-400 text-sm sm:text-base">
             Enter your story idea and let our AI bring it to life
+            {isGenerationLimitReached && (
+              <span className="block text-yellow-500 mt-1">
+                (Currently generating 2 stories - maximum limit reached)
+              </span>
+            )}
           </p>
         </motion.div>
 
@@ -97,20 +114,6 @@ export default function CreatePage() {
           </motion.button>
         </motion.div>
 
-        {/* Active Generation Progress */}
-        {generatingStory && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-          >
-            <GenerationProgress
-              steps={GENERATION_STEPS}
-              currentStepIndex={generatingStory.currentStep}
-              overallProgress={generatingStory.progress}
-            />
-          </motion.div>
-        )}
-
         {/* Story Queue */}
         {queue.length > 0 && (
           <motion.div
@@ -135,9 +138,8 @@ export default function CreatePage() {
               {queue.map((task) => (
                 <StoryQueueItem
                   key={task.id}
-                  id={task.id}
-                  prompt={task.prompt}
-                  status={task.status}
+                  task={task}
+                  onStop={task.status === "generating" ? stopTask : undefined}
                 />
               ))}
             </div>

@@ -1,16 +1,18 @@
-import { Metadata } from "next";
+"use client";
+
 import DashboardLayout from "@/components/DashboardLayout";
 import { Web3Provider } from "@/components/Web3Provider";
-
-export const metadata: Metadata = {
-  title: "Dashboard | SLAG",
-  description: "SLAG Dashboard",
-};
+import { AuthProvider } from "@/contexts/AuthContext";
+import { StoryQueueProvider } from "@/contexts/StoryQueueContext";
 
 export default function Layout({ children }: { children: React.ReactNode }) {
   return (
     <Web3Provider>
-      <DashboardLayout>{children}</DashboardLayout>
+      <AuthProvider>
+        <StoryQueueProvider>
+          <DashboardLayout>{children}</DashboardLayout>
+        </StoryQueueProvider>
+      </AuthProvider>
     </Web3Provider>
   );
 }
