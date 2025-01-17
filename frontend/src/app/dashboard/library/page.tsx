@@ -9,6 +9,8 @@ import {
   Users,
   History,
   LogIn,
+  Download,
+  X,
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useWeb3 } from "@/contexts/Web3Context";
@@ -43,67 +45,59 @@ interface StoryModalProps {
 }
 
 function StoryModal({ story, onClose }: StoryModalProps) {
+  const handleBackdropClick = (e: React.MouseEvent) => {
+    if (e.target === e.currentTarget) {
+      onClose();
+    }
+  };
+
   const downloadStory = () => {
-    const content = `# ${story.title}\n\n${story.content}`;
-    const blob = new Blob([content], { type: "text/plain" });
-    const url = window.URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `${story.title.toLowerCase().replace(/\s+/g, "-")}.txt`;
-    document.body.appendChild(a);
-    a.click();
-    window.URL.revokeObjectURL(url);
-    document.body.removeChild(a);
+    const element = document.createElement("a");
+    const file = new Blob([story.content], { type: "text/plain" });
+    element.href = URL.createObjectURL(file);
+    element.download = `${story.title}.txt`;
+    document.body.appendChild(element);
+    element.click();
+    document.body.removeChild(element);
   };
 
   return (
-    <div className="fixed inset-0 bg-black/80 flex items-center justify-center p-4 z-50">
-      <div className="bg-gray-900 rounded-lg w-full max-w-4xl max-h-[90vh] overflow-y-auto">
-        <div className="p-6 space-y-6">
-          {/* Header */}
-          <div className="flex justify-between items-center">
-            <h2 className="text-2xl font-bold text-white">{story.title}</h2>
-            <div className="space-x-2">
-              <button
-                onClick={downloadStory}
-                className="px-4 py-2 bg-green-400 text-black rounded hover:bg-green-300"
-              >
-                Download
-              </button>
-              <button
-                onClick={onClose}
-                className="px-4 py-2 bg-gray-700 text-white rounded hover:bg-gray-600"
-              >
-                Close
-              </button>
+    <div
+      className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 overflow-y-auto"
+      onClick={handleBackdropClick}
+    >
+      <div className="min-h-screen px-4 py-8" onClick={handleBackdropClick}>
+        <div
+          className="bg-gray-900 rounded-lg w-full max-w-4xl mx-auto"
+          onClick={(e) => e.stopPropagation()}
+        >
+          <div className="p-6">
+            <div className="flex items-start justify-between mb-4">
+              <div>
+                <h2 className="text-2xl font-bold mb-1">{story.title}</h2>
+                <div className="flex items-center space-x-4 text-sm text-gray-400">
+                  <span>{story.genre}</span>
+                  <span>{story.word_count} words</span>
+                  <span>{new Date(story.created_at).toLocaleDateString()}</span>
+                </div>
+              </div>
+              <div className="flex space-x-2">
+                <button
+                  onClick={downloadStory}
+                  className="p-2 hover:bg-white/10 rounded-lg transition-colors"
+                >
+                  <Download className="w-5 h-5" />
+                </button>
+                <button
+                  onClick={onClose}
+                  className="p-2 hover:bg-white/10 rounded-lg transition-colors"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
             </div>
-          </div>
-
-          {/* Story Content */}
-          <div className="space-y-4">
-            <h3 className="text-xl text-green-400">Story</h3>
-            <div className="bg-gray-800/50 p-4 rounded whitespace-pre-wrap text-gray-300">
-              {story.content || ""}
-            </div>
-          </div>
-
-          {/* Story Bible */}
-          <div className="space-y-4">
-            <h3 className="text-xl text-green-400">Story Bible</h3>
-            <div className="bg-gray-800/50 p-4 rounded">
-              <pre className="text-gray-300 overflow-x-auto">
-                {JSON.stringify(story.bible, null, 2)}
-              </pre>
-            </div>
-          </div>
-
-          {/* Story Framework */}
-          <div className="space-y-4">
-            <h3 className="text-xl text-green-400">Story Framework</h3>
-            <div className="bg-gray-800/50 p-4 rounded">
-              <pre className="text-gray-300 overflow-x-auto">
-                {JSON.stringify(story.framework, null, 2)}
-              </pre>
+            <div className="prose prose-invert max-w-none">
+              <div className="whitespace-pre-wrap">{story.content}</div>
             </div>
           </div>
         </div>
