@@ -68,10 +68,64 @@ export default function DashboardLayout({
         )
       ) {
         signOut();
-        await connect();
+        try {
+          await connect();
+          // Wait for the connection and authentication to complete
+          const provider = window?.phantom?.solana;
+          if (provider?.isPhantom && provider.publicKey) {
+            const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL;
+            if (!BACKEND_URL) return;
+
+            // Try to login with the wallet
+            const response = await fetch(`${BACKEND_URL}/api/auth/login`, {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({
+                web3_wallet: provider.publicKey.toString(),
+                login_method: "web3",
+              }),
+            });
+
+            if (response.ok) {
+              const data = await response.json();
+              signIn(data.token, data.user);
+            }
+          }
+        } catch (error) {
+          console.error("Error connecting wallet:", error);
+        }
       }
     } else {
-      await connect();
+      try {
+        await connect();
+        // Same authentication logic as above
+        const provider = window?.phantom?.solana;
+        if (provider?.isPhantom && provider.publicKey) {
+          const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL;
+          if (!BACKEND_URL) return;
+
+          // Try to login with the wallet
+          const response = await fetch(`${BACKEND_URL}/api/auth/login`, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              web3_wallet: provider.publicKey.toString(),
+              login_method: "web3",
+            }),
+          });
+
+          if (response.ok) {
+            const data = await response.json();
+            signIn(data.token, data.user);
+          }
+        }
+      } catch (error) {
+        console.error("Error connecting wallet:", error);
+      }
     }
   };
 
