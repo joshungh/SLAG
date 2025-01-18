@@ -78,6 +78,8 @@ interface StoryTask {
   wordCount?: number;
   /** Request ID for the story generation */
   requestId?: string;
+  /** Title of the completed story */
+  title?: string;
 }
 
 /**
@@ -143,38 +145,109 @@ export function StoryQueueProvider({
   // Add request tracking
   const requestInProgress = useRef<boolean>(false);
   const isProcessingQueue = useRef<boolean>(false);
+  const completedTasks = useRef<Set<string>>(new Set());
 
-  // Helper function to get final story data
-  const getFinalStoryData = useCallback(
-    async (taskId: string, requestId: string) => {
+  // Helper function to handle errors - memoize with no dependencies
+  const handleError = useCallback((taskId: string, error: unknown) => {
+    setQueue((prev) =>
+      prev.map((task) =>
+        task.id === taskId
+          ? {
+              ...task,
+              status: "error",
+              error:
+                error instanceof Error ? error.message : "An error occurred",
+            }
+          : task
+      )
+    );
+
+    setActivePolls((prev) => {
+      const newPolls = { ...prev };
+      delete newPolls[taskId];
+      return newPolls;
+    });
+  }, []); // No dependencies needed since it only uses setState functions
+
+  // Helper function to handle story completion - depend only on handleError
+  const handleCompletion = useCallback(
+    async (taskId: string, data: any) => {
       try {
-        const response = await fetch(
-          `${STORY_ENGINE_URL}/status/${requestId}`,
-          {
-            headers: {
-              Authorization: `Bearer ${localStorage.getItem("auth_token")}`,
-            },
-          }
+        // Skip if already completed
+        if (completedTasks.current.has(taskId)) {
+          return;
+        }
+
+        // Parse the result field which is a stringified JSON
+        const storyData = JSON.parse(data.result);
+
+        // Extract the needed fields from the parsed story data
+        const storyToSave = {
+          title: storyData.title,
+          genre: storyData.genre,
+          content: storyData.content,
+          word_count: storyData.word_count,
+          prompt: data.prompt,
+          created_at: data.created_at,
+          completed_at: data.completed_at,
+          updated_at: data.updated_at,
+          framework_id: storyData.framework_id,
+          bible_id: storyData.bible_id,
+          file_paths: storyData.file_paths,
+        };
+
+        // Save to backend DynamoDB
+        const saveResponse = await fetch(`${BACKEND_URL}/api/stories`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${localStorage.getItem("auth_token")}`,
+          },
+          body: JSON.stringify(storyToSave),
+        });
+
+        if (!saveResponse.ok) {
+          throw new Error("Failed to save completed story");
+        }
+
+        const savedStory = await saveResponse.json();
+
+        completedTasks.current.add(taskId);
+
+        // Update queue with completed story info and title
+        setQueue((prev) =>
+          prev.map((task) =>
+            task.id === taskId
+              ? {
+                  ...task,
+                  status: "completed",
+                  progress: 100,
+                  currentStep: "Story completed!",
+                  storyId: savedStory.id,
+                  timestamp: Date.now(),
+                  wordCount: storyData.word_count,
+                  title: storyData.title,
+                }
+              : task
+          )
         );
 
-        if (!response.ok) {
-          throw new Error(`Failed to get story status (${response.status})`);
-        }
-
-        const data = await response.json();
-        if (data.status === "completed") {
-          handleCompletion(taskId, data);
-        }
+        // Clean up stream
+        setActivePolls((prev) => {
+          const newPolls = { ...prev };
+          delete newPolls[taskId];
+          return newPolls;
+        });
       } catch (error) {
         handleError(taskId, error);
       }
     },
-    []
+    [handleError] // Only depend on handleError
   );
 
-  // Process the stream data
+  // Process the stream data - depend only on handleCompletion and handleError
   const processStreamData = useCallback(
-    (text: string, taskId: string) => {
+    (text: string, taskId: string, requestId: string) => {
       const line = text.trim();
 
       // Handle ping messages
@@ -204,25 +277,40 @@ export function StoryQueueProvider({
           // Try to parse as JSON first
           const jsonData = JSON.parse(message);
           if (jsonData.complete) {
-            // Only update UI and trigger status check
-            setQueue((prev) => {
-              const task = prev.find((t) => t.id === taskId);
-              if (task?.requestId) {
-                // Let getFinalStoryData handle the completion and saving
-                void getFinalStoryData(taskId, task.requestId);
-              }
-              return prev.map((task) =>
+            // Skip if already completed
+            if (completedTasks.current.has(taskId)) {
+              return;
+            }
+
+            // For completion message, get the final data from the status endpoint
+            fetch(`${STORY_ENGINE_URL}/status/${requestId}`, {
+              headers: {
+                Authorization: `Bearer ${localStorage.getItem("auth_token")}`,
+              },
+            })
+              .then((response) => response.json())
+              .then((data) => {
+                if (data.status === "completed") {
+                  void handleCompletion(taskId, data);
+                }
+              })
+              .catch((error) => handleError(taskId, error));
+
+            // Update UI
+            setQueue((prev) =>
+              prev.map((task) =>
                 task.id === taskId
                   ? {
                       ...task,
                       currentStep: jsonData.message,
-                      progress: 95, // Keep at 95% until final save completes
+                      progress: 95,
                     }
                   : task
-              );
-            });
+              )
+            );
             return;
           }
+
           // Update with the message from JSON if available
           if (jsonData.message) {
             setQueue((prev) =>
@@ -255,75 +343,82 @@ export function StoryQueueProvider({
         }
       }
     },
-    [getFinalStoryData]
+    [handleCompletion, handleError] // Only depend on stable callbacks
   );
 
-  // Helper function to start streaming
-  const startStreaming = useCallback((taskId: string, requestId: string) => {
-    const startStream = async () => {
-      try {
-        const response = await fetch(
-          `${STORY_ENGINE_URL}/stream/${requestId}`,
-          {
-            headers: {
-              Authorization: `Bearer ${localStorage.getItem("auth_token")}`,
-            },
-          }
-        );
+  // Helper function to start streaming - depend only on processStreamData and handleError
+  const startStreaming = useCallback(
+    (taskId: string, requestId: string) => {
+      const startStream = async () => {
+        try {
+          const response = await fetch(
+            `${STORY_ENGINE_URL}/stream/${requestId}`,
+            {
+              headers: {
+                Authorization: `Bearer ${localStorage.getItem("auth_token")}`,
+              },
+            }
+          );
 
-        if (!response.ok) {
-          throw new Error(`Failed to connect to stream (${response.status})`);
-        }
-
-        const reader = response.body?.getReader();
-        if (!reader) {
-          throw new Error("Stream reader not available");
-        }
-
-        // Read the stream
-        const decoder = new TextDecoder();
-        let buffer = "";
-
-        while (true) {
-          const { done, value } = await reader.read();
-
-          if (done) {
-            break;
+          if (!response.ok) {
+            throw new Error(`Failed to connect to stream (${response.status})`);
           }
 
-          // Decode the chunk and add to buffer
-          const chunk = decoder.decode(value, { stream: true });
-          buffer += chunk;
+          const reader = response.body?.getReader();
+          if (!reader) {
+            throw new Error("Stream reader not available");
+          }
 
-          // Process complete lines
-          const lines = buffer.split("\n");
-          buffer = lines.pop() || ""; // Keep the incomplete line in the buffer
+          // Read the stream
+          const decoder = new TextDecoder();
+          let buffer = "";
 
-          // Process each complete line
-          for (const line of lines) {
-            if (line.trim()) {
-              processStreamData(line, taskId);
+          while (true) {
+            const { done, value } = await reader.read();
+
+            if (done) {
+              break;
+            }
+
+            // Decode the chunk and add to buffer
+            const chunk = decoder.decode(value, { stream: true });
+            buffer += chunk;
+
+            // Process complete lines
+            const lines = buffer.split("\n");
+            buffer = lines.pop() || ""; // Keep the incomplete line in the buffer
+
+            // Process each complete line
+            for (const line of lines) {
+              if (line.trim()) {
+                processStreamData(line, taskId, requestId);
+              }
             }
           }
+        } catch (error) {
+          handleError(taskId, error);
         }
-      } catch (error) {
-        handleError(taskId, error);
-      }
-    };
+      };
 
-    // Start the stream
-    void startStream();
-  }, []);
+      // Start the stream
+      void startStream();
+    },
+    [processStreamData, handleError] // Only depend on stable callbacks
+  );
 
   // Load queue from localStorage and restore streaming for generating stories
   useEffect(() => {
-    const savedQueue = localStorage.getItem(
-      user ? `${QUEUE_STORAGE_KEY}_${user.user_id}` : QUEUE_STORAGE_KEY
-    );
-    if (savedQueue && user) {
+    if (!user) {
+      setQueue([]);
+      return;
+    }
+
+    const key = `${QUEUE_STORAGE_KEY}_${user.user_id}`;
+    const savedQueue = localStorage.getItem(key);
+
+    if (savedQueue) {
       try {
         const parsedQueue = JSON.parse(savedQueue);
-        // Only restore non-completed items that are less than 5 minutes old
         const now = Date.now();
         const filteredQueue = parsedQueue.filter(
           (task: StoryTask & { timestamp?: number }) => {
@@ -336,10 +431,15 @@ export function StoryQueueProvider({
           }
         );
 
-        // Restore the queue first
-        setQueue(filteredQueue);
+        // Only update if queue is different
+        setQueue((prevQueue) => {
+          if (JSON.stringify(prevQueue) === JSON.stringify(filteredQueue)) {
+            return prevQueue;
+          }
+          return filteredQueue;
+        });
 
-        // Then reconnect to streams for any generating stories
+        // Reconnect to streams for any generating stories
         filteredQueue.forEach((task: StoryTask) => {
           if (task.status === "generating" && task.requestId) {
             startStreaming(task.id, task.requestId);
@@ -349,110 +449,47 @@ export function StoryQueueProvider({
         handleError("queue", error);
       }
     } else {
-      // Clear queue if no user is logged in
       setQueue([]);
     }
-  }, [startStreaming, user]);
+  }, [user?.user_id, startStreaming, handleError]); // Only depend on user ID, not the entire user object
 
   // Save queue to localStorage whenever it changes
   useEffect(() => {
-    if (queue.length > 0 && user) {
-      // Add timestamp to completed items
-      const queueWithTimestamps = queue.map((task) => {
-        if (task.status === "completed" && !task.timestamp) {
-          return { ...task, timestamp: Date.now() };
-        }
-        return task;
-      });
-      localStorage.setItem(
-        `${QUEUE_STORAGE_KEY}_${user.user_id}`,
-        JSON.stringify(queueWithTimestamps)
-      );
-    } else if (user) {
-      localStorage.removeItem(`${QUEUE_STORAGE_KEY}_${user.user_id}`);
-    }
-  }, [queue, user]);
-
-  // Helper function to handle story completion
-  const handleCompletion = async (taskId: string, data: any) => {
-    try {
-      // Parse the result field which is a stringified JSON
-      const storyData = JSON.parse(data.result);
-
-      // Extract the needed fields from the parsed story data
-      const storyToSave = {
-        title: storyData.title,
-        genre: storyData.genre,
-        content: storyData.content,
-        word_count: storyData.word_count,
-        prompt: data.prompt,
-        created_at: data.created_at,
-        completed_at: data.completed_at,
-        updated_at: data.updated_at,
-        framework_id: storyData.framework_id,
-        bible_id: storyData.bible_id,
-        file_paths: storyData.file_paths,
-      };
-
-      // Save to backend DynamoDB
-      const saveResponse = await fetch(`${BACKEND_URL}/api/stories`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${localStorage.getItem("auth_token")}`,
-        },
-        body: JSON.stringify(storyToSave),
-      });
-
-      if (!saveResponse.ok) {
-        throw new Error("Failed to save completed story");
+    const saveQueue = () => {
+      if (!user?.user_id) {
+        return;
       }
 
-      const savedStory = await saveResponse.json();
+      const key = `${QUEUE_STORAGE_KEY}_${user.user_id}`;
+      if (queue.length > 0) {
+        const queueWithTimestamps = queue.map((task) => {
+          if (task.status === "completed" && !task.timestamp) {
+            return { ...task, timestamp: Date.now() };
+          }
+          return task;
+        });
 
-      // Update queue with completed story info
-      setQueue((prev) =>
-        prev.map((task) =>
-          task.id === taskId
-            ? {
-                ...task,
-                status: "completed",
-                progress: 100,
-                currentStep: "Story completed!",
-                storyId: savedStory.id,
-                timestamp: Date.now(),
-                wordCount: storyData.word_count,
-              }
-            : task
-        )
-      );
+        // Only save if the queue has actually changed
+        const currentSaved = localStorage.getItem(key);
+        const newValue = JSON.stringify(queueWithTimestamps);
+        if (currentSaved !== newValue) {
+          localStorage.setItem(key, newValue);
+        }
+      } else {
+        localStorage.removeItem(key);
+      }
+    };
 
-      // Clean up stream
-      setActivePolls((prev) => {
-        const newPolls = { ...prev };
-        delete newPolls[taskId];
-        return newPolls;
-      });
-    } catch (error) {
-      handleError(taskId, error);
-    }
-  };
+    // Debounce the save operation
+    const timeoutId = setTimeout(saveQueue, 100);
+    return () => clearTimeout(timeoutId);
+  }, [queue, user?.user_id]); // Only depend on queue and user ID
 
   // Process the next story in the queue
   const processNextStory = useCallback(
     async (prompt: string, taskId: string) => {
       // Check if a request is already in progress
       if (requestInProgress.current) {
-        return;
-      }
-
-      // Check current generating stories
-      const generatingCount = queue.filter(
-        (task) => task.status === "generating"
-      ).length;
-
-      // Don't process if we're at the limit
-      if (generatingCount >= MAX_CONCURRENT_GENERATIONS) {
         return;
       }
 
@@ -513,67 +550,11 @@ export function StoryQueueProvider({
         handleError(taskId, error);
       }
     },
-    [queue, startStreaming]
+    [startStreaming, handleError] // Only depend on stable callbacks
   );
-
-  // Process queue when it changes
-  useEffect(() => {
-    const processQueue = async () => {
-      // Skip if already processing or if a request is in progress
-      if (isProcessingQueue.current || requestInProgress.current) {
-        return;
-      }
-
-      const generatingCount = queue.filter(
-        (task) => task.status === "generating"
-      ).length;
-
-      // Only start new generations if we're under the limit
-      if (generatingCount < MAX_CONCURRENT_GENERATIONS) {
-        isProcessingQueue.current = true;
-        // No need for queue processing since we start generation immediately in addToQueue
-        isProcessingQueue.current = false;
-      }
-    };
-
-    void processQueue();
-  }, [queue, processNextStory]);
-
-  // Helper function to handle errors
-  const handleError = (taskId: string, error: unknown) => {
-    setQueue((prev) =>
-      prev.map((task) =>
-        task.id === taskId
-          ? {
-              ...task,
-              status: "error",
-              error:
-                error instanceof Error ? error.message : "An error occurred",
-            }
-          : task
-      )
-    );
-
-    setActivePolls((prev) => {
-      const newPolls = { ...prev };
-      delete newPolls[taskId];
-      return newPolls;
-    });
-  };
 
   const addToQueue = useCallback(
     async (prompt: string) => {
-      // Check if we're already at the limit
-      const generatingCount = queue.filter(
-        (task) => task.status === "generating"
-      ).length;
-
-      if (generatingCount >= MAX_CONCURRENT_GENERATIONS) {
-        throw new Error(
-          "Maximum number of concurrent generations reached. Please wait for current stories to complete."
-        );
-      }
-
       // Create new task with default message
       const newTask: StoryTask = {
         id: uuidv4(),
@@ -584,21 +565,38 @@ export function StoryQueueProvider({
       };
 
       // Add the task to the list first
-      setQueue((prev) => [...prev, newTask]);
+      setQueue((prev) => {
+        // Check if we're already at the limit
+        const generatingCount = prev.filter(
+          (task) => task.status === "generating"
+        ).length;
 
-      // Process the story using processNextStory instead of duplicating the logic
+        if (generatingCount >= MAX_CONCURRENT_GENERATIONS) {
+          throw new Error(
+            "Maximum number of concurrent generations reached. Please wait for current stories to complete."
+          );
+        }
+
+        return [...prev, newTask];
+      });
+
+      // Process the story using processNextStory
       await processNextStory(prompt, newTask.id);
     },
-    [queue, processNextStory]
+    [processNextStory] // Only depend on the stable processNextStory callback
   );
 
   const removeFromQueue = useCallback((id: string) => {
     setQueue((prev) => prev.filter((task) => task.id !== id));
+    // Remove from completed tasks when removing from queue
+    completedTasks.current.delete(id);
   }, []);
 
   const clearQueue = useCallback(() => {
     setQueue([]);
     localStorage.removeItem(QUEUE_STORAGE_KEY);
+    // Clear completed tasks when clearing queue
+    completedTasks.current.clear();
   }, []);
 
   const retryTask = useCallback(

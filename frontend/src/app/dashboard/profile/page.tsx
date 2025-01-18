@@ -345,6 +345,7 @@ export default function ProfilePage() {
   useEffect(() => {
     if (!authUser) return;
 
+    let mounted = true;
     const fetchUserData = async () => {
       try {
         const token = localStorage.getItem("auth_token");
@@ -353,16 +354,19 @@ export default function ProfilePage() {
         const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL;
         if (!BACKEND_URL) return;
 
-        // Fetch stories
-        const storiesResponse = await fetch(`${BACKEND_URL}/api/stories`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
+        // Only fetch stories if we don't have any yet
+        if (stories.length === 0) {
+          // Fetch stories
+          const storiesResponse = await fetch(`${BACKEND_URL}/api/stories`, {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          });
 
-        if (storiesResponse.ok) {
-          const data = await storiesResponse.json();
-          setStories(data.stories || []);
+          if (storiesResponse.ok && mounted) {
+            const data = await storiesResponse.json();
+            setStories(data.stories || []);
+          }
         }
 
         // Get recent activities from story queue
@@ -375,15 +379,21 @@ export default function ProfilePage() {
             prompt: item.prompt,
             timestamp: new Date(item.timestamp || Date.now()).toISOString(),
           }));
-          setActivities(recentActivities);
+          if (mounted) {
+            setActivities(recentActivities);
+          }
         }
       } catch (error) {
         console.error("Error fetching user data:", error);
       }
     };
 
-    fetchUserData();
-  }, [authUser]);
+    void fetchUserData();
+
+    return () => {
+      mounted = false;
+    };
+  }, [authUser, stories.length]); // Add stories.length to dependencies
 
   const handleShareProfile = async () => {
     try {

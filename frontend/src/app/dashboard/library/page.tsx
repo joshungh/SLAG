@@ -235,14 +235,13 @@ export default function LibraryPage() {
   useEffect(() => {
     let mounted = true;
 
-    if (!user && !connected) {
+    // Only fetch if we have a user and haven't fetched yet
+    if (!user || hasFetched) {
       setLoading(false);
       return;
     }
 
     const fetchStories = async () => {
-      if (hasFetched) return;
-
       try {
         const response = await fetch(
           `${process.env.NEXT_PUBLIC_API_URL}/api/stories`,
@@ -278,7 +277,7 @@ export default function LibraryPage() {
     return () => {
       mounted = false;
     };
-  }, [user, connected]);
+  }, [user, hasFetched]); // Only depend on user and hasFetched
 
   const handleDelete = useCallback(async (storyId: string) => {
     try {

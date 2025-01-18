@@ -59,7 +59,7 @@ export default function DashboardLayout({
     return `${address.slice(0, 4)}...${address.slice(-4)}`;
   };
 
-  const handleConnect = () => {
+  const handleConnect = async () => {
     if (authMethod === "email") {
       // Show warning or confirmation before switching
       if (
@@ -68,10 +68,10 @@ export default function DashboardLayout({
         )
       ) {
         signOut();
-        connect();
+        await connect();
       }
     } else {
-      connect();
+      await connect();
     }
   };
 
@@ -279,7 +279,7 @@ export default function DashboardLayout({
 
         {/* Auth Section */}
         <div className="mt-auto px-4 space-y-4">
-          {user && (
+          {user ? (
             <div className="mb-4">
               <UserMenu
                 user={user}
@@ -290,9 +290,7 @@ export default function DashboardLayout({
                 authMethod={authMethod}
               />
             </div>
-          )}
-
-          {!user && (
+          ) : (
             <button
               onClick={handleOpenSignIn}
               disabled={connected && authMethod === "wallet"}
@@ -324,14 +322,11 @@ export default function DashboardLayout({
             )}
           </div>
         </div>
-
-        {/* Bottom padding */}
-        <div className="p-4" />
       </div>
 
       {/* Main Content */}
-      <div className="flex-1 md:ml-64">
-        <div className="p-4 sm:p-8">{children}</div>
+      <div className="flex-1 ml-0 md:ml-64">
+        <main className="min-h-screen p-8">{children}</main>
       </div>
 
       {/* Modals */}
@@ -340,15 +335,17 @@ export default function DashboardLayout({
         onClose={handleCloseSignIn}
         onSignIn={handleSignIn}
         onRegisterClick={handleOpenRegistration}
-      ></SignInModal>
-
+      />
       <UserRegistrationModal
         isOpen={isRegistrationModalOpen}
         onClose={handleCloseRegistration}
         onSubmit={handleRegister}
-        mode={publicKey ? "web3" : "traditional"}
+        mode="traditional"
         walletAddress={publicKey}
-        onSignInClick={handleOpenSignIn}
+        onSignInClick={() => {
+          setIsRegistrationModalOpen(false);
+          setIsSignInModalOpen(true);
+        }}
       />
     </div>
   );

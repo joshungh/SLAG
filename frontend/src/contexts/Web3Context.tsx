@@ -139,6 +139,7 @@ export function Web3Provider({ children }: { children: React.ReactNode }) {
       }
 
       const data = await response.json();
+      localStorage.setItem("auth_token", data.token); // Set token before signIn
       signIn(data.token, data.user);
       setUserProfile(data.user);
       return data;
@@ -188,7 +189,6 @@ export function Web3Provider({ children }: { children: React.ReactNode }) {
       try {
         await handleUserLogin(pubKey);
         setShowRegistration(false);
-        return;
       } catch (error) {
         console.error("Login failed, checking if user exists:", error);
 

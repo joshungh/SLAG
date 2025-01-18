@@ -1,55 +1,25 @@
 "use client";
 
-import { motion } from "framer-motion";
-import { StoryTask } from "@/contexts/StoryQueueContext";
+import { useRouter } from "next/navigation";
+import { AnimatedEllipsis } from "./AnimatedEllipsis";
 import { Progress } from "./ui/progress";
 
 interface StoryQueueItemProps {
-  task: StoryTask;
+  task: {
+    id: string;
+    prompt: string;
+    status: "generating" | "completed" | "error" | "stopped";
+    progress: number;
+    currentStep: string;
+    error?: string;
+    title?: string;
+  };
   onStop?: (id: string) => void;
 }
 
-function AnimatedEllipsis() {
-  return (
-    <span className="inline-flex items-center space-x-0.5 ml-1">
-      <motion.span
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{
-          repeat: Infinity,
-          duration: 0.8,
-          repeatType: "reverse",
-          delay: 0,
-        }}
-        className="w-1 h-1 rounded-full bg-blue-400"
-      />
-      <motion.span
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{
-          repeat: Infinity,
-          duration: 0.8,
-          repeatType: "reverse",
-          delay: 0.2,
-        }}
-        className="w-1 h-1 rounded-full bg-blue-400"
-      />
-      <motion.span
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{
-          repeat: Infinity,
-          duration: 0.8,
-          repeatType: "reverse",
-          delay: 0.4,
-        }}
-        className="w-1 h-1 rounded-full bg-blue-400"
-      />
-    </span>
-  );
-}
-
 export function StoryQueueItem({ task, onStop }: StoryQueueItemProps) {
+  const router = useRouter();
+
   const getStatusMessage = () => {
     switch (task.status) {
       case "generating":
@@ -57,7 +27,7 @@ export function StoryQueueItem({ task, onStop }: StoryQueueItemProps) {
       case "queued":
         return "Waiting to start...";
       case "completed":
-        return "Story completed!";
+        return task.title || "Story completed!";
       case "error":
         return task.error || "An error occurred";
       case "stopped":
@@ -107,6 +77,14 @@ export function StoryQueueItem({ task, onStop }: StoryQueueItemProps) {
               Stop
             </button>
           )}
+          {task.status === "completed" && (
+            <button
+              onClick={() => router.push("/dashboard/library")}
+              className="text-xs text-emerald-400 hover:text-emerald-300 transition-colors px-2 py-1 rounded-md hover:bg-emerald-400/10"
+            >
+              View in Library
+            </button>
+          )}
         </div>
       </div>
 
@@ -114,6 +92,12 @@ export function StoryQueueItem({ task, onStop }: StoryQueueItemProps) {
         <div className="px-4 space-y-1">
           <Progress value={task.progress} className="h-1" />
           <p className="text-xs text-gray-500">{getStatusMessage()}</p>
+        </div>
+      )}
+
+      {task.status === "completed" && task.title && (
+        <div className="px-4">
+          <p className="text-sm text-emerald-400 font-medium">{task.title}</p>
         </div>
       )}
 
