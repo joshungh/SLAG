@@ -1,12 +1,33 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import { useWeb3 } from "@/contexts/Web3Context";
 import { motion } from "framer-motion";
-import { Edit3, User, Mail, Wallet, X, Camera } from "lucide-react";
+import {
+  Edit3,
+  User,
+  Mail,
+  Wallet,
+  X,
+  Camera,
+  BookOpen,
+  Clock,
+  Share2,
+  Download,
+  MoreVertical,
+  Globe,
+  Link as LinkIcon,
+  Bug,
+  Flag,
+  Trash2,
+} from "lucide-react";
 import Image from "next/image";
 import { useAuth } from "@/contexts/AuthContext";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
+import { DeleteStoryButton } from "@/components/DeleteStoryButton";
+import { StoryProvider } from "@/contexts/StoryContext";
+import { useStories } from "@/contexts/StoryContext";
 
 interface DynamoDBString {
   S: string;
@@ -39,9 +60,128 @@ interface EditableFields {
   last_name: string;
 }
 
+interface Story {
+  id: string;
+  title: string;
+  genre: string;
+  word_count: number;
+  created_at: string;
+  content: string;
+  bible: any;
+  framework: any;
+}
+
+interface Activity {
+  id: string;
+  type: string;
+  prompt: string;
+  timestamp: string;
+}
+
+// Add StoryModal component
+function StoryModal({ story, onClose }: { story: Story; onClose: () => void }) {
+  // Add useEffect for click outside handling
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      const modalContent = document.querySelector(".modal-content");
+      if (modalContent && !modalContent.contains(event.target as Node)) {
+        onClose();
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [onClose]);
+
+  // Keep existing Escape key handler
+  useEffect(() => {
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        onClose();
+      }
+    };
+
+    document.addEventListener("keydown", handleEscape);
+    return () => document.removeEventListener("keydown", handleEscape);
+  }, [onClose]);
+
+  const downloadStory = () => {
+    const element = document.createElement("a");
+    const file = new Blob([story.content], { type: "text/plain" });
+    element.href = URL.createObjectURL(file);
+    element.download = `${story.title}.txt`;
+    document.body.appendChild(element);
+    element.click();
+    document.body.removeChild(element);
+  };
+
+  return (
+    <div className="fixed inset-0 bg-black/90 backdrop-blur-sm z-50 overflow-y-auto">
+      <div className="min-h-screen px-4 py-8">
+        <div className="modal-content bg-gradient-to-br from-gray-900 to-black border border-gray-800/50 rounded-xl w-full max-w-4xl mx-auto shadow-xl">
+          {/* Rest of the modal content stays the same */}
+          <div className="border-b border-gray-800/50">
+            <div className="p-6">
+              <div className="flex items-start justify-between">
+                <div>
+                  <h2 className="text-2xl font-bold text-white mb-2">
+                    {story.title}
+                  </h2>
+                  <div className="flex items-center gap-4 text-sm text-gray-400">
+                    <div className="flex items-center gap-1.5">
+                      <BookOpen className="w-4 h-4" />
+                      <span>{story.genre}</span>
+                    </div>
+                    <div className="flex items-center gap-1.5">
+                      <Clock className="w-4 h-4" />
+                      <span>
+                        {new Date(story.created_at).toLocaleDateString()}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-1.5">
+                      <BookOpen className="w-4 h-4" />
+                      <span>{story.word_count} words</span>
+                    </div>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={downloadStory}
+                    className="p-2 hover:bg-white/10 rounded-lg transition-colors text-gray-400 hover:text-white"
+                  >
+                    <Download className="w-5 h-5" />
+                  </button>
+                  <button
+                    onClick={onClose}
+                    className="p-2 hover:bg-white/10 rounded-lg transition-colors text-gray-400 hover:text-white"
+                  >
+                    <X className="w-5 h-5" />
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="p-6">
+            <div className="prose prose-invert prose-green max-w-none">
+              <div className="whitespace-pre-wrap leading-relaxed">
+                {story.content}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function ProfilePage() {
+  return <ProfilePageContent />;
+}
+
+function ProfilePageContent() {
   const router = useRouter();
-  const { connected, publicKey } = useWeb3();
+  const { connected, publicKey, balance } = useWeb3();
   const { user: authUser } = useAuth();
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [isEditing, setIsEditing] = useState(false);
@@ -52,6 +192,20 @@ export default function ProfilePage() {
   });
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [activities, setActivities] = useState<Activity[]>([]);
+  const [selectedStory, setSelectedStory] = useState<Story | null>(null);
+  const [openDropdownId, setOpenDropdownId] = useState<string | null>(null);
+  const { stories, deleteStory, refreshStories } = useStories();
+  const dropdownButtonRefs = useRef<{
+    [key: string]: HTMLButtonElement | null;
+  }>({});
+
+  // Refresh stories when component mounts
+  useEffect(() => {
+    if (authUser) {
+      void refreshStories();
+    }
+  }, [authUser, refreshStories]);
 
   // Redirect if not authenticated
   useEffect(() => {
@@ -203,6 +357,77 @@ export default function ProfilePage() {
     return `${address.slice(0, 4)}...${address.slice(-4)}`;
   };
 
+  // Fetch activities only
+  useEffect(() => {
+    if (!authUser) return;
+
+    let mounted = true;
+    const fetchUserData = async () => {
+      try {
+        // Get recent activities from story queue
+        const queueString = localStorage.getItem("storyQueue");
+        if (queueString) {
+          const queue = JSON.parse(queueString);
+          const recentActivities = queue.map((item: any) => ({
+            id: item.id,
+            type: "Story Generation",
+            prompt: item.prompt,
+            timestamp: new Date(item.timestamp || Date.now()).toISOString(),
+          }));
+          if (mounted) {
+            setActivities(recentActivities);
+          }
+        }
+      } catch (error) {
+        console.error("Error fetching user data:", error);
+      }
+    };
+
+    void fetchUserData();
+
+    return () => {
+      mounted = false;
+    };
+  }, [authUser]); // Only depend on authUser
+
+  const handleShareProfile = async () => {
+    try {
+      const url = window.location.href;
+      await navigator.clipboard.writeText(url);
+      // You could add a toast notification here
+      alert("Profile URL copied to clipboard!");
+    } catch (err) {
+      console.error("Failed to copy URL:", err);
+    }
+  };
+
+  const handleDelete = useCallback(
+    async (storyId: string): Promise<void> => {
+      try {
+        await deleteStory(storyId);
+      } catch (error) {
+        console.error("Error deleting story:", error);
+        throw error;
+      }
+    },
+    [deleteStory]
+  );
+
+  // Add useEffect for click outside handling
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      const dropdowns = document.querySelectorAll(".story-dropdown");
+      dropdowns.forEach((dropdown) => {
+        if (!dropdown.contains(event.target as Node)) {
+          dropdown.classList.add("hidden");
+        }
+      });
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
   if (!profile) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center">
@@ -221,71 +446,56 @@ export default function ProfilePage() {
   }
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="max-w-4xl mx-auto"
-      >
-        {/* Profile Header */}
-        <div className="bg-black/30 backdrop-blur-lg rounded-lg p-8 mb-8">
-          <div className="flex items-start justify-between">
-            <div className="flex items-center space-x-6">
-              <div className="relative group">
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      className="max-w-6xl mx-auto px-6 py-8"
+    >
+      {/* Profile Header - Suno-like layout */}
+      <div className="bg-gradient-to-br from-gray-900 to-black rounded-2xl p-8 mb-12 border border-gray-800/50">
+        <div className="flex flex-col md:flex-row md:items-center gap-8">
+          {/* Profile Picture */}
+          <div className="relative flex-shrink-0">
+            <div className="w-[140px] h-[140px] rounded-full overflow-hidden">
+              {profile?.profile_picture ? (
+                <Image
+                  src={profile.profile_picture}
+                  alt="Profile"
+                  width={140}
+                  height={140}
+                  className="object-cover"
+                />
+              ) : (
+                <div className="w-full h-full bg-gradient-to-br from-green-400/20 to-green-600/20 flex items-center justify-center">
+                  <User className="w-12 h-12 text-green-400" />
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Profile Info */}
+          <div className="flex-1 min-w-0">
+            <div className="flex items-start justify-between mb-6">
+              <div className="min-w-0 flex-1">
                 {isEditing ? (
-                  <div className="w-[120px] h-[120px] rounded-full overflow-hidden">
-                    {profile.profile_picture ? (
-                      <Image
-                        src={profile.profile_picture}
-                        alt="Profile"
-                        width={120}
-                        height={120}
-                        className="object-cover"
-                      />
-                    ) : (
-                      <div className="w-full h-full bg-gradient-to-br from-green-400/20 to-green-600/20 flex items-center justify-center">
-                        <User className="w-12 h-12 text-green-400" />
-                      </div>
-                    )}
-                  </div>
-                ) : (
-                  <div className="w-[120px] h-[120px] rounded-full overflow-hidden">
-                    {profile.profile_picture ? (
-                      <Image
-                        src={profile.profile_picture}
-                        alt="Profile"
-                        width={120}
-                        height={120}
-                        className="object-cover"
-                      />
-                    ) : (
-                      <div className="w-full h-full bg-gradient-to-br from-green-400/20 to-green-600/20 flex items-center justify-center">
-                        <User className="w-12 h-12 text-green-400" />
-                      </div>
-                    )}
-                  </div>
-                )}
-              </div>
-              <div className="space-y-2">
-                {isEditing ? (
-                  <div className="space-y-3">
+                  <div className="space-y-4 max-w-lg">
                     <input
                       type="text"
                       value={editableFields.username}
                       onChange={(e) =>
                         handleFieldChange("username", e.target.value)
                       }
-                      className="block w-full px-3 py-2 bg-black/50 border border-gray-700 rounded-lg focus:border-green-500 focus:ring-1 focus:ring-green-500 text-white"
+                      className="block w-full px-4 py-2.5 bg-black/50 border border-gray-700 rounded-lg focus:border-green-500 focus:ring-1 focus:ring-green-500 text-white text-lg"
                       placeholder="Username"
                     />
-                    <div className="flex gap-3">
+                    <div className="flex gap-4">
                       <input
                         type="text"
                         value={editableFields.first_name}
                         onChange={(e) =>
                           handleFieldChange("first_name", e.target.value)
                         }
-                        className="block w-full px-3 py-2 bg-black/50 border border-gray-700 rounded-lg focus:border-green-500 focus:ring-1 focus:ring-green-500 text-white"
+                        className="block w-full px-4 py-2.5 bg-black/50 border border-gray-700 rounded-lg focus:border-green-500 focus:ring-1 focus:ring-green-500 text-white"
                         placeholder="First Name"
                       />
                       <input
@@ -294,18 +504,18 @@ export default function ProfilePage() {
                         onChange={(e) =>
                           handleFieldChange("last_name", e.target.value)
                         }
-                        className="block w-full px-3 py-2 bg-black/50 border border-gray-700 rounded-lg focus:border-green-500 focus:ring-1 focus:ring-green-500 text-white"
+                        className="block w-full px-4 py-2.5 bg-black/50 border border-gray-700 rounded-lg focus:border-green-500 focus:ring-1 focus:ring-green-500 text-white"
                         placeholder="Last Name"
                       />
                     </div>
                   </div>
                 ) : (
                   <>
-                    <h1 className="text-3xl font-bold mb-2">
-                      {profile.username}
+                    <h1 className="text-3xl md:text-4xl font-bold mb-2 truncate">
+                      {profile?.username}
                     </h1>
-                    {(profile.first_name || profile.last_name) && (
-                      <p className="text-gray-400">
+                    {(profile?.first_name || profile?.last_name) && (
+                      <p className="text-gray-400 text-lg truncate">
                         {[profile.first_name, profile.last_name]
                           .filter(Boolean)
                           .join(" ")}
@@ -313,98 +523,222 @@ export default function ProfilePage() {
                     )}
                   </>
                 )}
-                <div className="text-gray-400 space-y-1">
-                  {profile.email && (
-                    <div className="flex items-center space-x-2">
-                      <Mail className="w-4 h-4" />
-                      <span>{profile.email}</span>
-                    </div>
-                  )}
-                  {profile.web3_wallet && (
-                    <div className="flex items-center space-x-2">
-                      <Wallet className="w-4 h-4" />
-                      <span>{truncateAddress(profile.web3_wallet)}</span>
-                    </div>
-                  )}
-                </div>
+                {profile?.email && (
+                  <div className="flex items-center space-x-2 text-gray-400 mt-3">
+                    <Mail className="w-4 h-4" />
+                    <span className="truncate">{profile.email}</span>
+                  </div>
+                )}
               </div>
-            </div>
-            <div className="flex space-x-2">
-              {isEditing ? (
-                <>
-                  <button
-                    onClick={handleSave}
-                    disabled={isLoading}
-                    className="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors disabled:opacity-50"
-                  >
-                    {isLoading ? "Saving..." : "Save"}
-                  </button>
+              <div className="flex space-x-2 ml-4 flex-shrink-0">
+                {isEditing ? (
+                  <>
+                    <button
+                      onClick={handleSave}
+                      disabled={isLoading}
+                      className="px-4 py-2 bg-green-500 text-black font-medium rounded-lg hover:bg-green-400 transition-colors disabled:opacity-50"
+                    >
+                      {isLoading ? "Saving..." : "Save"}
+                    </button>
+                    <button
+                      onClick={handleEditToggle}
+                      className="p-2 hover:bg-white/10 rounded-lg transition-colors"
+                    >
+                      <X className="w-5 h-5" />
+                    </button>
+                  </>
+                ) : (
                   <button
                     onClick={handleEditToggle}
                     className="p-2 hover:bg-white/10 rounded-lg transition-colors"
                   >
-                    <X className="w-5 h-5" />
+                    <Edit3 className="w-5 h-5" />
                   </button>
-                </>
-              ) : (
-                <button
-                  onClick={handleEditToggle}
-                  className="p-2 hover:bg-white/10 rounded-lg transition-colors"
-                >
-                  <Edit3 className="w-5 h-5" />
-                </button>
-              )}
+                )}
+              </div>
+            </div>
+
+            {error && (
+              <div className="mt-4 p-3 bg-red-500/10 border border-red-500 rounded-lg text-red-500 text-sm">
+                {error}
+              </div>
+            )}
+
+            {/* Stats */}
+            <div className="flex items-center space-x-8 text-gray-400">
+              <div className="flex items-center space-x-2">
+                <BookOpen className="w-4 h-4" />
+                <span>{stories.length} Stories</span>
+              </div>
+              <button
+                onClick={handleShareProfile}
+                className="flex items-center space-x-2 hover:text-white transition-colors"
+              >
+                <Share2 className="w-4 h-4" />
+                <span>Share Profile</span>
+              </button>
             </div>
           </div>
-          {error && (
-            <div className="mt-4 p-3 bg-red-500/10 border border-red-500 rounded-lg text-red-500 text-sm">
-              {error}
-            </div>
-          )}
         </div>
+      </div>
 
-        {/* Rest of the profile content */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          <div className="space-y-6">
-            <div className="bg-black/30 backdrop-blur-lg rounded-lg p-6">
-              <h2 className="text-xl font-semibold mb-4">About</h2>
-              <p className="text-gray-300">{profile.bio}</p>
+      {/* Navigation Tabs */}
+      <div className="border-b border-gray-800 mb-8 px-2">
+        <div className="flex space-x-8">
+          <div className="px-4 py-2 text-green-400 border-b-2 border-green-400">
+            Stories
+          </div>
+        </div>
+      </div>
+
+      {/* Stories Grid */}
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+        {stories.map((story) => (
+          <div
+            key={story.id}
+            className="group bg-gray-900/50 backdrop-blur-sm rounded-xl overflow-visible border border-gray-800/50 hover:border-green-500/20 transition-all duration-300 hover:shadow-lg hover:shadow-green-500/10"
+          >
+            {/* Clickable Story Area */}
+            <div
+              className="relative cursor-pointer"
+              onClick={() => setSelectedStory(story)}
+            >
+              {/* Cover Image Area */}
+              <div className="aspect-[3/2] bg-gradient-to-br from-green-500/5 via-emerald-500/5 to-green-500/5 relative">
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <BookOpen className="w-8 h-8 text-green-500/20" />
+                </div>
+
+                {/* Hover Overlay */}
+                <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-all duration-300 flex items-center justify-center backdrop-blur-sm">
+                  <button className="px-5 py-2 bg-green-500 text-black font-medium rounded-lg hover:bg-green-400 transition-all duration-200 transform group-hover:scale-105">
+                    Read Story
+                  </button>
+                </div>
+              </div>
             </div>
-            <div className="bg-black/30 backdrop-blur-lg rounded-lg p-6">
-              <h2 className="text-xl font-semibold mb-4">Login Methods</h2>
-              <div className="space-y-2">
-                {profile.login_methods.map((method) => (
-                  <div
-                    key={method}
-                    className="flex items-center space-x-2 text-gray-300"
+
+            {/* Bottom Info Container */}
+            <div className="p-4 space-y-2">
+              {/* Title and Menu Row */}
+              <div className="flex items-start justify-between gap-2">
+                <h3 className="font-medium text-white text-sm leading-5">
+                  {story.title}
+                </h3>
+
+                {/* More Options Button */}
+                <div className="relative flex-shrink-0">
+                  <button
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      // Close all other dropdowns first
+                      const allDropdowns =
+                        document.querySelectorAll(".story-dropdown");
+                      allDropdowns.forEach((el) => {
+                        if (el !== e.currentTarget.nextElementSibling) {
+                          el.classList.add("hidden");
+                        }
+                      });
+                      // Toggle this dropdown
+                      const dropdown = e.currentTarget.nextElementSibling;
+                      dropdown?.classList.toggle("hidden");
+                    }}
+                    className="p-1 -mr-1 hover:bg-white/10 rounded-lg transition-colors"
                   >
-                    {method === "EMAIL" ? (
-                      <Mail className="w-4 h-4" />
-                    ) : (
-                      <Wallet className="w-4 h-4" />
-                    )}
-                    <span>{method}</span>
+                    <MoreVertical className="w-4 h-4 text-gray-400" />
+                  </button>
+
+                  {/* Main Dropdown Menu */}
+                  <div className="story-dropdown hidden absolute right-0 top-full mt-1.5 w-48 bg-gray-900/90 backdrop-blur-md border border-white/5 rounded-xl shadow-xl shadow-black/20 z-50">
+                    {/* Share Option */}
+                    <button
+                      className="w-full px-4 py-3 text-sm text-left hover:bg-white/5 flex items-center gap-3 text-gray-200 border-b border-white/5 transition-colors"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        const url = window.location.href;
+                        navigator.clipboard.writeText(url);
+                        alert("Profile URL copied to clipboard!");
+                        e.currentTarget
+                          .closest(".story-dropdown")
+                          ?.classList.add("hidden");
+                      }}
+                    >
+                      <Share2 className="w-4 h-4 text-gray-400" />
+                      <span className="font-medium">Share Story</span>
+                    </button>
+
+                    {/* Download Option */}
+                    <button
+                      className="w-full px-4 py-3 text-sm text-left hover:bg-white/5 flex items-center gap-3 text-gray-200 border-b border-white/5 transition-colors"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        const element = document.createElement("a");
+                        const file = new Blob([story.content], {
+                          type: "text/plain",
+                        });
+                        element.href = URL.createObjectURL(file);
+                        element.download = `${story.title}.txt`;
+                        document.body.appendChild(element);
+                        element.click();
+                        document.body.removeChild(element);
+                        e.currentTarget
+                          .closest(".story-dropdown")
+                          ?.classList.add("hidden");
+                      }}
+                    >
+                      <Download className="w-4 h-4 text-gray-400" />
+                      <span className="font-medium">Download</span>
+                    </button>
+
+                    {/* Delete Option */}
+                    <button
+                      className="w-full px-4 py-3 text-sm text-left hover:bg-white/5 flex items-center gap-3 text-red-400 hover:text-red-300 transition-colors"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        if (
+                          window.confirm(
+                            "Are you sure you want to delete this story? This action cannot be undone."
+                          )
+                        ) {
+                          try {
+                            void handleDelete(story.id);
+                            e.currentTarget
+                              .closest(".story-dropdown")
+                              ?.classList.add("hidden");
+                          } catch (error) {
+                            console.error("Error deleting story:", error);
+                            alert("Failed to delete story. Please try again.");
+                          }
+                        }
+                      }}
+                    >
+                      <Trash2 className="w-4 h-4" />
+                      <span className="font-medium">Delete Story</span>
+                    </button>
                   </div>
-                ))}
+                </div>
+              </div>
+
+              {/* Genre */}
+              <div className="text-xs text-gray-400">{story.genre}</div>
+
+              {/* Word Count */}
+              <div className="flex items-center gap-1.5 text-xs text-gray-500">
+                <BookOpen className="w-3.5 h-3.5" />
+                <span>{story.word_count} words</span>
               </div>
             </div>
           </div>
+        ))}
+      </div>
 
-          {/* Right Column - Stories & Activity */}
-          <div className="md:col-span-2 space-y-6">
-            <div className="bg-black/30 backdrop-blur-lg rounded-lg p-6">
-              <h2 className="text-xl font-semibold mb-4">Your Stories</h2>
-              {/* TODO: Add stories grid */}
-              <p className="text-gray-400">No stories yet</p>
-            </div>
-            <div className="bg-black/30 backdrop-blur-lg rounded-lg p-6">
-              <h2 className="text-xl font-semibold mb-4">Recent Activity</h2>
-              {/* TODO: Add activity feed */}
-              <p className="text-gray-400">No recent activity</p>
-            </div>
-          </div>
-        </div>
-      </motion.div>
-    </div>
+      {selectedStory && (
+        <StoryModal
+          story={selectedStory}
+          onClose={() => setSelectedStory(null)}
+        />
+      )}
+    </motion.div>
   );
 }

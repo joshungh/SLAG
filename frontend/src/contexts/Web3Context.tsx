@@ -4,6 +4,9 @@ import React, { createContext, useContext, useState, useEffect } from "react";
 import { Connection, PublicKey, clusterApiUrl } from "@solana/web3.js";
 import UserRegistrationModal from "@/components/UserRegistrationModal";
 import { useAuth } from "./AuthContext";
+import { useRouter } from "next/navigation";
+import { useCallback } from "react";
+import { setToken } from "@/utils/auth";
 
 // Initialize Solana connection
 const connection = new Connection(clusterApiUrl("devnet"), "confirmed");
@@ -131,16 +134,17 @@ export function Web3Provider({ children }: { children: React.ReactNode }) {
         }),
       });
 
-      const data = await response.json();
       if (!response.ok) {
-        throw new Error(data.detail || "Failed to login");
+        throw new Error("Login failed");
       }
 
+      const data = await response.json();
+      localStorage.setItem("auth_token", data.token); // Set token before signIn
       signIn(data.token, data.user);
       setUserProfile(data.user);
       return data;
     } catch (error) {
-      console.error("Error logging in:", error);
+      console.error("Login error:", error);
       throw error;
     }
   };
@@ -181,22 +185,28 @@ export function Web3Provider({ children }: { children: React.ReactNode }) {
       setPublicKey(pubKey);
       await fetchBalance(pubKey);
 
-      // Check if user exists first
-      const userExists = await checkUserExists(pubKey);
+      // First try to log in directly
+      try {
+        await handleUserLogin(pubKey);
+        setShowRegistration(false);
+      } catch (error) {
+        console.error("Login failed, checking if user exists:", error);
 
-      if (userExists) {
-        // If user exists, log them in
-        try {
-          await handleUserLogin(pubKey);
-          setShowRegistration(false);
-        } catch (error) {
-          console.error("Error logging in existing user:", error);
-          // If login fails, we should show registration
+        // If login failed, check if user exists
+        const userExists = await checkUserExists(pubKey);
+        if (userExists) {
+          // User exists but login failed - try login again
+          try {
+            await handleUserLogin(pubKey);
+            setShowRegistration(false);
+          } catch (loginError) {
+            console.error("Error logging in existing user:", loginError);
+            setShowRegistration(false); // Don't show registration for existing users
+          }
+        } else {
+          // User doesn't exist, show registration
           setShowRegistration(true);
         }
-      } else {
-        // Only show registration for new users
-        setShowRegistration(true);
       }
     } catch (error) {
       console.error("Error checking wallet connection:", error);

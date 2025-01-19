@@ -1,4 +1,4 @@
-from typing import Optional, Dict, Any
+from typing import Optional, Dict, Any, List
 import boto3
 from botocore.exceptions import ClientError
 import os
@@ -7,6 +7,8 @@ import asyncio
 from functools import partial
 from dotenv import load_dotenv
 import logging
+import uuid
+import json
 
 # Load environment variables
 load_dotenv()
@@ -437,3 +439,139 @@ class DynamoDBService:
         except ClientError as e:
             logger.error(f"Error getting user by username: {e.response['Error']['Message']}")
             raise
+
+    async def save_story(self, user_id: str, story_data: Dict[str, Any]) -> Dict[str, Any]:
+        """Save a story to DynamoDB."""
+        try:
+            story_id = str(uuid.uuid4())
+            
+            # Create story item for DynamoDB
+            story_item = {
+                'PK': {'S': f'USER#{user_id}'},
+                'SK': {'S': f'STORY#{story_id}'},
+                'id': {'S': story_id},
+                'user_id': {'S': user_id},
+                'title': {'S': story_data.get('title', '')},
+                'genre': {'S': story_data.get('genre', '')},
+                'content': {'S': story_data.get('content', '')},
+                'word_count': {'N': str(story_data.get('word_count', 0))},
+                'created_at': {'S': story_data.get('created', datetime.utcnow().isoformat())},
+                'updated_at': {'S': datetime.utcnow().isoformat()}
+            }
+            
+            # Add bible and framework if they exist
+            if 'bible' in story_data:
+                story_item['bible'] = {'S': json.dumps(story_data['bible'])}
+            if 'framework' in story_data:
+                story_item['framework'] = {'S': json.dumps(story_data['framework'])}
+            
+            # Save to DynamoDB
+            await self._run_async(
+                self.dynamodb.put_item,
+                TableName=self.stories_table,
+                Item=story_item
+            )
+            
+            # Return the story item with parsed JSON fields
+            return {
+                'id': story_id,
+                'user_id': user_id,
+                'title': story_data.get('title', ''),
+                'genre': story_data.get('genre', ''),
+                'content': story_data.get('content', ''),
+                'word_count': story_data.get('word_count', 0),
+                'created_at': story_data.get('created', datetime.utcnow().isoformat()),
+                'updated_at': datetime.utcnow().isoformat(),
+                'bible': json.loads(story_item['bible']['S']) if 'bible' in story_item else None,
+                'framework': json.loads(story_item['framework']['S']) if 'framework' in story_item else None
+            }
+            
+        except ClientError as e:
+            logger.error(f"Error saving story: {e.response['Error']['Message']}")
+            raise
+
+    async def get_user_stories(self, user_id: str) -> List[Dict[str, Any]]:
+        """Get all stories for a user."""
+        try:
+            response = await self._run_async(
+                self.dynamodb.query,
+                TableName=self.stories_table,
+                KeyConditionExpression='PK = :pk AND begins_with(SK, :sk)',
+                ExpressionAttributeValues={
+                    ':pk': {'S': f'USER#{user_id}'},
+                    ':sk': {'S': 'STORY#'}
+                }
+            )
+            
+            stories = []
+            for item in response.get('Items', []):
+                story = self._deserialize_item(item)
+                # Parse only bible and framework as JSON
+                for field in ['bible', 'framework']:
+                    if isinstance(story.get(field), str):
+                        try:
+                            story[field] = json.loads(story[field])
+                        except json.JSONDecodeError as e:
+                            logger.error(f"Error parsing {field} JSON: {str(e)}")
+                            # Keep the original string if JSON parsing fails
+                stories.append(story)
+                
+            return stories
+            
+        except ClientError as e:
+            logger.error(f"Error getting user stories: {e.response['Error']['Message']}")
+            raise
+
+    async def get_story(self, user_id: str, story_id: str) -> Optional[Dict[str, Any]]:
+        """Get a specific story."""
+        try:
+            response = await self._run_async(
+                self.dynamodb.get_item,
+                TableName=self.stories_table,
+                Key={
+                    'PK': {'S': f'USER#{user_id}'},
+                    'SK': {'S': f'STORY#{story_id}'}
+                }
+            )
+            
+            item = response.get('Item')
+            if not item:
+                return None
+            
+            story = self._deserialize_item(item)
+            # Parse only bible and framework as JSON
+            for field in ['bible', 'framework']:
+                if isinstance(story.get(field), str):
+                    try:
+                        story[field] = json.loads(story[field])
+                    except json.JSONDecodeError as e:
+                        logger.error(f"Error parsing {field} JSON: {str(e)}")
+                        # Keep the original string if JSON parsing fails
+                
+            return story
+            
+        except ClientError as e:
+            logger.error(f"Error getting story: {e.response['Error']['Message']}")
+            raise
+
+    async def delete_story(self, user_id: str, story_id: str) -> bool:
+        """Delete a story from DynamoDB."""
+        try:
+            # First check if the story exists and belongs to the user
+            story = await self.get_story(user_id, story_id)
+            if not story:
+                return False
+
+            # Delete the story
+            await self._run_async(
+                self.dynamodb.delete_item,
+                TableName=self.stories_table,
+                Key={
+                    'PK': {'S': f'USER#{user_id}'},
+                    'SK': {'S': f'STORY#{story_id}'}
+                }
+            )
+            return True
+        except Exception as e:
+            logger.error(f"Error deleting story: {str(e)}")
+            raise e
